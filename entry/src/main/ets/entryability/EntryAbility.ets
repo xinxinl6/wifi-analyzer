@@ -88,13 +88,15 @@ export default class EntryAbility extends UIAbility {
   }
 
   onBackPressed(): boolean {
-    // 导航栈有页面时 pop 返回，否则交由系统默认行为（退出应用）
-    if (RouterManager.canGoBack()) {
+    // 在子页面中时返回上一页，否则隐藏到后台
+    if (RouterManager.isInSubPage()) {
       hilog.info(DOMAIN, 'testTag', '%{public}s', 'NavPathStack pop (size=%d)', RouterManager.getStackSize());
       RouterManager.goBack();
       return true; // 已处理，不退出
     }
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'NavPathStack empty, exit app');
-    return false; // 栈为空，走系统默认退出行为
+    hilog.info(DOMAIN, 'testTag', '%{public}s', 'In home page, terminate self');
+    // 在主页时，隐藏应用而不是退出
+    this.context.terminateSelf();
+    return true; // 已处理返回事件
   }
 }

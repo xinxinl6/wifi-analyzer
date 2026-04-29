@@ -64,6 +64,9 @@ export class RouterManager {
   // AppStorage 模式下的页面栈
   private static pageStack: RouteName[] = []
 
+  // 是否在子页面中（主页之外的任何页面）
+  private static inSubPage: boolean = false
+
   // 路由变更回调
   private static callbacks: Array<(route: string | null) => void> = []
 
@@ -111,6 +114,8 @@ export class RouterManager {
       if (!RouterManager.pageStack.includes(route)) {
         RouterManager.pageStack.push(route)
       }
+      // 标记已进入子页面
+      RouterManager.inSubPage = true
     }
     RouterManager.notifyChange(route)
   }
@@ -137,6 +142,8 @@ export class RouterManager {
           }
         }
         if (RouterManager.pageStack.length === 0) {
+          // 栈为空，回到主页
+          RouterManager.inSubPage = false
           RouterManager.notifyChange(null)
         }
         return true
@@ -168,6 +175,14 @@ export class RouterManager {
     }
     // AppStorage 模式：检查页面栈
     return RouterManager.pageStack.length > 0
+  }
+
+  // 检查是否在子页面中
+  static isInSubPage(): boolean {
+    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
+      return RouterManager.navPathStack.size() > 0
+    }
+    return RouterManager.inSubPage
   }
 
   // 获取导航栈大小
