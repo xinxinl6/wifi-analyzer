@@ -61,6 +61,9 @@ export class RouterManager {
   // 当前模式
   private static useNavPathStack: boolean = false
 
+  // AppStorage 模式下的页面栈
+  private static pageStack: RouteName[] = []
+
   // 路由变更回调
   private static callbacks: Array<(route: string | null) => void> = []
 
@@ -77,6 +80,8 @@ export class RouterManager {
     for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
       AppStorage.set(key, false)
     }
+    // 清空页面栈
+    RouterManager.pageStack = []
   }
 
   // 获取 NavPathStack
@@ -102,6 +107,10 @@ export class RouterManager {
         return
       }
       AppStorage.set(key, true)
+      // 添加到页面栈
+      if (!RouterManager.pageStack.includes(route)) {
+        RouterManager.pageStack.push(route)
+      }
     }
     RouterManager.notifyChange(route)
   }
@@ -118,12 +127,21 @@ export class RouterManager {
       }
       return false
     } else {
-      // AppStorage 模式：关闭所有页面
-      for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
-        AppStorage.set(key, false)
+      // AppStorage 模式：只关闭最后一个页面
+      if (RouterManager.pageStack.length > 0) {
+        const lastRoute = RouterManager.pageStack.pop()
+        if (lastRoute) {
+          const key = ROUTE_TO_STORAGE_KEY[lastRoute]
+          if (key) {
+            AppStorage.set(key, false)
+          }
+        }
+        if (RouterManager.pageStack.length === 0) {
+          RouterManager.notifyChange(null)
+        }
+        return true
       }
-      RouterManager.notifyChange(null)
-      return true
+      return false
     }
   }
 
@@ -134,10 +152,11 @@ export class RouterManager {
         RouterManager.navPathStack.clear()
       }
     } else {
-      // AppStorage 模式：关闭所有页面
+      // AppStorage 模式：关闭所有页面并清空栈
       for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
         AppStorage.set(key, false)
       }
+      RouterManager.pageStack = []
     }
     RouterManager.notifyChange(null)
   }
@@ -147,13 +166,8 @@ export class RouterManager {
     if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
       return RouterManager.navPathStack.size() > 0
     }
-    // AppStorage 模式：检查是否有页面打开
-    for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
-      if (AppStorage.get<boolean>(key) === true) {
-        return true
-      }
-    }
-    return false
+    // AppStorage 模式：检查页面栈
+    return RouterManager.pageStack.length > 0
   }
 
   // 获取导航栈大小
@@ -161,13 +175,8 @@ export class RouterManager {
     if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
       return RouterManager.navPathStack.size()
     }
-    let count = 0
-    for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
-      if (AppStorage.get<boolean>(key) === true) {
-        count++
-      }
-    }
-    return count
+    // AppStorage 模式：返回页面栈大小
+    return RouterManager.pageStack.length
   }
 
   // 订阅路由变更
