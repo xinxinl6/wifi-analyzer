@@ -135,10 +135,6 @@ export struct IpGeoPage {
     .height('100%')
     .backgroundColor(COLOR_BACKGROUND)
     .padding({ top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
-    .onBackPress(() => {
-      RouterManager.goBack()
-      return true
-    })
   }
 
   // ==================== 初始视图 ====================

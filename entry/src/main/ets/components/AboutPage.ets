@@ -207,10 +207,6 @@ export struct AboutPage {
     }
     .width('100%')
     .height('100%')
-    .onBackPress(() => {
-      RouterManager.goBack()
-      return true
-    })
   }
 
   // ==================== 列表项点击 ====================

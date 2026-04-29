@@ -217,6 +217,18 @@ struct Index {
     )
   }
 
+  // 拦截系统返回键和边缘滑动返回，统一由 RouterManager 处理
+  onBackPress(): boolean {
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] onBackPress triggered');
+    if (RouterManager.isInSubPage()) {
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] In sub page, calling goBack()');
+      RouterManager.goBack();
+      return true; // 已处理，返回上一页
+    }
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] On home page, let system handle');
+    return false; // 交由系统默认处理
+  }
+
   build() {
     Stack() {
       // 背景层 — Aurora 极光渐变
@@ -245,17 +257,7 @@ struct Index {
     }
     .width('100%')
     .height('100%')
-    // 拦截系统返回键和边缘滑动返回，统一由 RouterManager 处理
-    .onBackPress(() => {
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] onBackPress triggered');
-      if (RouterManager.isInSubPage()) {
-        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] In sub page, calling goBack()');
-        RouterManager.goBack();
-        return true; // 已处理，返回上一页
-      }
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] On home page, let system handle');
-      return false; // 交由系统默认处理
-    })
+  }
 
   @Builder
   buildMainContent() {

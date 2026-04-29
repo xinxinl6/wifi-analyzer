@@ -147,10 +147,6 @@ export struct SubnetCalcPage {
     .width('100%')
     .height('100%')
     .backgroundColor(COLOR_BACKGROUND)
-    .onBackPress(() => {
-      RouterManager.goBack()
-      return true
-    })
   }
 
   // ==================== 输入区域 ====================

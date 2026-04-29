@@ -757,11 +757,6 @@ export struct PingTestPage {
       .width('100%').height('100%')
     }
     .width('100%').height('100%')
-    // 拦截边缘滑动返回和系统返回键
-    .onBackPress(() => {
-      RouterManager.goBack()
-      return true
-    })
   }
 
 }

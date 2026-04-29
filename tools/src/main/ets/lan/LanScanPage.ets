@@ -194,10 +194,6 @@ export struct LanScanPage {
     .width('100%')
     .height('100%')
     .backgroundColor(COLOR_BACKGROUND)
-    .onBackPress(() => {
-      RouterManager.goBack()
-      return true
-    })
   }
 
   // ==================== 主内容 ====================
