@@ -85,6 +85,8 @@ export class RouterManager {
     }
     // 清空页面栈
     RouterManager.pageStack = []
+    // 重置子页面标志
+    RouterManager.inSubPage = false
   }
 
   // 获取 NavPathStack
@@ -164,6 +166,7 @@ export class RouterManager {
         AppStorage.set(key, false)
       }
       RouterManager.pageStack = []
+      RouterManager.inSubPage = false
     }
     RouterManager.notifyChange(null)
   }
