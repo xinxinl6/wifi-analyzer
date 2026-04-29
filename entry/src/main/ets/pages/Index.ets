@@ -1,4 +1,5 @@
 import { common } from '@kit.AbilityKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 import { EventBus } from '../utils/EventBus'
 import {
   // Aurora V2 色彩
@@ -51,6 +52,9 @@ const TAB_ITEMS: Array<TabItem> = [
   { title: $r('app.string.tab_speed'), icon: $r('app.media.ic_speed') },
   { title: $r('app.string.tab_tools'), icon: $r('app.media.ic_tool') },
 ]
+
+// 日志 domain
+const DOMAIN = 0x0000
 
 @Entry
 @Component
@@ -241,7 +245,17 @@ struct Index {
     }
     .width('100%')
     .height('100%')
-  }
+    // 拦截系统返回键和边缘滑动返回，统一由 RouterManager 处理
+    .onBackPress(() => {
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] onBackPress triggered');
+      if (RouterManager.isInSubPage()) {
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] In sub page, calling goBack()');
+        RouterManager.goBack();
+        return true; // 已处理，返回上一页
+      }
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] On home page, let system handle');
+      return false; // 交由系统默认处理
+    })
 
   @Builder
   buildMainContent() {

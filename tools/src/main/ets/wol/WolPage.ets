@@ -15,6 +15,7 @@ import {
 import {
   WolEngine, WolDevice, WolResult, WolCallbacks,
 } from '../wol/WolEngine'
+import { RouterManager } from '@wifi-analyzer/core'
 
 @Component
 export struct WolPage {
@@ -137,6 +138,10 @@ export struct WolPage {
     .height('100%')
     .backgroundColor(COLOR_BACKGROUND)
     .padding({ top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
+    .onBackPress(() => {
+      RouterManager.goBack()
+      return true
+    })
   }
 
   // ==================== 主内容 ====================

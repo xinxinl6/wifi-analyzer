@@ -283,6 +283,10 @@ export struct TraceroutePage {
       .width('100%').height('100%')
     }
     .width('100%').height('100%')
+    .onBackPress(() => {
+      RouterManager.goBack()
+      return true
+    })
   }
 
   // ==================== 初始视图 ====================
