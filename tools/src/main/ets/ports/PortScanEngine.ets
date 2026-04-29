@@ -3,6 +3,7 @@
 
 import { http } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { ValidationPatterns, LoggerConfig, LogLevel } from '@wifi-analyzer/core'
 
 // 端口扫描结果
 export interface PortScanResult {
@@ -189,8 +190,16 @@ export class PortScanEngine {
 
   /**
    * 执行端口扫描（并行探测，控制并发数）
+   * 注意：此方法已在页面层做过输入验证，这里作为纵深防御再次检查
    */
   async scan(address: string, ports: number[], timeout: number, callbacks: PortScanCallbacks): Promise<void> {
+    // 纵深防御：检查目标地址（防止绕过页面层验证）
+    if (!this.isValidTarget(address)) {
+      LoggerConfig.warn('PortScanEngine', 'Invalid target rejected:', address)
+      callbacks.onError('无效的目标地址')
+      return
+    }
+
     this.abortController = false
     const results: PortScanResult[] = []
     const total: number = ports.length
@@ -225,5 +234,33 @@ export class PortScanEngine {
     }
 
     callbacks.onComplete(results)
+  }
+
+  /**
+   * 验证扫描目标（SSRF 防护）
+   * 拒绝内网IP、云元数据地址等
+   */
+  private isValidTarget(address: string): boolean {
+    const trimmed: string = address.trim()
+
+    // 验证格式
+    if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
+      return false
+    }
+
+    // 如果是IP地址，拒绝内网地址
+    if (ValidationPatterns.isValidIpv4(trimmed)) {
+      if (ValidationPatterns.isPrivateIp(trimmed)) {
+        return false
+      }
+
+      // 拒绝云元数据地址（常见云平台）
+      const lower: string = trimmed.toLowerCase()
+      if (lower === '169.254.169.254' || lower === 'metadata.google.internal' || lower === '100.100.100.200') {
+        return false
+      }
+    }
+
+    return true
   }
 }

@@ -17,6 +17,17 @@ export { PermissionManager, PermissionStatus } from './permission/PermissionMana
 // 网络诊断
 export { NetworkDiagnostics, NetworkDiagnosticsResult, defaultDiagnosticsResult, networkDiagnostics } from './network/NetworkDiagnostics'
 
+// 网络配置常量
+export {
+  PublicIpConfig,
+  DnsConfig,
+  DiagnosticsConfig,
+  PortScanConfig,
+  ValidationPatterns,
+  LoggerConfig,
+  LogLevel
+} from './config/NetworkConfig'
+
 // 依赖注入容器
 export { ServiceContainer, container, IServiceContainer } from './ServiceContainer'
 

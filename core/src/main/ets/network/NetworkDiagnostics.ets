@@ -2,6 +2,13 @@
 
 import { connection, http } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import {
+  DiagnosticsConfig,
+  DnsConfig,
+  LoggerConfig,
+  LogLevel,
+  PublicIpConfig
+} from '../config/NetworkConfig'
 
 // 网络诊断结果接口
 export interface NetworkDiagnosticsResult {
@@ -33,6 +40,12 @@ export const defaultDiagnosticsResult: NetworkDiagnosticsResult = {
   gateway: '--',
   dns: '--',
   isTesting: false
+}
+
+// 本地IP地址项接口
+interface LocalIpItem {
+  address: string
+  family: number
 }
 
 // HTTP请求选项接口（避免内联对象字面量作为类型）
@@ -86,10 +99,10 @@ export class NetworkDiagnostics {
       jitter: 0,
       uploadSpeed: 0,
       downloadSpeed: 0,
-      localIp: '获取中...',
-      publicIp: '获取中...',
-      gateway: '获取中...',
-      dns: '202.96.128.86',
+      localIp: DiagnosticsConfig.LOADING_PLACEHOLDER,
+      publicIp: DiagnosticsConfig.LOADING_PLACEHOLDER,
+      gateway: DiagnosticsConfig.LOADING_PLACEHOLDER,
+      dns: DnsConfig.DEFAULT_DNS,
       isTesting: true
     }
     
@@ -109,46 +122,63 @@ export class NetworkDiagnostics {
     if (this.pendingTasks >= this.totalTasks) {
       // 所有任务完成，设置测试状态为false
       this.currentState.isTesting = false
-      console.log('[NetworkDiagnostics] All network info loaded')
+      LoggerConfig.debug('NetworkDiagnostics', 'All network info loaded')
     }
   }
 
-  // 获取本地IP地址 - 使用 getAddressesByName 获取本地IP
+  // 获取本地IP地址 - 使用 getAddressesByName 或默认网络获取本地IP
   private fetchLocalIp(): void {
     try {
       this.pendingTasks++
+      let foundLocalIp: string = ''
+
+      // 方案一：通过默认网络获取连接属性来获取本地IP
       const netHandle: connection.NetHandle | null = connection.getDefaultNetSync()
       if (netHandle) {
-        // 直接使用 getAddressesByName 获取本地IP
-        connection.getAddressesByName(
-          'localhost',
-          (err: BusinessError, addresses: Array<connection.NetAddress>) => {
+        // 尝试获取网络地址信息
+        connection.getAddressesByName('localhost', (err: BusinessError, addresses: connection.NetAddress[]) => {
+          try {
             if (!err && addresses && addresses.length > 0) {
-              const address: connection.NetAddress = addresses[0]
-              if (address && address.address) {
-                console.log('[NetworkDiagnostics] Local IP from localhost:', address.address)
-                this.currentState.localIp = address.address
-              } else {
-                this.currentState.localIp = '--'
+              for (let i = 0; i < addresses.length; i++) {
+                const addr = addresses[i]
+                if (addr && addr.address) {
+                  const ip: string = addr.address
+                  // 过滤回环地址和IPv6本地链路
+                  if (ip !== '127.0.0.1' && !ip.startsWith('::') && !ip.startsWith('fe80')) {
+                    foundLocalIp = ip
+                    LoggerConfig.debug('NetworkDiagnostics', 'Found local IP:', ip)
+                    break
+                  }
+                }
               }
-            } else {
-              this.currentState.localIp = '--'
             }
+
+            if (foundLocalIp !== '') {
+              this.currentState.localIp = foundLocalIp
+            } else if (netHandle.netId) {
+              // 使用 netId 尝试构造局域网 IP（备选方案）
+              this.currentState.localIp = '已连接'
+              LoggerConfig.debug('NetworkDiagnostics', 'Connected via netId:', netHandle.netId)
+            } else {
+              this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
+            }
+          } finally {
             this.checkAllTasksCompleted()
           }
-        )
+        })
       } else {
-        this.currentState.localIp = '--'
+        LoggerConfig.warn('NetworkDiagnostics', 'getDefaultNetSync returned null')
+        this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
         this.pendingTasks++
         this.checkAllTasksCompleted()
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error('[NetworkDiagnostics] fetchLocalIp error:', error.message)
+        LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp error:', error.message)
       } else {
-        console.error('[NetworkDiagnostics] fetchLocalIp unknown error')
+        LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp unknown error')
       }
-      this.currentState.localIp = '--'
+      this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
       this.pendingTasks++
       this.checkAllTasksCompleted()
     }
@@ -164,8 +194,8 @@ export class NetworkDiagnostics {
           netHandle,
           (err: BusinessError, data: connection.ConnectionProperties) => {
             if (err) {
-              console.warn('[NetworkDiagnostics] getConnectionProperties error:', err.message)
-              this.currentState.gateway = '192.168.1.1'
+              LoggerConfig.warn('NetworkDiagnostics', 'getConnectionProperties error:', err.message)
+              this.currentState.gateway = DiagnosticsConfig.DEFAULT_GATEWAY
             } else {
               // 从 routes 数组中提取真实网关（使用原生 RouteInfo 类型）
               let gwIp: string = ''
@@ -175,7 +205,7 @@ export class NetworkDiagnostics {
                   if (route.isDefaultRoute && route.hasGateway && route.gateway) {
                     gwIp = route.gateway.address || ''
                     if (gwIp !== '') {
-                      console.log('[NetworkDiagnostics] ✓ Gateway from route:', gwIp)
+                      LoggerConfig.debug('NetworkDiagnostics', 'Gateway from route:', gwIp)
                       break
                     }
                   }
@@ -185,32 +215,32 @@ export class NetworkDiagnostics {
               // 备选：使用 DNS 服务器地址
               if (gwIp === '' && data.dnses && data.dnses.length > 0) {
                 gwIp = data.dnses[0].address || ''
-                console.log('[NetworkDiagnostics] Using first DNS as fallback:', gwIp)
+                LoggerConfig.debug('NetworkDiagnostics', 'Using first DNS as fallback:', gwIp)
               }
 
               if (gwIp === '') {
-                console.warn('[NetworkDiagnostics] Could not get real gateway')
-                gwIp = '192.168.1.1'
+                LoggerConfig.warn('NetworkDiagnostics', 'Could not get real gateway')
+                gwIp = DiagnosticsConfig.DEFAULT_GATEWAY
               }
 
               this.currentState.gateway = gwIp
-              this.currentState.dns = '223.5.5.5'
+              this.currentState.dns = DnsConfig.ALI_DNS
             }
             this.checkAllTasksCompleted()
           }
         )
       } else {
-        this.currentState.gateway = '--'
+        this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
         this.pendingTasks++
         this.checkAllTasksCompleted()
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error('[NetworkDiagnostics] fetchGateway error:', error.message)
+        LoggerConfig.error('NetworkDiagnostics', 'fetchGateway error:', error.message)
       } else {
-        console.error('[NetworkDiagnostics] fetchGateway unknown error')
+        LoggerConfig.error('NetworkDiagnostics', 'fetchGateway unknown error')
       }
-      this.currentState.gateway = '--'
+      this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
       this.pendingTasks++
       this.checkAllTasksCompleted()
     }
@@ -224,11 +254,11 @@ export class NetworkDiagnostics {
       httpRequest = http.createHttp()
       const pubIpOptions: PublicIpRequestOptions = {
         method: http.RequestMethod.GET,
-        connectTimeout: 3000,
-        readTimeout: 3000
+        connectTimeout: PublicIpConfig.TIMEOUT_MS,
+        readTimeout: PublicIpConfig.TIMEOUT_MS
       }
       httpRequest.request(
-        'https://api.ipify.org?format=json',
+        PublicIpConfig.PRIMARY_API,
         pubIpOptions,
         (err: BusinessError, data: http.HttpResponse) => {
           try {
@@ -237,22 +267,22 @@ export class NetworkDiagnostics {
               try {
                 const ipData: PublicIpResponse = JSON.parse(resultStr)
                 if (ipData && ipData.ip) {
-                  console.log('[NetworkDiagnostics] Public IP:', ipData.ip)
+                  LoggerConfig.debug('NetworkDiagnostics', 'Public IP:', ipData.ip)
                   this.currentState.publicIp = ipData.ip
                 } else {
-                  this.currentState.publicIp = '--'
+                  this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
                 }
               } catch (parseError) {
-                console.warn('[NetworkDiagnostics] parse publicIp error:', parseError)
-                this.currentState.publicIp = '--'
+                LoggerConfig.warn('NetworkDiagnostics', 'parse publicIp error:', parseError)
+                this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
               }
             } else {
               let errMsg: string = 'Unknown error'
               if (err) {
                 errMsg = err.message
               }
-              console.error('[NetworkDiagnostics] fetchPublicIp error:', errMsg)
-              this.currentState.publicIp = '--'
+              LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', errMsg)
+              this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
             }
           } finally {
             httpRequest?.destroy()
@@ -263,11 +293,11 @@ export class NetworkDiagnostics {
     } catch (error) {
       httpRequest?.destroy()
       if (error instanceof Error) {
-        console.error('[NetworkDiagnostics] fetchPublicIp error:', error.message)
+        LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', error.message)
       } else {
-        console.error('[NetworkDiagnostics] fetchPublicIp unknown error')
+        LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp unknown error')
       }
-      this.currentState.publicIp = '--'
+      this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
       this.pendingTasks++
       this.checkAllTasksCompleted()
     }

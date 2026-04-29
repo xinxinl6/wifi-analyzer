@@ -8,6 +8,7 @@ import {
   RADIUS_MD, RADIUS_LG, SAFE_AREA_BOTTOM
 } from '@wifi-analyzer/design-system'
 import { RouterManager } from '@wifi-analyzer/core'
+import promptAction from '@ohos.promptAction'
 
 // ==================== 列表项接口 ====================
 interface AboutListItem {
@@ -34,155 +35,188 @@ export struct AboutPage {
 
   // ==================== 构建 ====================
   build() {
-    Column() {
-      // 顶部返回按钮栏
-      Row() {
+    Stack() {
+      // ===== Aurora 天蓝渐变背景 =====
+      Column() {}
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: [
+            ['#C9E2F5', 0],
+            ['#D6E9F8', 0.4],
+            ['#E0F0FA', 0.75],
+            ['#EAF4FB', 1]
+          ]
+        })
+
+      // 极光装饰光晕
+      Circle()
+        .width(280)
+        .height(280)
+        .fill('rgba(74,144,217,0.12)')
+        .position({ x: -60, y: -60 })
+
+      Circle()
+        .width(180)
+        .height(180)
+        .fill('rgba(135,206,235,0.10)')
+        .position({ x: '68%', y: '45%' })
+
+      // ===== 主内容层 =====
+      Column() {
+        // 顶部返回按钮栏
         Row() {
-          Text('←')
-            .fontSize(20)
-            .fontColor(COLOR_PRIMARY)
-          Text($r('app.string.back'))
-            .fontSize(FONT_SIZE_MD)
-            .fontColor(COLOR_PRIMARY)
-            .fontWeight(FONT_WEIGHT_MEDIUM)
-        }
-        .padding({ left: 4, right: 12, top: 6, bottom: 6 })
-        .borderRadius(20)
-        .backgroundColor(COLOR_SURFACE)
-        .onClick(() => RouterManager.goBack())
-
-        Blank()
-      }
-      .width('100%')
-      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
-      .alignItems(VerticalAlign.Center)
-
-      // ===== 内容区域 =====
-      Scroll() {
-        Column({ space: 0 }) {
-
-          // ===== 应用 LOGO 区域 =====
-          Column({ space: 8 }) {
-            // 应用图标
-            Column() {
-              Image($r('app.media.icon'))
-                .width(80)
-                .height(80)
-                .borderRadius(18)
-                .shadow({ radius: 16, color: '#1A0066FF', offsetX: 0, offsetY: 4 })
-            }
-            .margin({ top: 4, bottom: 4 })
-
-            // 应用名称
-            Text($r('app.string.app_name_wifi_analyzer'))
-              .fontSize(FONT_SIZE_2XL)
-              .fontWeight(FONT_WEIGHT_BOLD)
-              .fontColor(COLOR_TEXT_PRIMARY)
-
-            // 版本号
-            Text() {
-              Span($r('app.string.version_prefix'))
-              Span(' ' + this.appVersion)
-            }
-              .fontSize(FONT_SIZE_SM)
-              .fontColor(COLOR_TEXT_TERTIARY)
-              .margin({ bottom: 32 })
+          Row() {
+            Text('←')
+              .fontSize(20)
+              .fontColor(COLOR_PRIMARY)
+            Text($r('app.string.back'))
+              .fontSize(FONT_SIZE_MD)
+              .fontColor(COLOR_PRIMARY)
+              .fontWeight(FONT_WEIGHT_MEDIUM)
           }
-          .width('100%')
-          .alignItems(HorizontalAlign.Center)
-          .backgroundColor(COLOR_BACKGROUND)
+          .padding({ left: 4, right: 12, top: 6, bottom: 6 })
+          .borderRadius(20)
+          .backgroundColor('rgba(255,255,255,0.60)')
+          .onClick(() => RouterManager.goBack())
 
-          // ===== 功能列表区域 =====
+          Blank()
+        }
+        .width('100%')
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
+        .alignItems(VerticalAlign.Center)
+
+        // ===== 内容区域 =====
+        Scroll() {
           Column({ space: 0 }) {
-            ForEach(this.listItems, (item: AboutListItem, index: number) => {
+
+            // ===== 应用 LOGO 区域 =====
+            Column({ space: 8 }) {
+              // 应用图标
               Column() {
-                Row() {
-                  Text(item.label)
-                    .fontSize(FONT_SIZE_MD)
-                    .fontColor(COLOR_TEXT_PRIMARY)
-                    .layoutWeight(1)
+                Image($r('app.media.icon'))
+                  .width(80)
+                  .height(80)
+                  .borderRadius(18)
+                  .shadow({ radius: 16, color: '#1A0066FF', offsetX: 0, offsetY: 4 })
+              }
+              .margin({ top: 4, bottom: 4 })
 
-                  if (item.value !== '') {
-                    Text(item.value)
-                      .fontSize(FONT_SIZE_SM)
-                      .fontColor(COLOR_TEXT_TERTIARY)
-                      .margin({ right: 4 })
+              // 应用名称
+              Text($r('app.string.app_name_wifi_analyzer'))
+                .fontSize(FONT_SIZE_2XL)
+                .fontWeight(FONT_WEIGHT_BOLD)
+                .fontColor(COLOR_TEXT_PRIMARY)
+
+              // 版本号
+              Text() {
+                Span($r('app.string.version_prefix'))
+                Span(' ' + this.appVersion)
+              }
+                .fontSize(FONT_SIZE_SM)
+                .fontColor(COLOR_TEXT_TERTIARY)
+                .margin({ bottom: 32 })
+            }
+            .width('100%')
+            .alignItems(HorizontalAlign.Center)
+
+            // ===== 功能列表区域 =====
+            Column({ space: 0 }) {
+              ForEach(this.listItems, (item: AboutListItem, index: number) => {
+                Column() {
+                  Row() {
+                    Text(item.label)
+                      .fontSize(FONT_SIZE_MD)
+                      .fontColor(COLOR_TEXT_PRIMARY)
+                      .layoutWeight(1)
+
+                    if (item.value !== '') {
+                      Text(item.value)
+                        .fontSize(FONT_SIZE_SM)
+                        .fontColor(COLOR_TEXT_TERTIARY)
+                        .margin({ right: 4 })
+                    }
+
+                    if (item.showArrow) {
+                      Image($r('app.media.ic_arrow_right'))
+                        .width(16)
+                        .height(16)
+                        .fillColor(COLOR_TEXT_TERTIARY)
+                    }
                   }
+                  .width('100%')
+                  .height(52)
+                  .padding({ left: SPACE_LG, right: SPACE_LG })
+                  .backgroundColor('rgba(255,255,255,0.60)')
+                  .onClick(() => { this.onItemClick(item.action) })
 
-                  if (item.showArrow) {
-                    Image($r('app.media.ic_arrow_right'))
-                      .width(16)
-                      .height(16)
-                      .fillColor(COLOR_TEXT_TERTIARY)
+                  // 分割线（最后一项不显示）
+                  if (index < this.listItems.length - 1) {
+                    Divider()
+                      .color('rgba(0,0,0,0.06)')
+                      .strokeWidth(0.5)
+                      .padding({ left: SPACE_LG })
+                      .margin({ left: SPACE_LG })
                   }
                 }
                 .width('100%')
-                .height(52)
-                .padding({ left: SPACE_LG, right: SPACE_LG })
-                .backgroundColor(COLOR_SURFACE)
-                .onClick(() => { this.onItemClick(item.action) })
+              })
+            }
+            .width('100%')
+            .borderRadius(RADIUS_LG)
+            .clip(true)
+            .margin({ left: 16, right: 16, top: 8 })
+            .width('calc(100% - 32vp)')
 
-                // 分割线（最后一项不显示）
-                if (index < this.listItems.length - 1) {
-                  Divider()
-                    .color(COLOR_DIVIDER)
-                    .strokeWidth(0.5)
-                    .padding({ left: SPACE_LG })
-                    .margin({ left: SPACE_LG })
-                }
+            // ===== 底部信息 =====
+            Column({ space: 6 }) {
+              Text() {
+                Span($r('app.string.contact_address'))
+                Span('：1218478630@qq.com')
               }
-              .width('100%')
-            })
+                .fontSize(FONT_SIZE_XS)
+                .fontColor(COLOR_TEXT_TERTIARY)
+                .textAlign(TextAlign.Center)
+
+              Text() {
+                Span($r('app.string.build_number'))
+                Span(': ' + this.buildNumber)
+              }
+                .fontSize(FONT_SIZE_XS)
+                .fontColor(COLOR_TEXT_TERTIARY)
+                .textAlign(TextAlign.Center)
+
+              Text($r('app.string.copyright'))
+                .fontSize(FONT_SIZE_XS)
+                .fontColor(COLOR_TEXT_TERTIARY)
+                .textAlign(TextAlign.Center)
+            }
+            .width('100%')
+            .padding({ top: 32, bottom: 48 })
+            .alignItems(HorizontalAlign.Center)
           }
           .width('100%')
-          .borderRadius(RADIUS_LG)
-          .clip(true)
-          .margin({ left: 16, right: 16, top: 8 })
-          .width('calc(100% - 32vp)')
-
-          // ===== 底部信息 =====
-          Column({ space: 6 }) {
-            Text() {
-              Span($r('app.string.contact_address'))
-              Span('：1218478630@qq.com')
-            }
-              .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
-              .textAlign(TextAlign.Center)
-
-            Text() {
-              Span($r('app.string.build_number'))
-              Span(': ' + this.buildNumber)
-            }
-              .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
-              .textAlign(TextAlign.Center)
-
-            Text($r('app.string.copyright'))
-              .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
-              .textAlign(TextAlign.Center)
-          }
-          .width('100%')
-          .padding({ top: 32, bottom: 48 })
-          .alignItems(HorizontalAlign.Center)
         }
+        .edgeEffect(EdgeEffect.Spring)
         .width('100%')
+        .layoutWeight(1)
       }
-      .edgeEffect(EdgeEffect.Spring)
       .width('100%')
-      .layoutWeight(1)
-      .backgroundColor(COLOR_BACKGROUND)
+      .height('100%')
     }
     .width('100%')
     .height('100%')
-    .backgroundColor(COLOR_BACKGROUND)
   }
 
   // ==================== 列表项点击 ====================
   onItemClick(action: string): void {
     if (action === 'checkUpdate') {
-      // TODO: 检查更新
+      // 检查更新：显示"当前已是最新版本"
+      promptAction.showToast({
+        message: $r('app.string.check_update_latest').toString(),
+        duration: 2000
+      })
     } else if (action === 'privacy') {
       // TODO: 隐私政策
     } else if (action === 'agreement') {

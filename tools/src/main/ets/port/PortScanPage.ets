@@ -1,6 +1,7 @@
 // 端口扫描页面组件
 // 界面：搜索栏 + 预设方案选择 + 扫描进度 + 端口状态列表
 
+import promptAction from '@ohos.promptAction'
 import {
   COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
   COLOR_PURPLE, COLOR_PINK, COLOR_CYAN,
@@ -13,7 +14,7 @@ import {
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM,
 } from '@wifi-analyzer/design-system'
 import { PortScanEngine, PortScanResult, PortScanCallbacks, PortPreset } from '../ports/PortScanEngine'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
 
 // ==================== 接口定义 ====================
 
@@ -136,9 +137,45 @@ export struct PortScanPage {
 
   // ==================== 业务逻辑 ====================
 
+  // 验证输入
+  private validateInput(addr: string): string {
+    const trimmed: string = addr.trim()
+
+    // 检查是否为空
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+
+    // 检查长度限制（域名/IP最大255字符）
+    if (trimmed.length > 255) {
+      return $r('app.string.err_input_too_long').toString()
+    }
+
+    // 检查是否为内网IP（安全限制）
+    if (ValidationPatterns.isValidIpv4(trimmed) && ValidationPatterns.isPrivateIp(trimmed)) {
+      return $r('app.string.err_private_ip').toString()
+    }
+
+    // 验证IP或域名格式
+    if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
+      return $r('app.string.err_invalid_ip_or_domain').toString()
+    }
+
+    return ''
+  }
+
   async startScan(): Promise<void> {
     const addr: string = this.inputText.trim()
-    if (addr.length === 0) return
+
+    // 输入验证
+    const errorMsg: string = this.validateInput(addr)
+    if (errorMsg !== '') {
+      promptAction.showToast({
+        message: errorMsg,
+        duration: 2000
+      })
+      return
+    }
 
     this.resultList = []
     this.openPorts = []

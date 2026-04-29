@@ -15,7 +15,8 @@ import {
 import {
   MacLookupEngine, MacLookupResult,
 } from '../maclookup/MacLookupEngine'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
+import promptAction from '@ohos.promptAction'
 
 @Component
 export struct MacLookupPage {
@@ -44,9 +45,29 @@ export struct MacLookupPage {
 
   // ==================== 业务逻辑 ====================
 
+  // ==================== 输入验证 ====================
+  private validateInput(mac: string): string {
+    const trimmed = mac.trim()
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+    if (trimmed.length > 17) { // 标准 MAC 地址最大长度
+      return $r('app.string.err_input_too_long').toString()
+    }
+    if (!ValidationPatterns.isValidMac(trimmed)) {
+      return $r('app.string.err_invalid_mac').toString()
+    }
+    return ''
+  }
+
   async doQuery(): Promise<void> {
     const mac: string = this.inputText.trim()
-    if (mac.length === 0) return
+    // 输入验证
+    const errorMsg = this.validateInput(mac)
+    if (errorMsg !== '') {
+      promptAction.showToast({ message: errorMsg, duration: 2000 })
+      return
+    }
 
     this.viewMode = 'querying'
     const queryResult: MacLookupResult = await this.engine.lookup(mac)

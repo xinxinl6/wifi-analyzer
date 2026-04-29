@@ -14,7 +14,8 @@ import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
   GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, SAFE_AREA_BOTTOM } from '@wifi-analyzer/design-system'
 import { http, connection, socket } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
+import promptAction from '@ohos.promptAction'
 
 // 子组件
 import { IdleView } from './PingIdleView'
@@ -74,6 +75,8 @@ interface PingTestPageProps {
 // ==================== 组件 ====================
 @Component
 export struct PingTestPage {
+  // 输入验证错误消息
+  @State inputError: string = ''
   // 输入 & 网关检测
   @State inputText: string = ''
   @State detectedGateway: string = ''
@@ -229,7 +232,12 @@ export struct PingTestPage {
 
   startContinuousPing(): void {
     const addr: string = this.inputText.trim()
-    if (addr.length === 0) return
+    // 输入验证
+    const errorMsg = this.validateInput(addr)
+    if (errorMsg !== '') {
+      promptAction.showToast({ message: errorMsg, duration: 2000 })
+      return
+    }
 
     this.targetHost = addr
     this.resolvedIp = addr
@@ -612,6 +620,23 @@ export struct PingTestPage {
     return true
   }
 
+  // ==================== 输入验证 ====================
+  private validateInput(addr: string): string {
+    const trimmed = addr.trim()
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+    if (trimmed.length > 255) {
+      return $r('app.string.err_input_too_long').toString()
+    }
+    // 验证是否为有效的IP或域名
+    if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
+      return $r('app.string.err_invalid_ip_or_domain').toString()
+    }
+    // 特殊处理内网IP - Ping测试支持内网，所以这里只做提示不阻止
+    return ''
+  }
+
   getHostLabelResource(): Resource {
     if (this.targetHost.indexOf('.') > 0 && !this.targetHost.startsWith('http')) {
       if (/^\d+\.\d+\.\d+\.\d+$/.test(this.targetHost)) return $r('app.string.target_ip')
@@ -631,19 +656,32 @@ export struct PingTestPage {
   // ==================== 页面入口 ====================
   build() {
     Stack() {
-      // 天蓝渐变背景
-      Column() {
-        Column()
-          .width('100%')
-          .height(220)
-          .linearGradient({
-            direction: GradientDirection.Bottom,
-            colors: [[COLOR_SKY_BLUE_LIGHT, 0], ['rgba(186,230,253,0.55)', 0.55], ['rgba(224,242,254,0.15)', 1]]
-          })
-        Blank()
-      }
-      .width('100%').height('100%')
-      .backgroundColor(COLOR_BACKGROUND)
+      // ===== Aurora 天蓝渐变背景 =====
+      Column() {}
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: [
+            ['#C9E2F5', 0],
+            ['#D6E9F8', 0.4],
+            ['#E0F0FA', 0.75],
+            ['#EAF4FB', 1]
+          ]
+        })
+
+      // 极光装饰光晕
+      Circle()
+        .width(280)
+        .height(280)
+        .fill('rgba(74,144,217,0.12)')
+        .position({ x: -60, y: -60 })
+
+      Circle()
+        .width(180)
+        .height(180)
+        .fill('rgba(135,206,235,0.10)')
+        .position({ x: '68%', y: '45%' })
 
       // 主内容
       Column() {

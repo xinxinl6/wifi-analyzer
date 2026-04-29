@@ -1,6 +1,7 @@
 // DNS 查询页面组件
 // 界面：搜索栏 + DNS服务器选择 + 记录类型标签 + 查询结果列表
 
+import promptAction from '@ohos.promptAction'
 import {
   COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
   COLOR_PURPLE, COLOR_PINK, COLOR_CYAN, COLOR_INDIGO,
@@ -13,7 +14,7 @@ import {
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM,
 } from '@wifi-analyzer/design-system'
 import { DnsLookupEngine, DnsLookupResult, DnsRecord, DnsRecordType, DnsServerPreset, DnsLookupConfig } from '../dnslookup/DnsLookupEngine'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
 
 // ==================== 接口定义 ====================
 
@@ -111,9 +112,40 @@ export struct DnsLookupPage {
 
   // ==================== 业务逻辑 ====================
 
+  // 验证域名输入
+  private validateDomain(domain: string): string {
+    const trimmed: string = domain.trim()
+
+    // 检查是否为空
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+
+    // 检查长度限制（域名最大253字符）
+    if (trimmed.length > 253) {
+      return $r('app.string.err_input_too_long').toString()
+    }
+
+    // 验证域名格式
+    if (!ValidationPatterns.isValidDomain(trimmed)) {
+      return $r('app.string.err_invalid_domain').toString()
+    }
+
+    return ''
+  }
+
   async doQuery(): Promise<void> {
     const domain: string = this.inputText.trim()
-    if (domain.length === 0) return
+
+    // 输入验证
+    const errorMsg: string = this.validateDomain(domain)
+    if (errorMsg !== '') {
+      promptAction.showToast({
+        message: errorMsg,
+        duration: 2000
+      })
+      return
+    }
 
     this.isQuerying = true
     this.viewMode = 'querying'

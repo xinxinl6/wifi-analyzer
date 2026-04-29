@@ -15,7 +15,8 @@ import {
 import {
   IpGeoEngine, IpGeoResult,
 } from '../ipgeo/IpGeoEngine'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
+import promptAction from '@ohos.promptAction'
 
 // ==================== 组件 ====================
 
@@ -75,9 +76,30 @@ export struct IpGeoPage {
 
   // ==================== 业务逻辑 ====================
 
+  // ==================== 输入验证 ====================
+  private validateInput(ip: string): string {
+    const trimmed = ip.trim()
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+    if (trimmed.length > 45) { // IPv6 最大长度
+      return $r('app.string.err_input_too_long').toString()
+    }
+    // 支持IPv4或域名
+    if (!ValidationPatterns.isValidIpv4(trimmed) && !ValidationPatterns.isValidDomain(trimmed)) {
+      return $r('app.string.err_invalid_ip_or_domain').toString()
+    }
+    return ''
+  }
+
   async doQuery(): Promise<void> {
     const ip: string = this.inputText.trim()
-    if (ip.length === 0) return
+    // 输入验证
+    const errorMsg = this.validateInput(ip)
+    if (errorMsg !== '') {
+      promptAction.showToast({ message: errorMsg, duration: 2000 })
+      return
+    }
 
     this.isQuerying = true
     this.viewMode = 'querying'

@@ -1,6 +1,7 @@
 // 路由追踪页面组件 — 天蓝色透明毛玻璃悬浮风格
 // 风格：天蓝色渐变背景 + 透明毛玻璃卡片 + 胶囊按钮 + 时间线路径
 
+import promptAction from '@ohos.promptAction'
 import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_BACKGROUND, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING,
   COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
@@ -15,7 +16,7 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
 import {
   TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteStats, DnsResolveResult
 } from '../traceroute/TracerouteEngine'
-import { RouterManager } from '@wifi-analyzer/core'
+import { RouterManager, ValidationPatterns, DnsConfig, DiagnosticsConfig } from '@wifi-analyzer/core'
 
 // ==================== 接口定义 ====================
 
@@ -82,13 +83,35 @@ export struct TraceroutePage {
 
   // ==================== 业务逻辑 ====================
 
+  // 验证目标地址输入
+  private validateTarget(addr: string): string {
+    const trimmed: string = addr.trim()
+
+    // 检查是否为空
+    if (trimmed.length === 0) {
+      return $r('app.string.err_empty_input').toString()
+    }
+
+    // 检查长度限制
+    if (trimmed.length > 255) {
+      return $r('app.string.err_input_too_long').toString()
+    }
+
+    // 验证IP或域名格式
+    if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
+      return $r('app.string.err_invalid_ip_or_domain').toString()
+    }
+
+    return ''
+  }
+
   onRecommendTap(index: number): void {
     switch (index) {
       case 0: // 网关
-        this.inputText = this.detectedGateway || '192.168.1.1'
+        this.inputText = this.detectedGateway || DiagnosticsConfig.DEFAULT_GATEWAY
         break
       case 1: // DNS
-        this.inputText = '223.5.5.5'
+        this.inputText = DnsConfig.ALI_DNS
         break
       case 2: // 百度
         this.inputText = 'baidu.com'
@@ -100,7 +123,16 @@ export struct TraceroutePage {
 
   startTrace(): void {
     const addr: string = this.inputText.trim()
-    if (addr.length === 0) return
+
+    // 输入验证
+    const errorMsg: string = this.validateTarget(addr)
+    if (errorMsg !== '') {
+      promptAction.showToast({
+        message: errorMsg,
+        duration: 2000
+      })
+      return
+    }
 
     this.targetHost = addr
     this.resolvedIp = addr
@@ -191,22 +223,57 @@ export struct TraceroutePage {
   // ==================== 页面入口 ====================
   build() {
     Stack() {
-      // 天蓝渐变背景
-      Column() {
-        Column()
-          .width('100%')
-          .height(220)
-          .linearGradient({
-            direction: GradientDirection.Bottom,
-            colors: [[COLOR_SKY_BLUE_LIGHT, 0], ['rgba(186,230,253,0.55)', 0.55], ['rgba(224,242,254,0.15)', 1]]
-          })
-        Blank()
-      }
-      .width('100%').height('100%')
-      .backgroundColor(COLOR_BACKGROUND)
+      // ===== Aurora 天蓝渐变背景 =====
+      Column() {}
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: [
+            ['#C9E2F5', 0],
+            ['#D6E9F8', 0.4],
+            ['#E0F0FA', 0.75],
+            ['#EAF4FB', 1]
+          ]
+        })
+
+      // 极光装饰光晕
+      Circle()
+        .width(280)
+        .height(280)
+        .fill('rgba(74,144,217,0.12)')
+        .position({ x: -60, y: -60 })
+
+      Circle()
+        .width(180)
+        .height(180)
+        .fill('rgba(135,206,235,0.10)')
+        .position({ x: '68%', y: '45%' })
 
       // 主内容
       Column() {
+        // 顶部返回按钮栏
+        Row() {
+          Row() {
+            Text('←')
+              .fontSize(20)
+              .fontColor(COLOR_SKY_BLUE)
+            Text($r('app.string.back'))
+              .fontSize(FONT_SIZE_MD)
+              .fontColor(COLOR_SKY_BLUE)
+              .fontWeight(FONT_WEIGHT_MEDIUM)
+          }
+          .padding({ left: 4, right: 12, top: 6, bottom: 6 })
+          .borderRadius(20)
+          .backgroundColor('rgba(255,255,255,0.60)')
+          .onClick(() => RouterManager.goBack())
+
+          Blank()
+        }
+        .width('100%')
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_SM })
+        .alignItems(VerticalAlign.Center)
+
         if (this.viewMode === 'idle') {
           this.IdleView()
         } else {
@@ -214,7 +281,6 @@ export struct TraceroutePage {
         }
       }
       .width('100%').height('100%')
-      .padding({ top: SPACE_LG })
     }
     .width('100%').height('100%')
   }
@@ -226,7 +292,7 @@ export struct TraceroutePage {
         // 大标题区
         Column({ space: 6 }) {
           Text($r('app.string.route_trace'))
-            .fontSize(FONT_SIZE_3XL)
+            .fontSize(FONT_SIZE_2XL)
             .fontWeight(FONT_WEIGHT_BOLD)
             .fontColor(COLOR_TEXT_PRIMARY)
           Text($r('app.string.path_desc'))
@@ -235,7 +301,6 @@ export struct TraceroutePage {
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
-        .padding({ top: SPACE_SM })
 
         // 搜索栏
         this.SearchBarSection()

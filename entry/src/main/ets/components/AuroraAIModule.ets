@@ -58,9 +58,9 @@ interface AIMessage {
 
 interface AIFeatureItem {
   enabled: boolean
-  title: string
+  title: ResourceStr
   icon: Resource
-  description: string
+  description: ResourceStr
 }
 
 interface AIFeatureMap {
@@ -74,30 +74,76 @@ export const AIFeatures: AIFeatureMap = {
   // 网络健康诊断
   networkHealth: {
     enabled: true,
-    title: '网络健康诊断',
+    title: 'ai_feature_network_health',
     icon: $r('app.media.ic_health'),
-    description: 'AI分析信号质量、延迟、丢包率'
+    description: 'ai_feature_network_health_desc'
   },
   // 智能信道推荐
   channelRecommend: {
     enabled: true,
-    title: '智能信道推荐',
+    title: 'ai_feature_channel_recommend',
     icon: $r('app.media.ic_channel'),
-    description: '基于环境AI推荐最优信道'
+    description: 'ai_feature_channel_recommend_desc'
   },
   // 异常预警
   anomalyAlert: {
     enabled: true,
-    title: '异常预警',
+    title: 'ai_feature_anomaly_alert',
     icon: $r('app.media.ic_warning'),
-    description: '预测性网络问题提醒'
+    description: 'ai_feature_anomaly_alert_desc'
   },
   // 优化建议
   optimizationTip: {
     enabled: true,
-    title: '优化建议',
+    title: 'ai_feature_optimization_tip',
     icon: $r('app.media.ic_tip'),
-    description: '个性化网络优化方案'
+    description: 'ai_feature_optimization_tip_desc'
+  }
+}
+
+// AI响应消息接口
+interface AIMessageResponses {
+  signal: string
+  channel: string
+  speed: string
+  defaultMsg: string
+}
+
+// AI消息集合接口
+interface AIMessagesMap {
+  launchFailed: string
+  welcome: string
+  panelTitle: string
+  onlineStatus: string
+  placeholder: string
+  responses: AIMessageResponses
+}
+
+// ============================================
+// AI 消息配置（便于国际化）
+// ============================================
+export const AIMessages: AIMessagesMap = {
+  // FAB 按钮失败消息
+  launchFailed: 'ai_launch_failed',
+
+  // 欢迎消息
+  welcome: 'ai_welcome_message',
+
+  // 面板标题
+  panelTitle: 'ai_panel_title',
+
+  // 在线状态
+  onlineStatus: 'ai_online_status',
+
+  // 输入占位符
+  placeholder: 'ai_placeholder',
+
+  // AI 响应消息
+  responses: {
+    signal: 'ai_response_signal',
+    channel: 'ai_response_channel',
+    speed: 'ai_response_speed',
+    defaultMsg: 'ai_response_default'
   }
 }
 
@@ -154,7 +200,7 @@ export struct AuroraAIFabButton {
         EventBus.emit(FAB_CLICK_EVENT_ID)
       }
     } catch (error) {
-      this.fabMessage = '启动失败，请重试'
+      this.fabMessage = $r('app.string.ai_launch_failed').toString()
     }
   }
 
@@ -250,7 +296,7 @@ export struct AuroraAIPanel {
       {
         id: 'welcome',
         role: 'assistant',
-        content: '你好！我是 Aurora WiFi 智能助手。我可以帮你分析网络状态、推荐最优信道、诊断网络问题。有什么可以帮你的吗？',
+        content: $r('app.string.ai_welcome_message').toString(),
         timestamp: Date.now(),
         type: 'text'
       }
@@ -297,13 +343,13 @@ export struct AuroraAIPanel {
   private generateAIResponse(userInput: string): string {
     const input = userInput.toLowerCase()
     if (input.includes('信号') || input.includes('wifi')) {
-      return '根据当前网络状态分析，你的WiFi信号强度良好（-55dBm），建议保持当前位置以获得最佳体验。'
+      return $r('app.string.ai_response_signal').toString()
     } else if (input.includes('信道') || input.includes('channel')) {
-      return '当前2.4GHz频段推荐使用信道1、6或11，它们之间干扰最小。5GHz频段建议选择149-165之间的信道。'
+      return $r('app.string.ai_response_channel').toString()
     } else if (input.includes('速度') || input.includes('测速')) {
-      return '建议运行一次完整测速来评估当前网络性能。我可以帮你选择最优测速节点。'
+      return $r('app.string.ai_response_speed').toString()
     } else {
-      return '我理解你的问题。让我分析一下...目前你的网络状态正常。如需进一步帮助，请描述具体问题。'
+      return $r('app.string.ai_response_default').toString()
     }
   }
 
@@ -364,7 +410,7 @@ export struct AuroraAIPanel {
               .width(24)
               .height(24)
               .fillColor(COLOR_AURORA_PRIMARY)
-            Text(feature.title)
+            Text($r(`app.string.${feature.title}`))
               .fontSize(11)
               .fontColor(COLOR_TEXT_GLASS_SECONDARY)
               .margin({ top: 4 })
@@ -373,7 +419,7 @@ export struct AuroraAIPanel {
           .backgroundColor(COLOR_GLASS_SURFACE)
           .borderRadius(12)
           .onClick(() => {
-            this.inputText = feature.title
+            this.inputText = $r(`app.string.${feature.title}`).toString()
           })
         })
       }
@@ -404,11 +450,11 @@ export struct AuroraAIPanel {
             }
 
             Column() {
-              Text('Aurora 助手')
+              Text($r('app.string.ai_panel_title'))
                 .fontSize(16)
                 .fontWeight(FontWeight.Bold)
                 .fontColor(COLOR_TEXT_GLASS_PRIMARY)
-              Text('在线')
+              Text($r('app.string.ai_online_status'))
                 .fontSize(11)
                 .fontColor('#00D97E')
             }
@@ -475,7 +521,7 @@ export struct AuroraAIPanel {
 
         // 输入区
         Row({ space: 12 }) {
-          TextInput({ placeholder: '输入问题...', text: this.inputText })
+          TextInput({ placeholder: $r('app.string.ai_placeholder'), text: this.inputText })
             .width('100%')
             .height(44)
             .padding({ left: 16, right: 16 })
@@ -643,11 +689,13 @@ interface AuroraAIModuleExport {
   AIPanel: object
   AIAnalysisCard: object
   features: AIFeatureMap
+  messages: AIMessagesMap
 }
 
 export const AuroraAIModule: AuroraAIModuleExport = {
   AIFabButton: AuroraAIFabButton,
   AIPanel: AuroraAIPanel,
   AIAnalysisCard: AuroraAIAnalysisCard,
-  features: AIFeatures
+  features: AIFeatures,
+  messages: AIMessages
 }

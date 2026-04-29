@@ -2635,6 +2635,114 @@
     {
       "name": "history_trend_desc",
       "value": "查看历史Ping记录和趋势"
+    },
+    {
+      "name": "err_invalid_ip",
+      "value": "请输入有效的IP地址"
+    },
+    {
+      "name": "err_invalid_domain",
+      "value": "请输入有效的域名"
+    },
+    {
+      "name": "err_invalid_ip_or_domain",
+      "value": "请输入有效的IP地址或域名"
+    },
+    {
+      "name": "err_invalid_port",
+      "value": "请输入有效的端口号（1-65535）"
+    },
+    {
+      "name": "err_invalid_mac",
+      "value": "请输入有效的MAC地址"
+    },
+    {
+      "name": "err_empty_input",
+      "value": "请输入内容"
+    },
+    {
+      "name": "err_input_too_long",
+      "value": "输入内容过长"
+    },
+    {
+      "name": "err_private_ip",
+      "value": "不支持内网IP地址扫描"
+    },
+    {
+      "name": "err_invalid_subnet",
+      "value": "请输入有效的子网（如 192.168.1.0/24）"
+    },
+    {
+      "name": "check_update_latest",
+      "value": "当前已是最新版本"
+    },
+    {
+      "name": "ai_welcome_message",
+      "value": "你好！我是 Aurora WiFi 智能助手。我可以帮你分析网络状态、推荐最优信道、诊断网络问题。有什么可以帮你的吗？"
+    },
+    {
+      "name": "ai_panel_title",
+      "value": "Aurora 助手"
+    },
+    {
+      "name": "ai_online_status",
+      "value": "在线"
+    },
+    {
+      "name": "ai_placeholder",
+      "value": "输入问题..."
+    },
+    {
+      "name": "ai_response_signal",
+      "value": "根据当前网络状态分析，你的WiFi信号强度良好，建议保持当前位置以获得最佳体验。"
+    },
+    {
+      "name": "ai_response_channel",
+      "value": "当前2.4GHz频段推荐使用信道1、6或11，它们之间干扰最小。5GHz频段建议选择149-165之间的信道。"
+    },
+    {
+      "name": "ai_response_speed",
+      "value": "建议运行一次完整测速来评估当前网络性能。我可以帮你选择最优测速节点。"
+    },
+    {
+      "name": "ai_response_default",
+      "value": "我理解你的问题。让我分析一下...目前你的网络状态正常。如需进一步帮助，请描述具体问题。"
+    },
+    {
+      "name": "ai_launch_failed",
+      "value": "启动失败，请重试"
+    },
+    {
+      "name": "ai_feature_network_health",
+      "value": "网络健康诊断"
+    },
+    {
+      "name": "ai_feature_network_health_desc",
+      "value": "AI分析信号质量、延迟、丢包率"
+    },
+    {
+      "name": "ai_feature_channel_recommend",
+      "value": "智能信道推荐"
+    },
+    {
+      "name": "ai_feature_channel_recommend_desc",
+      "value": "基于环境AI推荐最优信道"
+    },
+    {
+      "name": "ai_feature_anomaly_alert",
+      "value": "异常预警"
+    },
+    {
+      "name": "ai_feature_anomaly_alert_desc",
+      "value": "预测性网络问题提醒"
+    },
+    {
+      "name": "ai_feature_optimization_tip",
+      "value": "优化建议"
+    },
+    {
+      "name": "ai_feature_optimization_tip_desc",
+      "value": "个性化网络优化方案"
     }
   ]
 }

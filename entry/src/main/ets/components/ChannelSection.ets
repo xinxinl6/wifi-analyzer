@@ -1,6 +1,3 @@
-// 信道分析页组件（接入真实WiFi扫描数据）
-// 优化版：增强的5GHz交互体验 + 流畅动画 + 更好的空状态提示
-
 import { COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER, COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY, COLOR_BACKGROUND, COLOR_SURFACE, COLOR_BORDER,
   COLOR_CHANNEL_IDLE, COLOR_CHANNEL_LIGHT, COLOR_CHANNEL_MODERATE, COLOR_CHANNEL_CROWDED,
   COLOR_CHANNEL_IDLE_TOP, COLOR_CHANNEL_LIGHT_TOP, COLOR_CHANNEL_MODERATE_TOP, COLOR_CHANNEL_CROWDED_TOP,
@@ -353,7 +350,7 @@ export struct ChannelSection {
   @Builder buildBandTab(label: string, band: string) {
     Column({ space: 2 }) {
       Text(label)
-        .fontSize(FONT_SIZE_SM)
+        .fontSize(FONT_SIZE_MD)
         .fontWeight(this.currentBand === band ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
         .fontColor(this.currentBand === band ? this.getBandColor() : COLOR_TEXT_SECONDARY)
         .animation({ duration: 200 })
@@ -444,13 +441,15 @@ export struct ChannelSection {
       .height(20)
       .margin({ top: SPACE_SM })
     }
-    .width('100%')
+    .width('95%')
     .height(88)
     .padding(SPACE_MD)
-    .backgroundColor('rgba(74,144,217,0.10)')
+    .backgroundColor('rgba(255,255,255,0.60)')
+    .borderRadius(CARD_RADIUS)
+    .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
+    .shadow({ radius: 8, color: COLOR_SHADOW_GLASS, offsetX: 0, offsetY: 2 })
+    .backdropBlur(10)
     .margin({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: SPACE_MD })
-    .borderRadius(RADIUS_MD)
-    .shadow({ radius: 4, color: COLOR_CARD_SHADOW, offsetX: 0, offsetY: 1 })
   }
 
   // ==================== Builder: 柱状图卡片 ====================
@@ -485,7 +484,6 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    // WiFi 未连接卡片样式
     .backgroundColor('rgba(255,255,255,0.60)')
     .borderRadius(CARD_RADIUS)
     .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
@@ -556,7 +554,7 @@ export struct ChannelSection {
               // 数量标签
               if (item.count > 0) {
                 Text(item.count.toString())
-                  .fontSize(9)
+                  .fontSize(13)
                   .fontWeight(FONT_WEIGHT_MEDIUM)
                   .fontColor(item.color)
                   .margin({ bottom: 2 })
@@ -580,7 +578,7 @@ export struct ChannelSection {
 
               // 信道号
               Text(item.channel.toString())
-                .fontSize(9)
+                .fontSize(13)
                 .fontColor(COLOR_TEXT_TERTIARY)
                 .margin({ top: 4 })
             }
@@ -657,7 +655,6 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    // WiFi 未连接卡片样式：半透明白色
     .backgroundColor('rgba(255,255,255,0.60)')
     .borderRadius(CARD_RADIUS)
     .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
@@ -728,7 +725,6 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    // WiFi 未连接卡片样式：半透明白色
     .backgroundColor('rgba(255,255,255,0.60)')
     .borderRadius(CARD_RADIUS)
     .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
