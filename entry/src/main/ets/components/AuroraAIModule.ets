@@ -1,0 +1,653 @@
+// ============================================
+// Aurora WiFi V2 — AI 智能助手模块
+// API Level: 23+
+// ============================================
+
+import {
+  // Aurora 色彩
+  COLOR_AURORA_PRIMARY,
+  COLOR_AURORA_LIGHT,
+  COLOR_AURORA_GLOW,
+  // 毛玻璃色彩
+  COLOR_GLASS_SURFACE,
+  COLOR_GLASS_SURFACE_MEDIUM,
+  COLOR_GLASS_SURFACE_HIGH,
+  COLOR_GLASS_CARD,
+  COLOR_GLASS_BORDER_LIGHT,
+  COLOR_GLASS_BORDER_MEDIUM,
+  COLOR_GLASS_AURORA,
+  COLOR_GLASS_AURORA_LIGHT,
+  // 文字色
+  COLOR_TEXT_GLASS_PRIMARY,
+  COLOR_TEXT_GLASS_SECONDARY,
+  COLOR_TEXT_GLASS_TERTIARY,
+  // 阴影
+  COLOR_SHADOW_GLASS,
+  COLOR_SHADOW_AURORA,
+  // 动效
+  DURATION_FAST,
+  DURATION_NORMAL,
+  AnimationTapScale
+} from '@wifi-analyzer/design-system'
+import { EventBus } from '../utils/EventBus'
+import { launchXiaoyi, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
+import { common } from '@kit.AbilityKit'
+
+// ============================================
+// AI 事件定义
+// ============================================
+
+// FAB 点击事件 ID（导出供父组件订阅）
+export const FAB_CLICK_EVENT_ID = 1001
+
+// ============================================
+// AI 消息数据结构
+// ============================================
+
+interface AIMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: number
+  type?: 'text' | 'analysis' | 'suggestion' | 'warning'
+}
+
+// ============================================
+// AI 功能配置
+// ============================================
+
+interface AIFeatureItem {
+  enabled: boolean
+  title: string
+  icon: Resource
+  description: string
+}
+
+interface AIFeatureMap {
+  networkHealth: AIFeatureItem
+  channelRecommend: AIFeatureItem
+  anomalyAlert: AIFeatureItem
+  optimizationTip: AIFeatureItem
+}
+
+export const AIFeatures: AIFeatureMap = {
+  // 网络健康诊断
+  networkHealth: {
+    enabled: true,
+    title: '网络健康诊断',
+    icon: $r('app.media.ic_health'),
+    description: 'AI分析信号质量、延迟、丢包率'
+  },
+  // 智能信道推荐
+  channelRecommend: {
+    enabled: true,
+    title: '智能信道推荐',
+    icon: $r('app.media.ic_channel'),
+    description: '基于环境AI推荐最优信道'
+  },
+  // 异常预警
+  anomalyAlert: {
+    enabled: true,
+    title: '异常预警',
+    icon: $r('app.media.ic_warning'),
+    description: '预测性网络问题提醒'
+  },
+  // 优化建议
+  optimizationTip: {
+    enabled: true,
+    title: '优化建议',
+    icon: $r('app.media.ic_tip'),
+    description: '个性化网络优化方案'
+  }
+}
+
+// ============================================
+// AI 助手悬浮按钮（FAB）
+// ============================================
+
+@Component
+export struct AuroraAIFabButton {
+  @Prop fabVisible: boolean = true
+  // 可选的 WiFi 信息，用于构建小艺查询
+  @Prop wifiSsid: string = ''
+  @Prop wifiSignal: number = 0
+  @Prop wifiChannel: number = 0
+
+  @State private fabScale: number = 1.0
+  @State private glowScale: number = 1.0
+  @State private glowOpacity: number = 0.4
+  @State private fabMessage: string = ''
+
+  aboutToAppear(): void {
+    // 脉冲光晕动画
+    animateTo({
+      duration: 2000,
+      curve: Curve.EaseInOut,
+      iterations: -1
+    }, () => {
+      this.glowOpacity = this.glowOpacity === 0.4 ? 0.8 : 0.4
+      this.glowScale = this.glowScale === 1.0 ? 1.15 : 1.0
+    })
+  }
+
+  // 调用小艺助手
+  private async launchXiaoyi(): Promise<void> {
+    try {
+      // 构建网络分析查询
+      const networkInfo: WifiNetworkInfo = {
+        ssid: this.wifiSsid,
+        signal: this.wifiSignal,
+        channel: this.wifiChannel,
+        frequency: 0
+      }
+      const query = buildNetworkQuery(networkInfo)
+
+      // 获取 UIAbilityContext
+      const context = getContext(this) as common.UIAbilityContext
+
+      // 调用小艺
+      const result = await launchXiaoyi(context, query)
+      this.fabMessage = result.message
+
+      // 如果启动成功，通过事件总线通知父组件
+      if (result.success) {
+        EventBus.emit(FAB_CLICK_EVENT_ID)
+      }
+    } catch (error) {
+      this.fabMessage = '启动失败，请重试'
+    }
+  }
+
+  build() {
+    if (this.fabVisible) {
+      Stack({ alignContent: Alignment.Center }) {
+        // 外层呼吸光晕
+        Circle()
+          .width(72)
+          .height(72)
+          .fill(`rgba(74,144,217,${this.glowOpacity * 0.3})`)
+          .scale({ x: this.glowScale, y: this.glowScale })
+
+        // 内层光晕
+        Circle()
+          .width(64)
+          .height(64)
+          .fill(`rgba(74,144,217,0.15)`)
+
+        // 主按钮
+        Column()
+          .width(56)
+          .height(56)
+          .borderRadius(28)
+          .backgroundColor(COLOR_AURORA_PRIMARY)
+          .shadow({
+            radius: 16,
+            color: 'rgba(74,144,217,0.5)',
+            offsetX: 0,
+            offsetY: 4
+          })
+          .scale({ x: this.fabScale, y: this.fabScale })
+          .onTouch((event: TouchEvent) => {
+            if (event.type === TouchType.Down) {
+              animateTo(AnimationTapScale, () => {
+                this.fabScale = 0.88
+              })
+            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+              animateTo({
+                duration: DURATION_NORMAL,
+                curve: Curve.EaseOut
+              }, () => {
+                this.fabScale = 1.0
+              })
+            }
+          })
+          .onClick(() => {
+            // 调用小艺助手
+            this.launchXiaoyi()
+          }) {
+          // AI 图标
+          Row() {
+            Image($r('app.media.ic_ai_assistant'))
+              .width(26)
+              .height(26)
+              .fillColor('#FFFFFF')
+          }
+        }
+      }
+      .width(72)
+      .height(72)
+    }
+  }
+}
+
+// ============================================
+// AI 助手面板
+// ============================================
+
+@Component
+export struct AuroraAIPanel {
+  @Prop panelOpen: boolean = false
+
+  @State private panelHeight: number = 0
+  @State private messageList: AIMessage[] = []
+  @State private inputText: string = ''
+  @State private isTyping: boolean = false
+
+  private panelClose: () => void = () => {}
+
+  private getFeatureList(): AIFeatureItem[] {
+    return [
+      AIFeatures.networkHealth,
+      AIFeatures.channelRecommend,
+      AIFeatures.anomalyAlert,
+      AIFeatures.optimizationTip
+    ]
+  }
+
+  aboutToAppear(): void {
+    // 初始化欢迎消息
+    this.messageList = [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: '你好！我是 Aurora WiFi 智能助手。我可以帮你分析网络状态、推荐最优信道、诊断网络问题。有什么可以帮你的吗？',
+        timestamp: Date.now(),
+        type: 'text'
+      }
+    ]
+  }
+
+  private togglePanel(): void {
+    animateTo({
+      duration: 300,
+      curve: Curve.EaseOut
+    }, () => {
+      this.panelHeight = this.panelOpen ? 0 : 500
+    })
+  }
+
+  private sendMessage(): void {
+    if (this.inputText.trim() === '') return
+
+    const userMsg: AIMessage = {
+      id: `user_${Date.now()}`,
+      role: 'user',
+      content: this.inputText,
+      timestamp: Date.now()
+    }
+
+    this.messageList.push(userMsg)
+    this.inputText = ''
+    this.isTyping = true
+
+    // 模拟 AI 响应
+    setTimeout(() => {
+      const aiMsg: AIMessage = {
+        id: `ai_${Date.now()}`,
+        role: 'assistant',
+        content: this.generateAIResponse(userMsg.content),
+        timestamp: Date.now(),
+        type: 'analysis'
+      }
+      this.messageList.push(aiMsg)
+      this.isTyping = false
+    }, 1500)
+  }
+
+  private generateAIResponse(userInput: string): string {
+    const input = userInput.toLowerCase()
+    if (input.includes('信号') || input.includes('wifi')) {
+      return '根据当前网络状态分析，你的WiFi信号强度良好（-55dBm），建议保持当前位置以获得最佳体验。'
+    } else if (input.includes('信道') || input.includes('channel')) {
+      return '当前2.4GHz频段推荐使用信道1、6或11，它们之间干扰最小。5GHz频段建议选择149-165之间的信道。'
+    } else if (input.includes('速度') || input.includes('测速')) {
+      return '建议运行一次完整测速来评估当前网络性能。我可以帮你选择最优测速节点。'
+    } else {
+      return '我理解你的问题。让我分析一下...目前你的网络状态正常。如需进一步帮助，请描述具体问题。'
+    }
+  }
+
+  @Builder
+  MessageBubble(msg: AIMessage) {
+    Row() {
+      if (msg.role === 'assistant') {
+        // AI 头像
+        Circle()
+          .width(28)
+          .height(28)
+          .fill(COLOR_AURORA_PRIMARY)
+          .margin({ right: 8 })
+        Image($r('app.media.ic_ai_assistant'))
+          .width(14)
+          .height(14)
+          .fillColor('#FFFFFF')
+          .position({ x: 7, y: 7 })
+      }
+
+      Column() {
+        Text(msg.content)
+          .fontSize(14)
+          .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+          .lineHeight(20)
+      }
+      .layoutWeight(1)
+      .padding(12)
+      .backgroundColor(msg.role === 'user' ? COLOR_GLASS_AURORA : COLOR_GLASS_SURFACE)
+      .borderRadius(16)
+      .alignItems(msg.role === 'user' ? HorizontalAlign.End : HorizontalAlign.Start)
+
+      if (msg.role === 'user') {
+        // 用户头像
+        Circle()
+          .width(28)
+          .height(28)
+          .fill(COLOR_GLASS_SURFACE)
+          .margin({ left: 8 })
+        Image($r('app.media.ic_user'))
+          .width(14)
+          .height(14)
+          .fillColor(COLOR_TEXT_GLASS_SECONDARY)
+          .position({ x: 7, y: 7 })
+      }
+    }
+    .width('100%')
+    .justifyContent(msg.role === 'user' ? FlexAlign.End : FlexAlign.Start)
+  }
+
+  @Builder
+  QuickActions() {
+    Scroll() {
+      Row({ space: 10 }) {
+        ForEach(this.getFeatureList(), (feature: AIFeatureItem) => {
+          Column() {
+            Image(feature.icon)
+              .width(24)
+              .height(24)
+              .fillColor(COLOR_AURORA_PRIMARY)
+            Text(feature.title)
+              .fontSize(11)
+              .fontColor(COLOR_TEXT_GLASS_SECONDARY)
+              .margin({ top: 4 })
+          }
+          .padding(12)
+          .backgroundColor(COLOR_GLASS_SURFACE)
+          .borderRadius(12)
+          .onClick(() => {
+            this.inputText = feature.title
+          })
+        })
+      }
+      .padding({ left: 16, right: 16 })
+    }
+    .width('100%')
+    .height(72)
+    .scrollBar(BarState.Off)
+  }
+
+  build() {
+    Column() {
+      // 面板内容
+      Column() {
+        // 标题栏
+        Row() {
+          Row({ space: 10 }) {
+            // AI 头像
+            Stack({ alignContent: Alignment.Center }) {
+              Circle()
+                .width(36)
+                .height(36)
+                .fill(COLOR_AURORA_PRIMARY)
+              Image($r('app.media.ic_ai_assistant'))
+                .width(20)
+                .height(20)
+                .fillColor('#FFFFFF')
+            }
+
+            Column() {
+              Text('Aurora 助手')
+                .fontSize(16)
+                .fontWeight(FontWeight.Bold)
+                .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+              Text('在线')
+                .fontSize(11)
+                .fontColor('#00D97E')
+            }
+          }
+
+          Blank()
+
+          // 关闭按钮
+          Image($r('app.media.ic_close'))
+            .width(24)
+            .height(24)
+            .fillColor(COLOR_TEXT_GLASS_TERTIARY)
+            .onClick(() => {
+              this.panelClose()
+            })
+        }
+        .width('100%')
+        .padding({ left: 20, right: 20, top: 16, bottom: 12 })
+
+        Divider()
+          .color(COLOR_GLASS_BORDER_LIGHT)
+
+        // 消息列表
+        Scroll() {
+          Column({ space: 12 }) {
+            ForEach(this.messageList, (msg: AIMessage) => {
+              this.MessageBubble(msg)
+            })
+
+            // 打字指示器
+            if (this.isTyping) {
+              Row() {
+                Circle()
+                  .width(8)
+                  .height(8)
+                  .backgroundColor(COLOR_AURORA_LIGHT)
+                Circle()
+                  .width(8)
+                  .height(8)
+                  .backgroundColor(COLOR_AURORA_PRIMARY)
+                Circle()
+                  .width(8)
+                  .height(8)
+                  .backgroundColor(COLOR_AURORA_GLOW)
+              }
+              .width(48)
+              .height(32)
+              .padding(8)
+              .backgroundColor(COLOR_GLASS_SURFACE)
+              .borderRadius(16)
+            }
+          }
+          .padding({ left: 16, right: 16, top: 12 })
+        }
+        .width('100%')
+        .layoutWeight(1)
+        .scrollBar(BarState.Off)
+
+        // 快速功能入口
+        this.QuickActions()
+
+        Divider()
+          .color(COLOR_GLASS_BORDER_LIGHT)
+
+        // 输入区
+        Row({ space: 12 }) {
+          TextInput({ placeholder: '输入问题...', text: this.inputText })
+            .width('100%')
+            .height(44)
+            .padding({ left: 16, right: 16 })
+            .backgroundColor(COLOR_GLASS_SURFACE_HIGH)
+            .borderRadius(22)
+            .border({
+              width: 1,
+              color: COLOR_GLASS_BORDER_LIGHT,
+              radius: 22
+            })
+            .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+            .placeholderColor(COLOR_TEXT_GLASS_TERTIARY)
+            .onChange((value: string) => {
+              this.inputText = value
+            })
+            .onSubmit(() => {
+              this.sendMessage()
+            })
+
+          // 发送按钮
+          Circle()
+            .width(44)
+            .height(44)
+            .fill(COLOR_AURORA_PRIMARY)
+            .onClick(() => {
+              this.sendMessage()
+            }) {
+            Image($r('app.media.ic_send'))
+              .width(20)
+              .height(20)
+              .fillColor('#FFFFFF')
+          }
+        }
+        .width('100%')
+        .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+      }
+      .width('100%')
+      .height('100%')
+      .backgroundColor(COLOR_GLASS_CARD)
+      .borderRadius({ topLeft: 24, topRight: 24 })
+      .border({
+        width: 1,
+        color: COLOR_GLASS_BORDER_LIGHT,
+        radius: { topLeft: 24, topRight: 24 }
+      })
+    }
+    .width('100%')
+    .height(this.panelHeight)
+    .clip(true)
+  }
+}
+
+// ============================================
+// AI 网络分析卡片
+// ============================================
+
+@Component
+export struct AuroraAIAnalysisCard {
+  @Prop cardTitle: string = ''
+  @Prop analysisResult: string = ''
+  @Prop cardSuggestion: string = ''
+  @Prop healthScore: number = 85 // 0-100
+  @Prop cardType: string = 'analysis'
+
+  private getScoreColor(): string {
+    if (this.healthScore >= 80) return '#00D97E'
+    if (this.healthScore >= 60) return '#FBBF24'
+    return '#F87171'
+  }
+
+  private getTypeIcon(): Resource {
+    switch (this.cardType) {
+      case 'warning': return $r('app.media.ic_warning')
+      case 'suggestion': return $r('app.media.ic_tip')
+      default: return $r('app.media.ic_ai_assistant')
+    }
+  }
+
+  private getTypeBgColor(): string {
+    switch (this.cardType) {
+      case 'warning': return 'rgba(248,113,113,0.15)'
+      case 'suggestion': return 'rgba(74,144,217,0.15)'
+      default: return 'rgba(0,217,126,0.15)'
+    }
+  }
+
+  build() {
+    Column({ space: 16 }) {
+      // 标题行
+      Row({ space: 12 }) {
+        // 图标
+        Stack({ alignContent: Alignment.Center }) {
+          Circle()
+            .width(40)
+            .height(40)
+            .fill(this.getTypeBgColor())
+          Image(this.getTypeIcon())
+            .width(20)
+            .height(20)
+            .fillColor(this.cardType === 'warning' ? '#F87171' : COLOR_AURORA_PRIMARY)
+        }
+
+        Column({ space: 2 }) {
+          Text(this.cardTitle)
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+          Text(this.analysisResult)
+            .fontSize(13)
+            .fontColor(COLOR_TEXT_GLASS_SECONDARY)
+        }
+
+        Blank()
+
+        // 健康分数
+        if (this.healthScore > 0) {
+          Column() {
+            Text(String(this.healthScore))
+              .fontSize(24)
+              .fontWeight(FontWeight.Bold)
+              .fontColor(this.getScoreColor())
+            Text('分')
+              .fontSize(10)
+              .fontColor(COLOR_TEXT_GLASS_TERTIARY)
+          }
+        }
+      }
+
+      // 建议内容
+      if (this.cardSuggestion !== '') {
+        Row() {
+          Image($r('app.media.ic_tip'))
+            .width(16)
+            .height(16)
+            .fillColor(COLOR_AURORA_LIGHT)
+          Text(this.cardSuggestion)
+            .fontSize(13)
+            .fontColor(COLOR_TEXT_GLASS_SECONDARY)
+            .layoutWeight(1)
+            .margin({ left: 8 })
+        }
+        .padding(12)
+        .backgroundColor(COLOR_GLASS_AURORA_LIGHT)
+        .borderRadius(12)
+      }
+    }
+    .width('100%')
+    .padding(16)
+    .backgroundColor(COLOR_GLASS_CARD)
+    .borderRadius(16)
+    .border({
+      width: 1,
+      color: this.cardType === 'warning' ? 'rgba(248,113,113,0.3)' : COLOR_GLASS_BORDER_LIGHT,
+      radius: 16
+    })
+  }
+}
+
+// ============================================
+// 导出 AI 模块
+// ============================================
+
+interface AuroraAIModuleExport {
+  AIFabButton: object
+  AIPanel: object
+  AIAnalysisCard: object
+  features: AIFeatureMap
+}
+
+export const AuroraAIModule: AuroraAIModuleExport = {
+  AIFabButton: AuroraAIFabButton,
+  AIPanel: AuroraAIPanel,
+  AIAnalysisCard: AuroraAIAnalysisCard,
+  features: AIFeatures
+}

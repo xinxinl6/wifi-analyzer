@@ -1,0 +1,130 @@
+<!--
+  WiFi Analyzer App Icons - 鸿蒙应用图标集
+  Signal Pulse Design System
+  
+  使用说明：
+  1. 将此目录中的SVG文件导入设计工具（Figma/Sketch）导出为PNG
+  2. 导出分辨率：1024x1024 (应用商店)、180x180 (主屏幕)、48x48 (小图标)
+  3. 颜色配置：浅色模式使用 wifi-icon.svg，深色模式使用 wifi-icon-dark.svg
+-->
+
+<!-- 图标1: 经典版 - wifi-icon.svg -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F8FAFC"/>
+    </linearGradient>
+    <linearGradient id="iconGrad" x1="256" y1="170" x2="768" y2="887" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0066FF"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="24" flood-color="#0066FF" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="180" fill="url(#bgGrad)"/>
+  <g filter="url(#shadow)">
+    <path d="M256 552 Q512 170 768 552" stroke="url(#iconGrad)" stroke-width="68" stroke-linecap="round" fill="none"/>
+    <path d="M341 637 Q512 383 683 637" stroke="url(#iconGrad)" stroke-width="68" stroke-linecap="round" fill="none"/>
+    <path d="M426 722 Q512 553 598 722" stroke="url(#iconGrad)" stroke-width="68" stroke-linecap="round" fill="none"/>
+    <circle cx="512" cy="810" r="68" fill="url(#iconGrad)"/>
+  </g>
+  <g>
+    <rect x="410" y="860" width="34" height="51" rx="17" fill="#00D4FF" opacity="0.8"/>
+    <rect x="478" y="827" width="34" height="77" rx="17" fill="#0066FF"/>
+    <rect x="546" y="860" width="34" height="51" rx="17" fill="#00D4FF" opacity="0.8"/>
+  </g>
+</svg>
+
+<!-- 图标2: 深空版 - wifi-icon-dark.svg -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="darkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1628"/>
+      <stop offset="100%" stop-color="#1A2744"/>
+    </linearGradient>
+    <linearGradient id="neonGrad" x1="256" y1="170" x2="768" y2="887" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D4FF"/>
+      <stop offset="50%" stop-color="#00FF88"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="radar" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="50" cy="50" r="50" fill="none" stroke="#1E3A5F" stroke-width="0.5"/>
+      <line x1="0" y1="50" x2="100" y2="50" stroke="#1E3A5F" stroke-width="0.3"/>
+      <line x1="50" y1="0" x2="50" y2="100" stroke="#1E3A5F" stroke-width="0.3"/>
+    </pattern>
+  </defs>
+  <rect width="1024" height="1024" rx="180" fill="url(#darkBg)"/>
+  <rect x="62" y="62" width="900" height="900" fill="url(#radar)" opacity="0.6"/>
+  <g filter="url(#glow)">
+    <path d="M256 530 Q512 120 768 530" stroke="url(#neonGrad)" stroke-width="72" stroke-linecap="round" fill="none"/>
+    <path d="M341 615 Q512 340 683 615" stroke="url(#neonGrad)" stroke-width="72" stroke-linecap="round" fill="none"/>
+    <path d="M426 700 Q512 520 598 700" stroke="url(#neonGrad)" stroke-width="72" stroke-linecap="round" fill="none"/>
+    <circle cx="512" cy="790" r="68" fill="#00FF88"/>
+    <circle cx="512" cy="790" r="45" fill="#0A1628"/>
+    <circle cx="512" cy="790" r="30" fill="#00FF88" opacity="0.6"/>
+  </g>
+</svg>
+
+<!-- 图标3: 渐变版 - wifi-icon-gradient.svg -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="solidBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066FF"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <radialGradient id="innerGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="floatGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="180" fill="url(#solidBg)"/>
+  <rect width="1024" height="1024" rx="180" fill="url(#innerGlow)"/>
+  <g filter="url(#floatGlow)">
+    <path d="M256 540 Q512 160 768 540" stroke="white" stroke-width="70" stroke-linecap="round" fill="none"/>
+    <path d="M341 625 Q512 355 683 625" stroke="white" stroke-width="70" stroke-linecap="round" fill="none"/>
+    <path d="M426 710 Q512 530 598 710" stroke="white" stroke-width="70" stroke-linecap="round" fill="none"/>
+    <circle cx="512" cy="800" r="68" fill="white"/>
+  </g>
+  <g opacity="0.7">
+    <circle cx="180" cy="420" r="20" fill="white"/>
+    <circle cx="844" cy="420" r="20" fill="white"/>
+    <circle cx="120" cy="600" r="14" fill="white" opacity="0.5"/>
+    <circle cx="904" cy="600" r="14" fill="white" opacity="0.5"/>
+  </g>
+</svg>
+
+<!-- 图标4: 频谱版 - wifi-icon-spectrum.svg -->
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="spectrumBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F8FAFC"/>
+    </linearGradient>
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0066FF"/>
+      <stop offset="100%" stop-color="#00D4FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0066FF" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="180" fill="url(#spectrumBg)"/>
+  <g filter="url(#softShadow)">
+    <path d="M312 380 Q512 220 712 380" stroke="url(#mainGrad)" stroke-width="64" stroke-linecap="round" fill="none"/>
+    <rect x="272" y="520" width="64" height="160" rx="32" fill="#0066FF" opacity="0.4"/>
+    <rect x="376" y="480" width="64" height="200" rx="32" fill="#0066FF" opacity="0.6"/>
+    <rect x="480" y="440" width="64" height="240" rx="32" fill="url(#mainGrad)"/>
+    <rect x="584" y="480" width="64" height="200" rx="32" fill="#00D4FF" opacity="0.6"/>
+    <rect x="688" y="520" width="64" height="160" rx="32" fill="#00D4FF" opacity="0.4"/>
+  </g>
+</svg>

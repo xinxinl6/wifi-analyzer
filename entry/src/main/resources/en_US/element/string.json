@@ -1,0 +1,2576 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WiFi Analyzer"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "WiFi Network Analyzer"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "WiFi Analyzer"
+    },
+    {
+      "name": "tab_home",
+      "value": "Home"
+    },
+    {
+      "name": "tab_wifi",
+      "value": "WiFi"
+    },
+    {
+      "name": "tab_channel",
+      "value": "Channel"
+    },
+    {
+      "name": "tab_speed",
+      "value": "Speed"
+    },
+    {
+      "name": "tab_tools",
+      "value": "Tools"
+    },
+    {
+      "name": "err_init_failed",
+      "value": "App initialization failed. Please restart."
+    },
+    {
+      "name": "err_perm_denied",
+      "value": "Location permission required for WiFi scanning. Please enable in settings."
+    },
+    {
+      "name": "err_perm_exception",
+      "value": "Permission check failed. Please restart the app."
+    },
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi scanning requires WiFi info permission to display nearby networks and signal strength"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "WiFi scanning requires location permission for accurate signal strength (system requirement)"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "Speed test requires network permission to perform speed testing"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "Displaying local IP, gateway etc. requires network state permission"
+    },
+    {
+      "name": "current_network",
+      "value": "Current Network"
+    },
+    {
+      "name": "not_connected",
+      "value": "Not Connected"
+    },
+    {
+      "name": "connecting",
+      "value": "Connecting..."
+    },
+    {
+      "name": "loading",
+      "value": "Loading..."
+    },
+    {
+      "name": "local_ip",
+      "value": "Local IP"
+    },
+    {
+      "name": "gateway",
+      "value": "Gateway"
+    },
+    {
+      "name": "subnet_mask",
+      "value": "Subnet Mask"
+    },
+    {
+      "name": "dns_server",
+      "value": "DNS Server"
+    },
+    {
+      "name": "public_ip",
+      "value": "Public IP"
+    },
+    {
+      "name": "signal_strength",
+      "value": "Signal Strength"
+    },
+    {
+      "name": "channel",
+      "value": "Channel"
+    },
+    {
+      "name": "frequency",
+      "value": "Frequency"
+    },
+    {
+      "name": "frequency_band",
+      "value": "Band"
+    },
+    {
+      "name": "security",
+      "value": "Security"
+    },
+    {
+      "name": "bandwidth",
+      "value": "Bandwidth"
+    },
+    {
+      "name": "download",
+      "value": "Download"
+    },
+    {
+      "name": "upload",
+      "value": "Upload"
+    },
+    {
+      "name": "ping",
+      "value": "Ping"
+    },
+    {
+      "name": "jitter",
+      "value": "Jitter"
+    },
+    {
+      "name": "latency",
+      "value": "Latency"
+    },
+    {
+      "name": "ms",
+      "value": "ms"
+    },
+    {
+      "name": "mbps",
+      "value": "Mbps"
+    },
+    {
+      "name": "unknown",
+      "value": "Unknown"
+    },
+    {
+      "name": "wifi_list",
+      "value": "WiFi List"
+    },
+    {
+      "name": "filter_all",
+      "value": "All"
+    },
+    {
+      "name": "filter_2g",
+      "value": "2.4GHz"
+    },
+    {
+      "name": "filter_5g",
+      "value": "5GHz"
+    },
+    {
+      "name": "filter_5g1",
+      "value": "5.2GHz"
+    },
+    {
+      "name": "filter_5g2",
+      "value": "5.8GHz"
+    },
+    {
+      "name": "rescan",
+      "value": "Rescan"
+    },
+    {
+      "name": "scanning",
+      "value": "Scanning..."
+    },
+    {
+      "name": "scan_complete",
+      "value": "Scan Complete"
+    },
+    {
+      "name": "found_networks",
+      "value": "Networks Found"
+    },
+    {
+      "name": "connected",
+      "value": "Connected"
+    },
+    {
+      "name": "no_wifi_found",
+      "value": "No WiFi networks found"
+    },
+    {
+      "name": "pull_to_refresh",
+      "value": "Pull to refresh"
+    },
+    {
+      "name": "wifi_detail",
+      "value": "WiFi Details"
+    },
+    {
+      "name": "bssid",
+      "value": "BSSID"
+    },
+    {
+      "name": "security_type",
+      "value": "Security Type"
+    },
+    {
+      "name": "channel_analysis",
+      "value": "Channel Analysis"
+    },
+    {
+      "name": "channel_congestion",
+      "value": "Channel Congestion"
+    },
+    {
+      "name": "recommend_channel",
+      "value": "Recommended Channel"
+    },
+    {
+      "name": "ap_count",
+      "value": "AP Count"
+    },
+    {
+      "name": "swipe_hint",
+      "value": "Swipe left/right to switch bands"
+    },
+    {
+      "name": "low",
+      "value": "Low"
+    },
+    {
+      "name": "medium",
+      "value": "Medium"
+    },
+    {
+      "name": "high",
+      "value": "High"
+    },
+    {
+      "name": "2_4ghz",
+      "value": "2.4GHz"
+    },
+    {
+      "name": "5_1ghz",
+      "value": "5.1GHz"
+    },
+    {
+      "name": "5_2ghz",
+      "value": "5.2GHz"
+    },
+    {
+      "name": "5_8ghz",
+      "value": "5.8GHz"
+    },
+    {
+      "name": "speed_test",
+      "value": "Speed Test"
+    },
+    {
+      "name": "start_test",
+      "value": "Start Test"
+    },
+    {
+      "name": "stop_test",
+      "value": "Stop Test"
+    },
+    {
+      "name": "select_server",
+      "value": "Select Server"
+    },
+    {
+      "name": "download_speed",
+      "value": "Download Speed"
+    },
+    {
+      "name": "upload_speed",
+      "value": "Upload Speed"
+    },
+    {
+      "name": "network_latency",
+      "value": "Network Latency"
+    },
+    {
+      "name": "jitter_value",
+      "value": "Jitter"
+    },
+    {
+      "name": "test_history",
+      "value": "Test History"
+    },
+    {
+      "name": "best_server",
+      "value": "Best Server"
+    },
+    {
+      "name": "current_server",
+      "value": "Current Server"
+    },
+    {
+      "name": "connecting_server",
+      "value": "Connecting to server..."
+    },
+    {
+      "name": "testing_download",
+      "value": "Testing download..."
+    },
+    {
+      "name": "testing_upload",
+      "value": "Testing upload..."
+    },
+    {
+      "name": "test_failed",
+      "value": "Test Failed"
+    },
+    {
+      "name": "no_history",
+      "value": "No history yet"
+    },
+    {
+      "name": "avg_latency",
+      "value": "Avg Latency"
+    },
+    {
+      "name": "tools",
+      "value": "Tools"
+    },
+    {
+      "name": "ping_test",
+      "value": "Ping Test"
+    },
+    {
+      "name": "traceroute",
+      "value": "Traceroute"
+    },
+    {
+      "name": "dns_lookup",
+      "value": "DNS Lookup"
+    },
+    {
+      "name": "port_scan",
+      "value": "Port Scan"
+    },
+    {
+      "name": "subnet_calc",
+      "value": "Subnet Calc"
+    },
+    {
+      "name": "ip_geo",
+      "value": "IP Lookup"
+    },
+    {
+      "name": "poe_calc",
+      "value": "POE Calculator"
+    },
+    {
+      "name": "mac_lookup",
+      "value": "MAC Lookup"
+    },
+    {
+      "name": "wake_on_lan",
+      "value": "Wake on LAN"
+    },
+    {
+      "name": "lan_scan",
+      "value": "LAN Scan"
+    },
+    {
+      "name": "roam_test",
+      "value": "Roaming Test"
+    },
+    {
+      "name": "find_device",
+      "value": "Device Finder"
+    },
+    {
+      "name": "about",
+      "value": "About"
+    },
+    {
+      "name": "back",
+      "value": "Back"
+    },
+    {
+      "name": "start",
+      "value": "Start"
+    },
+    {
+      "name": "stop",
+      "value": "Stop"
+    },
+    {
+      "name": "confirm",
+      "value": "Confirm"
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "clear",
+      "value": "Clear"
+    },
+    {
+      "name": "copy",
+      "value": "Copy"
+    },
+    {
+      "name": "save",
+      "value": "Save"
+    },
+    {
+      "name": "apply",
+      "value": "Apply"
+    },
+    {
+      "name": "reset",
+      "value": "Reset"
+    },
+    {
+      "name": "settings",
+      "value": "Settings"
+    },
+    {
+      "name": "result",
+      "value": "Result"
+    },
+    {
+      "name": "history",
+      "value": "History"
+    },
+    {
+      "name": "statistics",
+      "value": "Statistics"
+    },
+    {
+      "name": "input_hint",
+      "value": "Please enter"
+    },
+    {
+      "name": "ip_address",
+      "value": "IP Address"
+    },
+    {
+      "name": "domain",
+      "value": "Domain"
+    },
+    {
+      "name": "port",
+      "value": "Port"
+    },
+    {
+      "name": "hostname",
+      "value": "Hostname"
+    },
+    {
+      "name": "mac_address",
+      "value": "MAC Address"
+    },
+    {
+      "name": "device_name",
+      "value": "Device Name"
+    },
+    {
+      "name": "vendor",
+      "value": "Vendor"
+    },
+    {
+      "name": "status",
+      "value": "Status"
+    },
+    {
+      "name": "online",
+      "value": "Online"
+    },
+    {
+      "name": "offline",
+      "value": "Offline"
+    },
+    {
+      "name": "success",
+      "value": "Success"
+    },
+    {
+      "name": "failed",
+      "value": "Failed"
+    },
+    {
+      "name": "timeout",
+      "value": "Timeout"
+    },
+    {
+      "name": "error",
+      "value": "Error"
+    },
+    {
+      "name": "warning",
+      "value": "Warning"
+    },
+    {
+      "name": "info",
+      "value": "Info"
+    },
+    {
+      "name": "retry",
+      "value": "Retry"
+    },
+    {
+      "name": "running",
+      "value": "Running"
+    },
+    {
+      "name": "idle",
+      "value": "Idle"
+    },
+    {
+      "name": "ping_host",
+      "value": "Target Address"
+    },
+    {
+      "name": "ping_count",
+      "value": "Ping Count"
+    },
+    {
+      "name": "ping_interval",
+      "value": "Interval(s)"
+    },
+    {
+      "name": "ping_packet_loss",
+      "value": "Packet Loss"
+    },
+    {
+      "name": "ping_min",
+      "value": "Min"
+    },
+    {
+      "name": "ping_max",
+      "value": "Max"
+    },
+    {
+      "name": "ping_avg",
+      "value": "Avg"
+    },
+    {
+      "name": "ping_time",
+      "value": "Time"
+    },
+    {
+      "name": "stability_score",
+      "value": "Stability Score"
+    },
+    {
+      "name": "no_ping_history",
+      "value": "No history data"
+    },
+    {
+      "name": "ping_history_hint",
+      "value": "Test results will appear here"
+    },
+    {
+      "name": "packet_loss_rate",
+      "value": "Packet Loss Rate"
+    },
+    {
+      "name": "avg_latency_label",
+      "value": "Avg Latency"
+    },
+    {
+      "name": "traceroute_host",
+      "value": "Target Host"
+    },
+    {
+      "name": "traceroute_hops",
+      "value": "Hops"
+    },
+    {
+      "name": "traceroute_result",
+      "value": "Traceroute Result"
+    },
+    {
+      "name": "traceroute_timeout",
+      "value": "Request Timeout"
+    },
+    {
+      "name": "dns_query_domain",
+      "value": "Query Domain"
+    },
+    {
+      "name": "dns_result",
+      "value": "Query Result"
+    },
+    {
+      "name": "dns_type_a",
+      "value": "A Record"
+    },
+    {
+      "name": "dns_type_aaaa",
+      "value": "AAAA Record"
+    },
+    {
+      "name": "dns_type_cname",
+      "value": "CNAME"
+    },
+    {
+      "name": "dns_type_mx",
+      "value": "MX Record"
+    },
+    {
+      "name": "dns_type_ns",
+      "value": "NS Record"
+    },
+    {
+      "name": "port_target",
+      "value": "Target IP"
+    },
+    {
+      "name": "port_range",
+      "value": "Port Range"
+    },
+    {
+      "name": "port_scan_result",
+      "value": "Scan Result"
+    },
+    {
+      "name": "port_open",
+      "value": "Open"
+    },
+    {
+      "name": "port_closed",
+      "value": "Closed"
+    },
+    {
+      "name": "port_service",
+      "value": "Service"
+    },
+    {
+      "name": "common_ports",
+      "value": "Common Ports"
+    },
+    {
+      "name": "custom_range",
+      "value": "Custom Range"
+    },
+    {
+      "name": "subnet_input",
+      "value": "Enter IP/Mask"
+    },
+    {
+      "name": "subnet_result",
+      "value": "Calculation Result"
+    },
+    {
+      "name": "network_addr",
+      "value": "Network Address"
+    },
+    {
+      "name": "broadcast_addr",
+      "value": "Broadcast Address"
+    },
+    {
+      "name": "first_host",
+      "value": "First Host"
+    },
+    {
+      "name": "last_host",
+      "value": "Last Host"
+    },
+    {
+      "name": "total_hosts",
+      "value": "Usable Hosts"
+    },
+    {
+      "name": "cidr_notation",
+      "value": "CIDR notation"
+    },
+    {
+      "name": "subnet_calc_hint",
+      "value": "e.g.: 192.168.1.0/24 or 192.168.1.100/255.255.255.0"
+    },
+    {
+      "name": "poe_power",
+      "value": "POE Power(W)"
+    },
+    {
+      "name": "poe_voltage",
+      "value": "Voltage(V)"
+    },
+    {
+      "name": "poe_current",
+      "value": "Current(A)"
+    },
+    {
+      "name": "poe_resistance",
+      "value": "Resistance(Ω)"
+    },
+    {
+      "name": "poe_cable_type",
+      "value": "Cable Type"
+    },
+    {
+      "name": "poe_cable_length",
+      "value": "Cable Length(m)"
+    },
+    {
+      "name": "poe_power_loss",
+      "value": "Power Loss"
+    },
+    {
+      "name": "poe_result_power",
+      "value": "Output Power"
+    },
+    {
+      "name": "mac_lookup_input",
+      "value": "MAC Address"
+    },
+    {
+      "name": "mac_lookup_result",
+      "value": "Lookup Result"
+    },
+    {
+      "name": "mac_vendor_info",
+      "value": "Vendor Info"
+    },
+    {
+      "name": "mac_address_format",
+      "value": "MAC Address Format"
+    },
+    {
+      "name": "wol_target_ip",
+      "value": "Target IP"
+    },
+    {
+      "name": "wol_target_mac",
+      "value": "Target MAC"
+    },
+    {
+      "name": "wol_port",
+      "value": "Port"
+    },
+    {
+      "name": "wol_send",
+      "value": "Send Magic Packet"
+    },
+    {
+      "name": "wol_sent_success",
+      "value": "Magic packet sent"
+    },
+    {
+      "name": "wol_sent_failed",
+      "value": "Send failed"
+    },
+    {
+      "name": "wol_broadcast",
+      "value": "Broadcast"
+    },
+    {
+      "name": "lan_scan_desc",
+      "value": "LAN Scan"
+    },
+    {
+      "name": "lan_scan_network",
+      "value": "Current Network"
+    },
+    {
+      "name": "lan_scan_progress",
+      "value": "Scanning..."
+    },
+    {
+      "name": "lan_scan_done",
+      "value": "Scan Complete"
+    },
+    {
+      "name": "lan_scan_scanned",
+      "value": "Scanned"
+    },
+    {
+      "name": "lan_scan_found",
+      "value": "Found"
+    },
+    {
+      "name": "lan_scan_online_devices",
+      "value": "devices online"
+    },
+    {
+      "name": "lan_scan_current",
+      "value": "Current"
+    },
+    {
+      "name": "lan_scan_range",
+      "value": "Scan Range"
+    },
+    {
+      "name": "lan_scan_stop",
+      "value": "Stop Scan"
+    },
+    {
+      "name": "lan_scan_restart",
+      "value": "Rescan"
+    },
+    {
+      "name": "lan_scan_start",
+      "value": "Start Scan"
+    },
+    {
+      "name": "lan_scan_hint",
+      "value": "Tap the button below to start scanning"
+    },
+    {
+      "name": "lan_scan_range_hint",
+      "value": "Probing"
+    },
+    {
+      "name": "lan_scan_range_to",
+      "value": "for online devices"
+    },
+    {
+      "name": "lan_scan_found_devices",
+      "value": "Devices Found"
+    },
+    {
+      "name": "lan_scan_sort",
+      "value": "Sort"
+    },
+    {
+      "name": "sort_by_ip",
+      "value": "IP Address"
+    },
+    {
+      "name": "sort_by_latency",
+      "value": "Latency"
+    },
+    {
+      "name": "lan_device_type_router",
+      "value": "Router"
+    },
+    {
+      "name": "lan_device_type_local",
+      "value": "This Device"
+    },
+    {
+      "name": "lan_device_type_server",
+      "value": "Server"
+    },
+    {
+      "name": "lan_device_type_device",
+      "value": "Device"
+    },
+    {
+      "name": "roam_test_desc",
+      "value": "Roaming Test"
+    },
+    {
+      "name": "roam_test_scan",
+      "value": "Scan Surrounding APs"
+    },
+    {
+      "name": "roam_test_rssi",
+      "value": "Signal(dBm)"
+    },
+    {
+      "name": "roam_test_ssid",
+      "value": "SSID"
+    },
+    {
+      "name": "roam_test_bssid",
+      "value": "BSSID"
+    },
+    {
+      "name": "roam_test_ch",
+      "value": "CH"
+    },
+    {
+      "name": "roam_test_beacon",
+      "value": "Beacon"
+    },
+    {
+      "name": "roam_test_probe_resp",
+      "value": "Probe Resp"
+    },
+    {
+      "name": "roam_test_avg_rssi",
+      "value": "Avg RSSI"
+    },
+    {
+      "name": "roam_test_standards",
+      "value": "Supported Standards"
+    },
+    {
+      "name": "roam_test_security",
+      "value": "Security"
+    },
+    {
+      "name": "find_device_desc",
+      "value": "Device Finder"
+    },
+    {
+      "name": "find_device_hint",
+      "value": "Search for devices on LAN"
+    },
+    {
+      "name": "find_device_start",
+      "value": "Start Discovery"
+    },
+    {
+      "name": "find_device_stop",
+      "value": "Stop Discovery"
+    },
+    {
+      "name": "find_device_found",
+      "value": "New device found"
+    },
+    {
+      "name": "about_app",
+      "value": "About"
+    },
+    {
+      "name": "about_version",
+      "value": "Version"
+    },
+    {
+      "name": "about_desc",
+      "value": "A professional WiFi network analysis tool with WiFi scanning, channel analysis, speed test and more"
+    },
+    {
+      "name": "chart_avg_latency",
+      "value": "Avg Latency"
+    },
+    {
+      "name": "no_data",
+      "value": "No Data"
+    },
+    {
+      "name": "no_history_data",
+      "value": "No history data"
+    },
+    {
+      "name": "chart_hint",
+      "value": "Test results will appear here"
+    },
+    {
+      "name": "speed_good",
+      "value": "Good"
+    },
+    {
+      "name": "speed_normal",
+      "value": "Normal"
+    },
+    {
+      "name": "speed_poor",
+      "value": "Poor"
+    },
+    {
+      "name": "speed_excellent",
+      "value": "Excellent"
+    },
+    {
+      "name": "network_available",
+      "value": "Network Available"
+    },
+    {
+      "name": "network_unavailable",
+      "value": "Network Unavailable"
+    },
+    {
+      "name": "internet_connected",
+      "value": "Internet Connected"
+    },
+    {
+      "name": "internet_disconnected",
+      "value": "Internet Disconnected"
+    },
+    {
+      "name": "signal_excellent",
+      "value": "Excellent"
+    },
+    {
+      "name": "signal_good",
+      "value": "Good"
+    },
+    {
+      "name": "signal_fair",
+      "value": "Fair"
+    },
+    {
+      "name": "signal_poor",
+      "value": "Poor"
+    },
+    {
+      "name": "no_signal",
+      "value": "No Signal"
+    },
+    {
+      "name": "no_network",
+      "value": "No Network Detected"
+    },
+    {
+      "name": "refreshing",
+      "value": "Refreshing"
+    },
+    {
+      "name": "refresh",
+      "value": "Refresh"
+    },
+    {
+      "name": "not_obtained",
+      "value": "Not Obtained"
+    },
+    {
+      "name": "connect_wifi_hint",
+      "value": "Connect to Wi-Fi to get network info"
+    },
+    {
+      "name": "network_info_auto_show",
+      "value": "IP address, gateway, DNS info will display after connection"
+    },
+    {
+      "name": "networks_found",
+      "value": "networks found"
+    },
+    {
+      "name": "scan_in_progress",
+      "value": "Scanning"
+    },
+    {
+      "name": "network_name",
+      "value": "Network Name"
+    },
+    {
+      "name": "band",
+      "value": "Band"
+    },
+    {
+      "name": "channel_ch",
+      "value": "Channel"
+    },
+    {
+      "name": "bandwidth_mhz",
+      "value": "Bandwidth"
+    },
+    {
+      "name": "encryption",
+      "value": "Encryption"
+    },
+    {
+      "name": "grant_permission_hint",
+      "value": "Grant location permission and tap Rescan"
+    },
+    {
+      "name": "no_scan_result",
+      "value": "No networks found"
+    },
+    {
+      "name": "wifi_not_connected",
+      "value": "Wi-Fi Not Connected"
+    },
+    {
+      "name": "no_2_4g_network",
+      "value": "No 2.4GHz networks detected"
+    },
+    {
+      "name": "no_5g1_network",
+      "value": "No 5GHz-1 networks detected"
+    },
+    {
+      "name": "no_5g2_network",
+      "value": "No 5GHz-2 networks detected"
+    },
+    {
+      "name": "connect_wifi_hint_short",
+      "value": "Connect to Wi-Fi to view channel distribution"
+    },
+    {
+      "name": "no_2_4g_network_hint",
+      "value": "No 2.4GHz Wi-Fi signals detected in this area"
+    },
+    {
+      "name": "no_5g1_network_hint",
+      "value": "Your device or router may not support this band"
+    },
+    {
+      "name": "no_5g2_network_hint",
+      "value": "Some routers use this band for other purposes"
+    },
+    {
+      "name": "channel_distribution",
+      "value": "Channel Distribution"
+    },
+    {
+      "name": "ap_count_short",
+      "value": "Networks"
+    },
+    {
+      "name": "light",
+      "value": "Light"
+    },
+    {
+      "name": "moderate",
+      "value": "Moderate"
+    },
+    {
+      "name": "crowded",
+      "value": "Crowded"
+    },
+    {
+      "name": "speed_test_title",
+      "value": "Speed Test"
+    },
+    {
+      "name": "speed_test_complete",
+      "value": "Test Complete"
+    },
+    {
+      "name": "test_result",
+      "value": "Test Result"
+    },
+    {
+      "name": "no_test_record",
+      "value": "No test records"
+    },
+    {
+      "name": "download_in_progress",
+      "value": "Downloading"
+    },
+    {
+      "name": "upload_in_progress",
+      "value": "Uploading"
+    },
+    {
+      "name": "latency_testing",
+      "value": "Testing latency"
+    },
+    {
+      "name": "tap_to_start",
+      "value": "Tap to start"
+    },
+    {
+      "name": "select_speed_server",
+      "value": "Select Server"
+    },
+    {
+      "name": "diagnostic_tools",
+      "value": "Diagnostics"
+    },
+    {
+      "name": "network_tools",
+      "value": "Network Tools"
+    },
+    {
+      "name": "advanced_tools",
+      "value": "Advanced"
+    },
+    {
+      "name": "other",
+      "value": "Other"
+    },
+    {
+      "name": "about_wifi_analyzer",
+      "value": "About WiFi Analyzer"
+    },
+    {
+      "name": "version_info",
+      "value": "Version v1.0.1"
+    },
+    {
+      "name": "desc_test_latency",
+      "value": "Test network latency and connectivity"
+    },
+    {
+      "name": "desc_trace_route",
+      "value": "Trace packet routing path"
+    },
+    {
+      "name": "desc_dns_check",
+      "value": "Check DNS resolution status"
+    },
+    {
+      "name": "desc_port_check",
+      "value": "Detect port status"
+    },
+    {
+      "name": "desc_subnet_calc",
+      "value": "Calculate IP subnet mask"
+    },
+    {
+      "name": "desc_poe_calc",
+      "value": "Calculate POE power"
+    },
+    {
+      "name": "desc_ip_query",
+      "value": "Query IP geolocation"
+    },
+    {
+      "name": "desc_mac_query",
+      "value": "Query device vendor info"
+    },
+    {
+      "name": "desc_wol",
+      "value": "Remote wake up device"
+    },
+    {
+      "name": "desc_lan_scan",
+      "value": "Discover LAN devices"
+    },
+    {
+      "name": "desc_roam_test",
+      "value": "Monitor WiFi roaming"
+    },
+    {
+      "name": "desc_find_device",
+      "value": "Locate network devices"
+    },
+    {
+      "name": "quick_tools",
+      "value": "Quick Tools"
+    },
+    {
+      "name": "network_info",
+      "value": "Network Info"
+    },
+    {
+      "name": "speed_history",
+      "value": "Speed History"
+    },
+    {
+      "name": "testing_latency",
+      "value": "Testing latency..."
+    },
+    {
+      "name": "speed_test_error",
+      "value": "Speed test failed"
+    },
+    {
+      "name": "cancelled",
+      "value": "Cancelled"
+    },
+    {
+      "name": "best",
+      "value": "Best"
+    },
+    {
+      "name": "no_recommend",
+      "value": "No recommendation"
+    },
+    {
+      "name": "least_interference",
+      "value": "Least interference"
+    },
+    {
+      "name": "unit_network",
+      "value": "Networks"
+    },
+    {
+      "name": "unit_count",
+      "value": ""
+    },
+    {
+      "name": "channel_detail",
+      "value": "Channel Status"
+    },
+    {
+      "name": "channel_band",
+      "value": "Band"
+    },
+    {
+      "name": "recommend_channels",
+      "value": "Recommended Channels"
+    },
+    {
+      "name": "2_4ghz_desc",
+      "value": "Mainstream band, good compatibility, strong penetration"
+    },
+    {
+      "name": "5_1ghz_desc",
+      "value": "Low-frequency 5GHz, fewer channels but wider coverage"
+    },
+    {
+      "name": "5_8ghz_desc",
+      "value": "High-frequency 5GHz, cleaner channels, higher speed"
+    },
+    {
+      "name": "dns",
+      "value": "DNS"
+    },
+    {
+      "name": "baidu",
+      "value": "Baidu"
+    },
+    {
+      "name": "aliyun",
+      "value": "Aliyun"
+    },
+    {
+      "name": "tencent",
+      "value": "Tencent"
+    },
+    {
+      "name": "detecting",
+      "value": "Detecting..."
+    },
+    {
+      "name": "common_addresses",
+      "value": "Common Addresses"
+    },
+    {
+      "name": "no_common_addresses",
+      "value": "No common addresses"
+    },
+    {
+      "name": "local_gateway",
+      "value": "Local Gateway"
+    },
+    {
+      "name": "tap_to_test",
+      "value": "Tap to test"
+    },
+    {
+      "name": "testing",
+      "value": "Testing..."
+    },
+    {
+      "name": "waiting_for_result",
+      "value": "Waiting for first result"
+    },
+    {
+      "name": "end",
+      "value": "End"
+    },
+    {
+      "name": "continue_action",
+      "value": "Resume"
+    },
+    {
+      "name": "pause_action",
+      "value": "Pause"
+    },
+    {
+      "name": "live_latency",
+      "value": "Live Latency"
+    },
+    {
+      "name": "history_trend",
+      "value": "History Trend"
+    },
+    {
+      "name": "stability_trend",
+      "value": "Stability Trend"
+    },
+    {
+      "name": "worst",
+      "value": "Worst"
+    },
+    {
+      "name": "avg_latency_colon",
+      "value": "Avg:"
+    },
+    {
+      "name": "target_ip",
+      "value": "Target IP"
+    },
+    {
+      "name": "domain_name",
+      "value": "Domain"
+    },
+    {
+      "name": "target",
+      "value": "Target"
+    },
+    {
+      "name": "no_records",
+      "value": "No records"
+    },
+    {
+      "name": "route_trace",
+      "value": "Traceroute"
+    },
+    {
+      "name": "trace",
+      "value": "Trace"
+    },
+    {
+      "name": "recommended_target",
+      "value": "Recommended"
+    },
+    {
+      "name": "feature_intro",
+      "value": "Features"
+    },
+    {
+      "name": "path_detection",
+      "value": "Path Detection"
+    },
+    {
+      "name": "path_desc",
+      "value": "Show the network path from this device to target"
+    },
+    {
+      "name": "latency_analysis",
+      "value": "Latency Analysis"
+    },
+    {
+      "name": "latency_analysis_desc",
+      "value": "Measure hop-by-hop latency, locate bottlenecks"
+    },
+    {
+      "name": "statistics_report",
+      "value": "Statistics"
+    },
+    {
+      "name": "statistics_report_desc",
+      "value": "Complete route statistics and quality assessment"
+    },
+    {
+      "name": "total_hops",
+      "value": "Total Hops"
+    },
+    {
+      "name": "hop_success",
+      "value": "Success"
+    },
+    {
+      "name": "hop_failed",
+      "value": "Failed"
+    },
+    {
+      "name": "end_to_end",
+      "value": "End-to-End"
+    },
+    {
+      "name": "tracing",
+      "value": "Tracing..."
+    },
+    {
+      "name": "trace_complete",
+      "value": "Trace Complete"
+    },
+    {
+      "name": "route_path",
+      "value": "Route Path"
+    },
+    {
+      "name": "hops_count",
+      "value": "hops"
+    },
+    {
+      "name": "no_response",
+      "value": "No Response"
+    },
+    {
+      "name": "timeout_status",
+      "value": "Timeout"
+    },
+    {
+      "name": "gateway_tag",
+      "value": "Gateway"
+    },
+    {
+      "name": "target_tag",
+      "value": "Target"
+    },
+    {
+      "name": "tracing_path",
+      "value": "Detecting network path..."
+    },
+    {
+      "name": "trace_duration_hint",
+      "value": "Usually takes 10-30 seconds"
+    },
+    {
+      "name": "stop_trace",
+      "value": "Stop"
+    },
+    {
+      "name": "re_trace",
+      "value": "Trace Again"
+    },
+    {
+      "name": "very_fast",
+      "value": "Very Fast"
+    },
+    {
+      "name": "good_speed",
+      "value": "Good"
+    },
+    {
+      "name": "normal_speed",
+      "value": "Normal"
+    },
+    {
+      "name": "slow_speed",
+      "value": "Slow"
+    },
+    {
+      "name": "input_ip_hint",
+      "value": "Enter domain or IP address"
+    },
+    {
+      "name": "dns_query",
+      "value": "DNS Lookup"
+    },
+    {
+      "name": "input_domain_hint",
+      "value": "Enter domain, e.g. baidu.com"
+    },
+    {
+      "name": "query_action",
+      "value": "Lookup"
+    },
+    {
+      "name": "record_type",
+      "value": "Record Type"
+    },
+    {
+      "name": "ipv4_address",
+      "value": "IPv4 Address"
+    },
+    {
+      "name": "ipv6_address",
+      "value": "IPv6 Address"
+    },
+    {
+      "name": "alias_record",
+      "value": "CNAME Record"
+    },
+    {
+      "name": "mail_server",
+      "value": "Mail Server"
+    },
+    {
+      "name": "name_server",
+      "value": "Name Server"
+    },
+    {
+      "name": "text_record",
+      "value": "TXT Record"
+    },
+    {
+      "name": "common_domains",
+      "value": "Popular Domains"
+    },
+    {
+      "name": "dns_query_intro",
+      "value": "DNS Lookup Info"
+    },
+    {
+      "name": "dns_query_intro_desc",
+      "value": "Query DNS resolution records, support multiple record types and DNS servers"
+    },
+    {
+      "name": "dns_records",
+      "value": "DNS Records"
+    },
+    {
+      "name": "query_failed",
+      "value": "Query Failed"
+    },
+    {
+      "name": "records_count",
+      "value": "records"
+    },
+    {
+      "name": "querying_dns",
+      "value": "Querying DNS records..."
+    },
+    {
+      "name": "re_query",
+      "value": "Lookup Again"
+    },
+    {
+      "name": "all_types",
+      "value": "All"
+    },
+    {
+      "name": "scan_action",
+      "value": "Scan"
+    },
+    {
+      "name": "scan_preset",
+      "value": "Scan Preset"
+    },
+    {
+      "name": "port_count_ports",
+      "value": "ports"
+    },
+    {
+      "name": "port_scan_intro",
+      "value": "Port Scan Info"
+    },
+    {
+      "name": "port_scan_intro_desc",
+      "value": "Scan target host ports, auto-detect common services"
+    },
+    {
+      "name": "scanning_port",
+      "value": "Scanning port"
+    },
+    {
+      "name": "scan_stopped",
+      "value": "Scan Stopped"
+    },
+    {
+      "name": "progress_label",
+      "value": "Progress:"
+    },
+    {
+      "name": "scanned",
+      "value": "Scanned"
+    },
+    {
+      "name": "discovered_open_ports",
+      "value": "Open Ports Found"
+    },
+    {
+      "name": "all_ports",
+      "value": "All Ports"
+    },
+    {
+      "name": "ports_total",
+      "value": "ports"
+    },
+    {
+      "name": "latency_ms",
+      "value": "Latency"
+    },
+    {
+      "name": "port_status",
+      "value": "Status"
+    },
+    {
+      "name": "stop_scan",
+      "value": "Stop Scan"
+    },
+    {
+      "name": "re_scan",
+      "value": "Scan Again"
+    },
+    {
+      "name": "input_ip_subnet_hint",
+      "value": "Enter IP, e.g. 192.168.1.1/24"
+    },
+    {
+      "name": "calculate_action",
+      "value": "Calculate"
+    },
+    {
+      "name": "cidr_format_hint",
+      "value": "CIDR format supported, e.g. 10.0.0.1/16, default /24"
+    },
+    {
+      "name": "common_subnets",
+      "value": "Common Subnets"
+    },
+    {
+      "name": "host_range",
+      "value": "Host Range"
+    },
+    {
+      "name": "start_ip",
+      "value": "Start IP"
+    },
+    {
+      "name": "end_ip",
+      "value": "End IP"
+    },
+    {
+      "name": "usable_hosts",
+      "value": "Usable Hosts"
+    },
+    {
+      "name": "detail_info",
+      "value": "Details"
+    },
+    {
+      "name": "wildcard_mask",
+      "value": "Wildcard Mask"
+    },
+    {
+      "name": "ip_class",
+      "value": "IP Class"
+    },
+    {
+      "name": "ip_type",
+      "value": "IP Type"
+    },
+    {
+      "name": "is_private",
+      "value": "Is Private"
+    },
+    {
+      "name": "yes",
+      "value": "Yes"
+    },
+    {
+      "name": "no",
+      "value": "No"
+    },
+    {
+      "name": "binary_subnet",
+      "value": "Binary Mask"
+    },
+    {
+      "name": "subnet_calc_intro",
+      "value": "Subnet Calc Info"
+    },
+    {
+      "name": "subnet_calc_intro_desc",
+      "value": "Calculate network address, broadcast address, usable host range"
+    },
+    {
+      "name": "poe_standard",
+      "value": "PoE Standard"
+    },
+    {
+      "name": "poe_available",
+      "value": "Available"
+    },
+    {
+      "name": "param_settings",
+      "value": "Parameters"
+    },
+    {
+      "name": "cable_length",
+      "value": "Cable Length"
+    },
+    {
+      "name": "cable_meter",
+      "value": "m"
+    },
+    {
+      "name": "cable_spec",
+      "value": "Cable Spec"
+    },
+    {
+      "name": "device_power",
+      "value": "Device Power"
+    },
+    {
+      "name": "power_unit_w",
+      "value": "W"
+    },
+    {
+      "name": "common_devices",
+      "value": "Common Devices"
+    },
+    {
+      "name": "power_sufficient",
+      "value": "Power Sufficient"
+    },
+    {
+      "name": "power_insufficient",
+      "value": "Power Insufficient"
+    },
+    {
+      "name": "config_can_meet",
+      "value": "Current config meets device requirements"
+    },
+    {
+      "name": "upgrade_poe_hint",
+      "value": "Upgrade PoE standard or shorten cable"
+    },
+    {
+      "name": "delivered_power",
+      "value": "Delivered Power"
+    },
+    {
+      "name": "cable_loss",
+      "value": "Cable Loss"
+    },
+    {
+      "name": "efficiency",
+      "value": "Efficiency"
+    },
+    {
+      "name": "detail_data",
+      "value": "Details"
+    },
+    {
+      "name": "pse_output",
+      "value": "PSE Output"
+    },
+    {
+      "name": "pd_available",
+      "value": "PD Available"
+    },
+    {
+      "name": "actual_delivered",
+      "value": "Actual Delivered"
+    },
+    {
+      "name": "device_required",
+      "value": "Device Required"
+    },
+    {
+      "name": "remaining_budget",
+      "value": "Remaining Budget"
+    },
+    {
+      "name": "power_pins",
+      "value": "Power Pins"
+    },
+    {
+      "name": "suggestion",
+      "value": "Suggestion"
+    },
+    {
+      "name": "max_recommended_length",
+      "value": "Max Recommended Length"
+    },
+    {
+      "name": "within_length_hint",
+      "value": "Within this length, power meets device requirements"
+    },
+    {
+      "name": "low_efficiency_hint",
+      "value": "Low power efficiency"
+    },
+    {
+      "name": "use_thicker_cable_hint",
+      "value": "Use thicker cable (AWG22/23) or shorten cable"
+    },
+    {
+      "name": "efficiency_only",
+      "value": "Efficiency only"
+    },
+    {
+      "name": "sufficient_margin",
+      "value": "Sufficient Margin"
+    },
+    {
+      "name": "remaining_power_hint",
+      "value": "Remaining"
+    },
+    {
+      "name": "support_power_fluctuation",
+      "value": "Supports power fluctuation"
+    },
+    {
+      "name": "config_stable",
+      "value": "Current config is stable"
+    },
+    {
+      "name": "mac_query",
+      "value": "MAC Lookup"
+    },
+    {
+      "name": "input_mac_hint",
+      "value": "Enter MAC address, e.g. A4:B1:97:00:AB:CD"
+    },
+    {
+      "name": "mac_format_hint",
+      "value": "Formats: AA:BB:CC:DD:EE:FF / AA-BB-CC-DD-EE-FF / AABBCCDDEEFF"
+    },
+    {
+      "name": "common_vendor_examples",
+      "value": "Vendor Examples"
+    },
+    {
+      "name": "mac_query_intro",
+      "value": "MAC Lookup Info"
+    },
+    {
+      "name": "mac_query_intro_desc",
+      "value": "Query device vendor info by MAC address, built-in 60+ vendor database"
+    },
+    {
+      "name": "query_history",
+      "value": "History"
+    },
+    {
+      "name": "clear_history",
+      "value": "Clear"
+    },
+    {
+      "name": "local_database",
+      "value": "Local DB"
+    },
+    {
+      "name": "online_api",
+      "value": "Online API"
+    },
+    {
+      "name": "online_query",
+      "value": "Online Query"
+    },
+    {
+      "name": "unknown_vendor",
+      "value": "Unknown Vendor"
+    },
+    {
+      "name": "not_in_database",
+      "value": "Not found in local DB or online API"
+    },
+    {
+      "name": "mac_address_label",
+      "value": "MAC Address"
+    },
+    {
+      "name": "oui_prefix",
+      "value": "OUI Prefix"
+    },
+    {
+      "name": "address_type",
+      "value": "Address Type"
+    },
+    {
+      "name": "unicast",
+      "value": "Unicast"
+    },
+    {
+      "name": "multicast",
+      "value": "Multicast"
+    },
+    {
+      "name": "data_source",
+      "value": "Data Source"
+    },
+    {
+      "name": "query_time",
+      "value": "Query Time"
+    },
+    {
+      "name": "querying_mac",
+      "value": "Querying MAC vendor info..."
+    },
+    {
+      "name": "back_action",
+      "value": "Back"
+    },
+    {
+      "name": "query_fail",
+      "value": "Query Failed"
+    },
+    {
+      "name": "retry_query",
+      "value": "Retry Query"
+    },
+    {
+      "name": "remote_wake",
+      "value": "Remote Wake"
+    },
+    {
+      "name": "remote_wake_desc",
+      "value": "Send Magic Packet to wake LAN devices"
+    },
+    {
+      "name": "quick_add",
+      "value": "Quick Add"
+    },
+    {
+      "name": "saved_devices",
+      "value": "Saved Devices"
+    },
+    {
+      "name": "devices_count",
+      "value": "devices"
+    },
+    {
+      "name": "wake_action",
+      "value": "Wake"
+    },
+    {
+      "name": "add_device_action",
+      "value": "Add Device"
+    },
+    {
+      "name": "mac_label",
+      "value": "MAC"
+    },
+    {
+      "name": "ip_label",
+      "value": "IP"
+    },
+    {
+      "name": "optional_hint",
+      "value": "Optional"
+    },
+    {
+      "name": "confirm_add",
+      "value": "Add"
+    },
+    {
+      "name": "cancel_action",
+      "value": "Cancel"
+    },
+    {
+      "name": "sending_wake_packet",
+      "value": "Sending wake packet to"
+    },
+    {
+      "name": "sending_wake_packet_suffix",
+      "value": "..."
+    },
+    {
+      "name": "wake_success",
+      "value": "Wake Success"
+    },
+    {
+      "name": "wake_failed",
+      "value": "Wake Failed"
+    },
+    {
+      "name": "usage_intro",
+      "value": "Usage"
+    },
+    {
+      "name": "wol_hint",
+      "value": "Ensure target device has Wake On LAN enabled and is on the same LAN"
+    },
+    {
+      "name": "mac_format_error",
+      "value": "Invalid MAC address format"
+    },
+    {
+      "name": "new_device",
+      "value": "New Device"
+    },
+    {
+      "name": "device_name_placeholder",
+      "value": "e.g. Desktop PC"
+    },
+    {
+      "name": "mac_placeholder",
+      "value": "AA:BB:CC:DD:EE:FF"
+    },
+    {
+      "name": "ip_optional_placeholder",
+      "value": "Optional, e.g. 192.168.1.100"
+    },
+    {
+      "name": "subnet_mask_label",
+      "value": "Subnet Mask"
+    },
+    {
+      "name": "scanning_hint",
+      "value": "Scanning..."
+    },
+    {
+      "name": "scanned_count",
+      "value": "Scanned"
+    },
+    {
+      "name": "current_scan",
+      "value": "Current:"
+    },
+    {
+      "name": "found_devices",
+      "value": "Found"
+    },
+    {
+      "name": "online_devices",
+      "value": "devices"
+    },
+    {
+      "name": "scan_summary",
+      "value": "Scan Complete"
+    },
+    {
+      "name": "online_device_count",
+      "value": "Online"
+    },
+    {
+      "name": "scan_duration",
+      "value": "Duration"
+    },
+    {
+      "name": "scan_range",
+      "value": "Range"
+    },
+    {
+      "name": "discovered_devices",
+      "value": "Devices Found"
+    },
+    {
+      "name": "sort_by",
+      "value": "Sort:"
+    },
+    {
+      "name": "device_type_router",
+      "value": "Router"
+    },
+    {
+      "name": "device_type_local",
+      "value": "This Device"
+    },
+    {
+      "name": "device_type_server",
+      "value": "Server"
+    },
+    {
+      "name": "device_type_device",
+      "value": "Device"
+    },
+    {
+      "name": "scan_hint",
+      "value": "Tap the button below to start scanning"
+    },
+    {
+      "name": "scan_range_hint",
+      "value": "Probing"
+    },
+    {
+      "name": "scan_range_to",
+      "value": "for online devices"
+    },
+    {
+      "name": "lan_scan_intro",
+      "value": "Scan Info"
+    },
+    {
+      "name": "lan_scan_intro_desc",
+      "value": "Discover active LAN devices via HTTP probing, auto-identify routers, servers, etc."
+    },
+    {
+      "name": "ip_colon",
+      "value": "IP:"
+    },
+    {
+      "name": "device_count_suffix",
+      "value": ""
+    },
+    {
+      "name": "start_scan",
+      "value": "Start Scan"
+    },
+    {
+      "name": "retry_scan",
+      "value": "Retry Scan"
+    },
+    {
+      "name": "getting_ip",
+      "value": "Getting..."
+    },
+    {
+      "name": "gateway_label",
+      "value": "Gateway"
+    },
+    {
+      "name": "wifi_connection",
+      "value": "WiFi Connection"
+    },
+    {
+      "name": "signal_label",
+      "value": "Signal"
+    },
+    {
+      "name": "avg_signal",
+      "value": "Avg"
+    },
+    {
+      "name": "roam_label",
+      "value": "Roam"
+    },
+    {
+      "name": "times_suffix",
+      "value": "times"
+    },
+    {
+      "name": "tested",
+      "value": "Tested"
+    },
+    {
+      "name": "total_duration",
+      "value": "Total"
+    },
+    {
+      "name": "bssid_history",
+      "value": "BSSID History"
+    },
+    {
+      "name": "recent_records",
+      "value": "Recent"
+    },
+    {
+      "name": "records_suffix",
+      "value": "records"
+    },
+    {
+      "name": "stability_very_stable",
+      "value": "Very Stable"
+    },
+    {
+      "name": "stability_stable",
+      "value": "Stable"
+    },
+    {
+      "name": "stability_average",
+      "value": "Average"
+    },
+    {
+      "name": "stability_unstable",
+      "value": "Unstable"
+    },
+    {
+      "name": "stability_very_unstable",
+      "value": "Very Unstable"
+    },
+    {
+      "name": "test_duration",
+      "value": "Duration"
+    },
+    {
+      "name": "roam_count",
+      "value": "Roam Count"
+    },
+    {
+      "name": "roaming_ap",
+      "value": "APs"
+    },
+    {
+      "name": "count_suffix",
+      "value": ""
+    },
+    {
+      "name": "signal_range",
+      "value": "Range"
+    },
+    {
+      "name": "roam_events_detail",
+      "value": "Roam Events"
+    },
+    {
+      "name": "collapse",
+      "value": "Collapse"
+    },
+    {
+      "name": "expand",
+      "value": "Expand"
+    },
+    {
+      "name": "total_roam_events",
+      "value": "Total"
+    },
+    {
+      "name": "roam_event_hint",
+      "value": "roam events, tap to expand"
+    },
+    {
+      "name": "wifi_roam_test",
+      "value": "WiFi Roam Test"
+    },
+    {
+      "name": "roam_test_intro",
+      "value": "Roam Test Info"
+    },
+    {
+      "name": "roam_test_intro_desc",
+      "value": "Monitor WiFi AP handover (roaming), record roam counts and latency, evaluate roaming stability"
+    },
+    {
+      "name": "start_roam_test",
+      "value": "Start Test"
+    },
+    {
+      "name": "stop_roam_test",
+      "value": "Stop Test"
+    },
+    {
+      "name": "retry_roam_test",
+      "value": "Test Again"
+    },
+    {
+      "name": "find_device_title",
+      "value": "Device Finder"
+    },
+    {
+      "name": "back_with_arrow",
+      "value": "<  Back"
+    },
+    {
+      "name": "search_ip_mac_vendor",
+      "value": "Search IP/MAC/Vendor"
+    },
+    {
+      "name": "online_only",
+      "value": "Online Only"
+    },
+    {
+      "name": "online_only_active",
+      "value": "Online Only *"
+    },
+    {
+      "name": "device_type_computer",
+      "value": "Computer"
+    },
+    {
+      "name": "reset_all",
+      "value": "Reset All"
+    },
+    {
+      "name": "scan_mode",
+      "value": "Scan Mode"
+    },
+    {
+      "name": "quick_scan",
+      "value": "Quick Scan"
+    },
+    {
+      "name": "quick_scan_hint",
+      "value": "~20 common IPs"
+    },
+    {
+      "name": "full_scan",
+      "value": "Full Scan"
+    },
+    {
+      "name": "full_scan_hint",
+      "value": "All 254 IPs"
+    },
+    {
+      "name": "find_lan_device",
+      "value": "Find LAN Devices"
+    },
+    {
+      "name": "find_lan_device_desc",
+      "value": "Discover devices via scanning, auto-identify device types and vendors"
+    },
+    {
+      "name": "scanning_device",
+      "value": "Scanning devices..."
+    },
+    {
+      "name": "current_colon",
+      "value": "Current: "
+    },
+    {
+      "name": "found_count",
+      "value": "Found"
+    },
+    {
+      "name": "device_unit",
+      "value": ""
+    },
+    {
+      "name": "scanned_ips",
+      "value": "Scanned"
+    },
+    {
+      "name": "ip_suffix",
+      "value": " IPs"
+    },
+    {
+      "name": "matched_result",
+      "value": "Matched"
+    },
+    {
+      "name": "scan_time",
+      "value": "Time"
+    },
+    {
+      "name": "device_list",
+      "value": "Device List"
+    },
+    {
+      "name": "no_matched_device",
+      "value": "No matching devices"
+    },
+    {
+      "name": "try_modify_filter",
+      "value": "Try adjusting search criteria or reset filters"
+    },
+    {
+      "name": "stop_find",
+      "value": "Stop"
+    },
+    {
+      "name": "start_find",
+      "value": "Start"
+    },
+    {
+      "name": "find_again",
+      "value": "Find Again"
+    },
+    {
+      "name": "find_device_intro",
+      "value": "Device Finder Info"
+    },
+    {
+      "name": "find_device_intro_desc",
+      "value": "Combine LAN scanning and MAC vendor lookup to quickly locate and identify network devices"
+    },
+    {
+      "name": "about_title",
+      "value": "About"
+    },
+    {
+      "name": "check_update",
+      "value": "Check for Updates"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "user_agreement",
+      "value": "Terms of Service"
+    },
+    {
+      "name": "feedback",
+      "value": "Feedback"
+    },
+    {
+      "name": "app_name_wifi_analyzer",
+      "value": "WiFi Analyzer"
+    },
+    {
+      "name": "version_prefix",
+      "value": "version_prefix"
+    },
+    {
+      "name": "contact_address",
+      "value": "contact_address"
+    },
+    {
+      "name": "build_number",
+      "value": "build_number"
+    },
+    {
+      "name": "copyright",
+      "value": "WiFi Analyzer © 2026  xinxin"
+    },
+    {
+      "name": "ip_geo_title",
+      "value": "IP Lookup"
+    },
+    {
+      "name": "my_public_ip",
+      "value": "My Public IP"
+    },
+    {
+      "name": "detect_failed",
+      "value": "Failed"
+    },
+    {
+      "name": "input_ip_address",
+      "value": "Enter IP address"
+    },
+    {
+      "name": "ip_geo_intro",
+      "value": "IP Lookup Info"
+    },
+    {
+      "name": "ip_geo_intro_desc",
+      "value": "Query geolocation, ISP and network info of any IP"
+    },
+    {
+      "name": "query_latency",
+      "value": "Query Time"
+    },
+    {
+      "name": "geographic_location",
+      "value": "Location"
+    },
+    {
+      "name": "latitude",
+      "value": "Latitude"
+    },
+    {
+      "name": "longitude",
+      "value": "Longitude"
+    },
+    {
+      "name": "timezone_colon",
+      "value": "Timezone: "
+    },
+    {
+      "name": "country_region",
+      "value": "Country/Region"
+    },
+    {
+      "name": "province",
+      "value": "Province"
+    },
+    {
+      "name": "city",
+      "value": "City"
+    },
+    {
+      "name": "district",
+      "value": "District"
+    },
+    {
+      "name": "timezone",
+      "value": "Timezone"
+    },
+    {
+      "name": "querying_ip_info",
+      "value": "Querying IP info..."
+    },
+    {
+      "name": "query_my_ip",
+      "value": "Query My IP"
+    },
+    {
+      "name": "location_separator",
+      "value": " · "
+    },
+    {
+      "name": "ping_received",
+      "value": "Received"
+    },
+    {
+      "name": "paused",
+      "value": "Paused"
+    },
+    {
+      "name": "test_complete",
+      "value": "Test Complete"
+    },
+    {
+      "name": "ping_loss",
+      "value": "Packet Loss"
+    },
+    {
+      "name": "stability",
+      "value": "Stability"
+    },
+    {
+      "name": "live_chart",
+      "value": "Live Chart"
+    },
+    {
+      "name": "avg",
+      "value": "Avg"
+    },
+    {
+      "name": "avg_colon",
+      "value": "Avg:"
+    },
+    {
+      "name": "end_test",
+      "value": "End Test"
+    },
+    {
+      "name": "ping_desc",
+      "value": "Ping Test Info"
+    },
+    {
+      "name": "ping_action",
+      "value": "Ping Test"
+    },
+    {
+      "name": "latency_detection",
+      "value": "Latency Detection"
+    },
+    {
+      "name": "latency_detection_desc",
+      "value": "Measure network latency and response time"
+    },
+    {
+      "name": "ic_stability",
+      "value": "Stability"
+    },
+    {
+      "name": "stability_analysis",
+      "value": "Stability Analysis"
+    },
+    {
+      "name": "stability_analysis_desc",
+      "value": "Calculate network jitter and stability score"
+    },
+    {
+      "name": "history_trend_desc",
+      "value": "View historical ping records and trends"
+    }
+  ]
+}

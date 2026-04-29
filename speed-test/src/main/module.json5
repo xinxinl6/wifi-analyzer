@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "speed_test",
+    "type": "har",
+    "deviceTypes": [
+      "phone",
+      "tablet"
+    ]
+  }
+}

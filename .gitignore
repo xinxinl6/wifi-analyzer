@@ -1,0 +1,61 @@
+# HarmonyOS / DevEco Studio
+.idea/
+.gradle/
+local.properties
+*.iml
+*.iws
+*.ipr
+
+# 构建输出
+build/
+*/build/
+out/
+*/out/
+
+# DevEco 构建缓存
+.cxx/
+.hvigor/
+hvigorw
+hvigorw.bat
+node_modules/
+*/node_modules/
+
+# HarmonyOS 依赖包（类似 node_modules，不提交）
+oh_modules/
+**/oh_modules/
+oh-package-lock.json5
+**/oh-package-lock.json5
+
+# 签名密钥（绝对不要提交）
+*.p12
+*.keystore
+*.jks
+Key/
+*.key
+
+# 日志与调试
+*.log
+debug_hilog.txt
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+.DS_Store
+Thumbs.db
+
+# 生成的图标脚本（可选）
+generate_*.py
+generate_*.js
+convert_*.js
+extract_frames.py
+
+# 备份文件
+backup_*.ets
+
+# Preview 缓存
+.preview/
+previews/
+
+# 系统文件
+.workbuddy/

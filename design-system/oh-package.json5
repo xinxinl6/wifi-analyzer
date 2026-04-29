@@ -1,0 +1,9 @@
+{
+  "name": "@wifi-analyzer/design-system",
+  "version": "1.0.0",
+  "description": "WiFi Analyzer 设计系统 — 颜色、尺寸、字体排版常量",
+  "main": "src/main/ets/Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

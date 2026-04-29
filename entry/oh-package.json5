@@ -1,0 +1,14 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "@wifi-analyzer/design-system": "file:../design-system",
+    "@wifi-analyzer/core": "file:../core",
+    "@wifi-analyzer/speed-test": "file:../speed-test",
+    "@wifi-analyzer/tools": "file:../tools"
+  }
+}

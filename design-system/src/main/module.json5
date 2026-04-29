@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "design_system",
+    "type": "har",
+    "deviceTypes": [
+      "phone",
+      "tablet"
+    ]
+  }
+}
