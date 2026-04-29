@@ -129,7 +129,7 @@ export struct AuroraConnectionCard {
         Column({ space: 6 }) {
           // 状态标签
           Row({ space: 6 }) {
-            Text(this.wifiState.isScanning ? '扫描中' : (this.connected ? '已连接' : '未连接'))
+            Text(this.wifiState.isScanning ? $r('app.string.scanning') : (this.connected ? $r('app.string.connected') : $r('app.string.not_connected')))
               .fontSize(12)
               .fontColor(this.connected ? this.textSecondary : this.textTertiary)
 
@@ -142,7 +142,7 @@ export struct AuroraConnectionCard {
           }
 
           // SSID 名称
-          Text(this.connected ? this.wifiState.connectedSsid : '无网络连接')
+          Text(this.connected ? this.wifiState.connectedSsid : $r('app.string.no_network'))
             .fontSize(22)
             .fontWeight(FontWeight.Bold)
             .fontColor(this.textPrimary)
@@ -190,7 +190,7 @@ export struct AuroraConnectionCard {
               .fontColor(this.signalColor)
               .margin({ top: 4 })
 
-            Text('dBm')
+            Text($r('app.string.dbm_unit'))
               .fontSize(10)
               .fontColor(this.textTertiary)
           }
@@ -255,7 +255,7 @@ export struct AuroraNetworkGrid {
   }
 
   @Builder
-  InfoGridItem(label: string, value: string, icon: Resource) {
+  InfoGridItem(label: ResourceStr, value: string, icon: Resource) {
     Column({ space: 8 }) {
       Row({ space: 6 }) {
         Image(icon)
@@ -290,7 +290,7 @@ export struct AuroraNetworkGrid {
     Column({ space: 12 }) {
       // 标题
       Row() {
-        Text('网络信息')
+        Text($r('app.string.network_info'))
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.textPrimary)
@@ -303,7 +303,7 @@ export struct AuroraNetworkGrid {
             .width(14)
             .height(14)
             .fillColor(COLOR_AURORA_PRIMARY)
-          Text('AI分析')
+          Text($r('app.string.ai_analysis_home'))
             .fontSize(12)
             .fontColor(COLOR_AURORA_PRIMARY)
         }
@@ -316,16 +316,16 @@ export struct AuroraNetworkGrid {
       // 信息网格
       Grid() {
         GridItem() {
-          this.InfoGridItem('本地IP', this.diagnostics.localIp || '--', $r('app.media.ic_device'))
+          this.InfoGridItem($r('app.string.local_ip'), this.diagnostics.localIp || '--', $r('app.media.ic_device'))
         }
         GridItem() {
-          this.InfoGridItem('公网IP', this.diagnostics.publicIp || '--', $r('app.media.ic_route'))
+          this.InfoGridItem($r('app.string.public_ip'), this.diagnostics.publicIp || '--', $r('app.media.ic_route'))
         }
         GridItem() {
-          this.InfoGridItem('网关', this.diagnostics.gateway || '--', $r('app.media.ic_route'))
+          this.InfoGridItem($r('app.string.gateway'), this.diagnostics.gateway || '--', $r('app.media.ic_route'))
         }
         GridItem() {
-          this.InfoGridItem('DNS', this.diagnostics.dns || '--', $r('app.media.ic_dns'))
+          this.InfoGridItem($r('app.string.dns'), this.diagnostics.dns || '--', $r('app.media.ic_dns'))
         }
       }
       .columnsTemplate('1fr 1fr')
@@ -362,7 +362,7 @@ export struct AuroraToolsGrid {
   }
 
   @Builder
-  ToolCard(title: string, icon: Resource, bgColor: string, iconColor: string, index: number, action: string) {
+  ToolCard(title: ResourceStr, icon: Resource, bgColor: string, iconColor: string, index: number, action: string) {
     Column({ space: 8 }) {
       Stack({ alignContent: Alignment.Center }) {
         // 图标背景
@@ -432,14 +432,14 @@ export struct AuroraToolsGrid {
     Column({ space: 12 }) {
       // 标题
       Row() {
-        Text('快速工具')
+        Text($r('app.string.quick_tools'))
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
           .fontColor(this.textPrimary)
 
         Blank()
 
-        Text('更多')
+        Text($r('app.string.more'))
           .fontSize(12)
           .fontColor(COLOR_AURORA_PRIMARY)
       }
@@ -448,16 +448,16 @@ export struct AuroraToolsGrid {
       // 工具网格
       Grid() {
         GridItem() {
-          this.ToolCard('漫游测试', $r('app.media.ic_roaming'), 'rgba(74,144,217,0.15)', COLOR_AURORA_PRIMARY, 0, 'roamtest')
+          this.ToolCard($r('app.string.roam_test'), $r('app.media.ic_roaming'), 'rgba(74,144,217,0.15)', COLOR_AURORA_PRIMARY, 0, 'roamtest')
         }
         GridItem() {
-          this.ToolCard('设备发现', $r('app.media.ic_device'), 'rgba(0,217,126,0.15)', '#00D97E', 1, 'finddevice')
+          this.ToolCard($r('app.string.find_device'), $r('app.media.ic_device'), 'rgba(0,217,126,0.15)', '#00D97E', 1, 'finddevice')
         }
         GridItem() {
-          this.ToolCard('周边WiFi', $r('app.media.ic_surround'), 'rgba(135,206,235,0.15)', COLOR_AURORA_LIGHT, 2, '')
+          this.ToolCard($r('app.string.surrounding_wifi'), $r('app.media.ic_surround'), 'rgba(135,206,235,0.15)', COLOR_AURORA_LIGHT, 2, '')
         }
         GridItem() {
-          this.ToolCard('信道分析', $r('app.media.ic_channel'), 'rgba(139,92,246,0.15)', '#8B5CF6', 3, '')
+          this.ToolCard($r('app.string.channel_analysis'), $r('app.media.ic_channel'), 'rgba(139,92,246,0.15)', '#8B5CF6', 3, '')
         }
       }
       .columnsTemplate('1fr 1fr 1fr 1fr')

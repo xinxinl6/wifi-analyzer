@@ -2409,6 +2409,26 @@
       "value": "Feedback"
     },
     {
+      "name": "ai_analysis",
+      "value": "AI Analysis"
+    },
+    {
+      "name": "ai_analysis_home",
+      "value": "AI Analysis"
+    },
+    {
+      "name": "more",
+      "value": "More"
+    },
+    {
+      "name": "surrounding_wifi",
+      "value": "Nearby WiFi"
+    },
+    {
+      "name": "dbm_unit",
+      "value": "dBm"
+    },
+    {
       "name": "app_name_wifi_analyzer",
       "value": "WiFi Analyzer"
     },

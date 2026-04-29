@@ -1245,6 +1245,26 @@
       "value": "网络信息"
     },
     {
+      "name": "ai_analysis",
+      "value": "AI分析"
+    },
+    {
+      "name": "ai_analysis_home",
+      "value": "AI分析"
+    },
+    {
+      "name": "more",
+      "value": "更多"
+    },
+    {
+      "name": "surrounding_wifi",
+      "value": "周边WiFi"
+    },
+    {
+      "name": "dbm_unit",
+      "value": "dBm"
+    },
+    {
       "name": "speed_history",
       "value": "历史测速"
     },

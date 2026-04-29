@@ -214,7 +214,7 @@ export struct AboutPage {
     if (action === 'checkUpdate') {
       // 检查更新：显示"当前已是最新版本"
       promptAction.showToast({
-        message: $r('app.string.check_update_latest').toString(),
+        message: $r('app.string.check_update_latest'),
         duration: 2000
       })
     } else if (action === 'privacy') {
