@@ -15,6 +15,7 @@ import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
 import { http, connection, socket } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
+import { BackButtonGlass } from '@wifi-analyzer/design-system'
 import promptAction from '@ohos.promptAction'
 
 // 子组件
@@ -685,22 +686,9 @@ export struct PingTestPage {
 
       // 主内容
       Column() {
-        // 顶部返回按钮栏
+        // 顶部返回按钮栏（华为标准：只显示箭头，不显示文字）
         Row() {
-          Row() {
-            Text('←')
-              .fontSize(20)
-              .fontColor(COLOR_SKY_BLUE)
-            Text($r('app.string.back'))
-              .fontSize(FONT_SIZE_MD)
-              .fontColor(COLOR_SKY_BLUE)
-              .fontWeight(FONT_WEIGHT_MEDIUM)
-          }
-          .padding({ left: 4, right: 12, top: 6, bottom: 6 })
-          .borderRadius(20)
-          .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
-          .onClick(() => RouterManager.goBack())
-
+          BackButtonGlass({ onBack: () => RouterManager.goBack() })
           Blank()
         }
         .width('100%')

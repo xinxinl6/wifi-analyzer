@@ -12,6 +12,7 @@ import {
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM,
 } from '@wifi-analyzer/design-system'
+import { BackButtonCapsule } from '@wifi-analyzer/design-system'
 import {
   SubnetCalculator, SubnetResult, IpAddressInfo, SubnetPreset,
 } from '../subnet/SubnetCalculator'
@@ -108,14 +109,13 @@ export struct SubnetCalcPage {
           Text('←')
             .fontSize(20)
             .fontColor(COLOR_PRIMARY)
-          Text($r('app.string.back'))
-            .fontSize(FONT_SIZE_MD)
-            .fontColor(COLOR_PRIMARY)
-            .fontWeight(FONT_WEIGHT_MEDIUM)
         }
-        .padding({ left: 4, right: 12, top: 6, bottom: 6 })
+        .padding({ left: 8, right: 8, top: 6, bottom: 6 })
         .borderRadius(20)
         .backgroundColor(COLOR_SURFACE)
+        .borderWidth(1)
+        .borderColor(COLOR_BORDER)
+        .onClick(() => RouterManager.goBack())
         .onClick(() => RouterManager.goBack())
 
         Blank()

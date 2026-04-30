@@ -12,6 +12,7 @@ import {
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM,
 } from '@wifi-analyzer/design-system'
+import { BackButtonCapsule } from '@wifi-analyzer/design-system'
 import {
   FindDeviceEngine, DeviceSearchResult, EnrichedDevice, DeviceFilter, FindDeviceCallbacks,
 } from '../finddevice/FindDeviceEngine'
@@ -552,12 +553,7 @@ export struct FindDevicePage {
         .onClick(() => this.startFind())
     } else if (this.viewMode === 'done' || this.viewMode === 'error') {
       Row({ space: SPACE_MD }) {
-        Button($r('app.string.back_action'))
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_SECONDARY).fontWeight(FONT_WEIGHT_MEDIUM)
-          .backgroundColor(Color.Transparent).borderWidth(1).borderColor(COLOR_BORDER)
-          .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_MD).layoutWeight(1)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => RouterManager.goBack())
+        BackButtonCapsule({ onBack: () => RouterManager.goBack() })
         Button($r('app.string.find_again'))
           .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
           .backgroundColor(COLOR_EMERALD)

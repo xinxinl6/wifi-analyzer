@@ -12,6 +12,7 @@ import {
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
 } from '@wifi-analyzer/design-system'
+import { BackButtonCapsule } from '@wifi-analyzer/design-system'
 import {
   MacLookupEngine, MacLookupResult,
 } from '../maclookup/MacLookupEngine'
@@ -379,12 +380,7 @@ export struct MacLookupPage {
   // 操作按钮
   @Builder ActionButtons() {
     Row({ space: SPACE_MD }) {
-      Button($r('app.string.back'))
-        .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_SECONDARY).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(Color.Transparent).borderWidth(1).borderColor(COLOR_BORDER)
-        .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_MD).layoutWeight(1)
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => RouterManager.goBack())
+      BackButtonCapsule({ onBack: () => RouterManager.goBack() })
       Button($r('app.string.retry_query'))
         .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
         .backgroundColor(COLOR_INDIGO)

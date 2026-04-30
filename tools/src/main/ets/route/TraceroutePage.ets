@@ -17,6 +17,7 @@ import {
   TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteStats, DnsResolveResult
 } from '../traceroute/TracerouteEngine'
 import { RouterManager, ValidationPatterns, DnsConfig, DiagnosticsConfig } from '@wifi-analyzer/core'
+import { BackButtonGlass, BackButtonCapsule } from '@wifi-analyzer/design-system'
 
 // ==================== 接口定义 ====================
 
@@ -254,20 +255,7 @@ export struct TraceroutePage {
       Column() {
         // 顶部返回按钮栏
         Row() {
-          Row() {
-            Text('←')
-              .fontSize(20)
-              .fontColor(COLOR_SKY_BLUE)
-            Text($r('app.string.back'))
-              .fontSize(FONT_SIZE_MD)
-              .fontColor(COLOR_SKY_BLUE)
-              .fontWeight(FONT_WEIGHT_MEDIUM)
-          }
-          .padding({ left: 4, right: 12, top: 6, bottom: 6 })
-          .borderRadius(20)
-          .backgroundColor('rgba(255,255,255,0.60)')
-          .onClick(() => RouterManager.goBack())
-
+          BackButtonGlass({ onBack: () => RouterManager.goBack() })
           Blank()
         }
         .width('100%')
@@ -788,18 +776,8 @@ export struct TraceroutePage {
   // 操作按钮
   @Builder ActionButtons() {
     Row({ space: SPACE_MD }) {
-      // 返回按钮
-      Row() {
-        Text($r('app.string.back')).fontSize(FONT_SIZE_MD).fontColor(COLOR_SKY_BLUE).fontWeight(FONT_WEIGHT_MEDIUM)
-      }
-      .justifyContent(FlexAlign.Center)
-      .layoutWeight(1)
-      .padding({ top: 13, bottom: 13 })
-      .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
-      .borderRadius(999)
-      .borderWidth(1)
-      .borderColor(COLOR_GLASS_BORDER)
-      .onClick(() => RouterManager.goBack())
+      // 返回按钮（华为标准：只显示箭头，不显示文字）
+      BackButtonCapsule({ onBack: () => RouterManager.goBack() })
 
       // 停止/重新追踪按钮
       if (this.isRunning) {
