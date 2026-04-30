@@ -380,14 +380,14 @@ export struct AuroraToolsGrid {
 
         // 图标
         Image(icon)
-          .width(24)
-          .height(24)
+          .width(26)
+          .height(26)
           .fillColor(iconColor)
       }
 
       // 标题
       Text(title)
-        .fontSize(12)
+        .fontSize(10)
         .fontColor(this.textPrimary)
         .textAlign(TextAlign.Center)
         .maxLines(1)
@@ -467,7 +467,7 @@ export struct AuroraToolsGrid {
       .height(110)
     }
     .width('100%')
-    .padding(16)
+    .padding(15)
     .backgroundColor(COLOR_GLASS_CARD)
     .borderRadius(RADIUS_CARD)
     .border({

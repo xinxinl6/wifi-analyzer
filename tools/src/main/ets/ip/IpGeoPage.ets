@@ -10,7 +10,7 @@ import {
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
-  BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM,
+  BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
 } from '@wifi-analyzer/design-system'
 import {
   IpGeoEngine, IpGeoResult,
@@ -134,7 +134,7 @@ export struct IpGeoPage {
     .width('100%')
     .height('100%')
     .backgroundColor(COLOR_BACKGROUND)
-    .padding({ top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
+    .padding({ top: SAFE_AREA_TOP, bottom: SAFE_AREA_BOTTOM })
   }
 
   // ==================== 初始视图 ====================

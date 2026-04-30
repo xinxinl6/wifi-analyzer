@@ -11,7 +11,7 @@ import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
-  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, SAFE_AREA_BOTTOM } from '@wifi-analyzer/design-system'
+  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP } from '@wifi-analyzer/design-system'
 import { http, connection, socket } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
@@ -704,7 +704,7 @@ export struct PingTestPage {
           Blank()
         }
         .width('100%')
-        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SAFE_AREA_TOP, bottom: SAFE_AREA_BOTTOM })
         .alignItems(VerticalAlign.Center)
 
         if (this.viewMode === 'testing') {

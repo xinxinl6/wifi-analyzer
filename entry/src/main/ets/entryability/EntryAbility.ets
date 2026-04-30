@@ -39,8 +39,8 @@ export default class EntryAbility extends UIAbility {
           hilog.warn(DOMAIN, 'testTag', 'setWindowSystemBarEnable not supported: %{public}s', JSON.stringify(e));
         }
 
-        // 非全屏模式：系统自动为内容区预留状态栏空间，避免内容重叠
-        mainWindow.setWindowLayoutFullScreen(false);
+        // 全屏模式：允许内容画到状态栏区域
+        mainWindow.setWindowLayoutFullScreen(true);
 
         // 设置系统栏属性（状态栏）
         mainWindow.setWindowSystemBarProperties({

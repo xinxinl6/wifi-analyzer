@@ -12,7 +12,7 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
-  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, GLASS_SHADOW_3XL, SAFE_AREA_BOTTOM } from '@wifi-analyzer/design-system'
+  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, GLASS_SHADOW_3XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP } from '@wifi-analyzer/design-system'
 import {
   TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteStats, DnsResolveResult
 } from '../traceroute/TracerouteEngine'
@@ -271,7 +271,7 @@ export struct TraceroutePage {
           Blank()
         }
         .width('100%')
-        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_SM })
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SAFE_AREA_TOP })
         .alignItems(VerticalAlign.Center)
 
         if (this.viewMode === 'idle') {

@@ -107,6 +107,14 @@ struct Index {
   // Tab 点击动画状态
   @State private tabScales: number[] = [1, 1, 1, 1, 1]
   @State private tabGlows: number[] = [0, 0, 0, 0, 0]
+  // Tab 图标弹跳偏移量（选中时向上跳）
+  @State private tabOffsetY: number[] = [0, 0, 0, 0, 0]
+  // Tab 选中指示点透明度
+  @State private tabDotOpacity: number[] = [1, 0, 0, 0, 0]
+  // 页面内容透明度（切换时淡入淡出）
+  @State private contentOpacity: number = 1
+  // 页面内容偏移量（切换时上滑入场）
+  @State private contentOffsetY: number = 0
 
   aboutToAppear(): void {
     console.log('[Index] === aboutToAppear START ===')
@@ -165,26 +173,98 @@ struct Index {
            this.showAboutPage
   }
 
-  // Aurora Tab 点击处理
+  // Aurora Tab 点击处理 — 弹跳 + 光晕 + 页面淡入
   private onTabClick(index: number): void {
+    if (this.currentIndex === index) return  // 已选中，不重复触发
+
+    const prevIndex = this.currentIndex
+
+    // === 阶段 1：页面内容淡出 ===
     animateTo({
       duration: 100,
       curve: Curve.FastOutSlowIn
     }, () => {
-      this.tabScales[index] = 0.90
+      this.contentOpacity = 0.6
+      this.contentOffsetY = 8
     })
 
+    // === 阶段 1：旧 Tab 图标缩小 + 新 Tab 预压缩 ===
+    const scales1 = [
+      this.tabScales[0], this.tabScales[1], this.tabScales[2],
+      this.tabScales[3], this.tabScales[4]
+    ]
+    const offsets1 = [
+      this.tabOffsetY[0], this.tabOffsetY[1], this.tabOffsetY[2],
+      this.tabOffsetY[3], this.tabOffsetY[4]
+    ]
+    const dots1 = [
+      this.tabDotOpacity[0], this.tabDotOpacity[1], this.tabDotOpacity[2],
+      this.tabDotOpacity[3], this.tabDotOpacity[4]
+    ]
+    scales1[prevIndex] = 0.85
+    scales1[index] = 0.75
+    offsets1[index] = 4
+    dots1[prevIndex] = 0
+
+    animateTo({ duration: 100, curve: Curve.FastOutSlowIn }, () => {
+      this.tabScales = scales1
+      this.tabOffsetY = offsets1
+      this.tabDotOpacity = dots1
+    })
+
+    // === 阶段 2：切换页面 + 图标弹出 ===
     setTimeout(() => {
-      animateTo({
-        duration: 200,
-        curve: Curve.EaseOut
-      }, () => {
-        this.tabScales[index] = 1.0
+      this.currentIndex = index
+      this.tabsController.changeIndex(index)
+
+      const scales2 = [
+        this.tabScales[0], this.tabScales[1], this.tabScales[2],
+        this.tabScales[3], this.tabScales[4]
+      ]
+      const offsets2 = [
+        this.tabOffsetY[0], this.tabOffsetY[1], this.tabOffsetY[2],
+        this.tabOffsetY[3], this.tabOffsetY[4]
+      ]
+      const glows2 = [
+        this.tabGlows[0], this.tabGlows[1], this.tabGlows[2],
+        this.tabGlows[3], this.tabGlows[4]
+      ]
+      const dots2 = [
+        this.tabDotOpacity[0], this.tabDotOpacity[1], this.tabDotOpacity[2],
+        this.tabDotOpacity[3], this.tabDotOpacity[4]
+      ]
+      scales2[index] = 1.12
+      offsets2[index] = -6
+      glows2[index] = 1
+      dots2[index] = 1
+
+      // 图标弹跳弹出 + 光晕出现
+      animateTo({ duration: 280, curve: Curve.FastOutSlowIn }, () => {
+        this.tabScales = scales2
+        this.tabOffsetY = offsets2
+        this.tabGlows = glows2
+        this.tabDotOpacity = dots2
+      })
+
+      // 页面内容淡入
+      animateTo({ duration: 250, curve: Curve.EaseOut }, () => {
+        this.contentOpacity = 1
+        this.contentOffsetY = 0
       })
     }, 100)
 
-    this.currentIndex = index
-    this.tabsController.changeIndex(index)
+    // === 阶段 3：图标回弹到正常大小 ===
+    setTimeout(() => {
+      const scales3 = [1.0, 1.0, 1.0, 1.0, 1.0]
+      const offsets3 = [0, 0, 0, 0, 0]
+      const glows3 = [0, 0, 0, 0, 0]
+
+      animateTo({ duration: 220, curve: Curve.EaseOut }, () => {
+        this.tabScales = scales3
+        this.tabOffsetY = offsets3
+        this.tabGlows = glows3
+      })
+    }, 380)
   }
 
   // ==================== 权限请求 + 扫描流程 ====================
@@ -231,11 +311,12 @@ struct Index {
 
   build() {
     Stack() {
-      // 背景层 — Aurora 极光渐变
+      // 背景层 — Aurora 极光渐变（延伸到状态栏区域）
       Column()
         .width('100%')
         .height('100%')
         .backgroundColor(this.isDarkMode ? '#0A1628' : '#F0F8FF')
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
       // 内容层
       if (this.hasOverlayPage()) {
@@ -262,39 +343,56 @@ struct Index {
   @Builder
   buildMainContent() {
     Stack({ alignContent: Alignment.Bottom }) {
-      // Tabs 内容区域 — 占满全屏
+      // Tabs 内容区域 — 占满全屏，顶部避让状态栏
       Tabs({
         index: this.currentIndex,
         controller: this.tabsController
       }) {
         TabContent() {
-          AuroraDashboard({ isDarkMode: this.isDarkMode })
+          Column() {
+            AuroraDashboard({ isDarkMode: this.isDarkMode })
+          }
+          .padding({ top: 32 }) // 避让状态栏高度
         }
 
         TabContent() {
-          WifiListSection()
+          Column() {
+            WifiListSection()
+          }
+          .padding({ top: 32 })
         }
 
         TabContent() {
-          ChannelSection()
+          Column() {
+            ChannelSection()
+          }
+          .padding({ top: 32 })
         }
 
         TabContent() {
-          SpeedTestSection()
+          Column() {
+            SpeedTestSection()
+          }
+          .padding({ top: 32 })
         }
 
         TabContent() {
-          ToolsSection()
+          Column() {
+            ToolsSection()
+          }
+          .padding({ top: 32 })
         }
       }
       .barHeight(0)  // 隐藏原生 TabBar
       .scrollable(false)
-      .animationDuration(300)
+      .animationDuration(0)  // 关闭原生动画，由自定义动画接管
       .onChange((index: number) => {
         this.currentIndex = index
       })
       .width('100%')
       .height('100%')
+      .opacity(this.contentOpacity)
+      .translate({ x: 0, y: this.contentOffsetY })
 
       // 悬浮 TabBar — 浮在内容上方，底部居中
       this.AuroraTabBarRow()
@@ -353,30 +451,57 @@ struct Index {
     // ==================== Aurora TabBar（悬浮毛玻璃效果）====================
   @Builder
   AuroraTabBarRow() {
-    // 使用双 Stack 实现点击穿透
-    // 内层 Stack：hitTestBehavior(None) 让透明区域穿透到外层
-    Stack({ alignContent: Alignment.Bottom }) {
-      // 背景透明区域（无背景色=透明，点击穿透）
-      Stack() {}
-        .width('100%')
-        .height('100%')
-        .hitTestBehavior(HitTestMode.None)  // 透明区域完全不响应点击，点击穿透到下层
+    // 全屏模式：底部安全区需要手动处理
+    // 外层 Column 占满屏幕，底部预留安全区 + 悬浮间距
+    Column() {
+      // 透明区域（点击穿透到 Tabs）
+      Column() {}
+        .layoutWeight(1)
+        .hitTestBehavior(HitTestMode.None)
 
-      // 顶层 Column：水平居中，承载毛玻璃 TabBar
+      // TabBar 毛玻璃卡片
       Column() {
         Row() {
           ForEach(TAB_ITEMS, (item: TabItem, index: number) => {
             Column() {
-              Image(item.icon)
-                .width(28)
-                .height(28)
-                .fillColor(this.currentIndex === index ? '#007AFF' : '#8E8E93')
+              // 图标 + 光晕容器
+              Stack() {
+                // 选中光晕背景（蓝色圆形）
+                Column()
+                  .width(44)
+                  .height(44)
+                  .borderRadius(22)
+                  .backgroundColor('#007AFF')
+                  .opacity(this.tabGlows[index] * 0.12 + (this.currentIndex === index ? 0.10 : 0))
+                  .blur(8)
 
+                // Tab 图标（带弹跳位移 + 缩放）
+                Image(item.icon)
+                  .width(26)
+                  .height(26)
+                  .fillColor(this.currentIndex === index ? '#007AFF' : '#8E8E93')
+                  .scale({ x: this.tabScales[index], y: this.tabScales[index] })
+                  .translate({ x: 0, y: this.tabOffsetY[index] })
+              }
+              .width(44)
+              .height(44)
+
+              // Tab 标签文字
               Text(item.title)
-                .fontSize(12)
+                .fontSize(11)
                 .fontWeight(this.currentIndex === index ? FontWeight.Medium : FontWeight.Normal)
                 .fontColor(this.currentIndex === index ? '#007AFF' : '#8E8E93')
-                .margin({ top: 4 })
+                .margin({ top: 2 })
+                .scale({ x: this.tabScales[index], y: this.tabScales[index] })
+
+              // 选中指示点
+              Column()
+                .width(4)
+                .height(4)
+                .borderRadius(2)
+                .backgroundColor('#007AFF')
+                .margin({ top: 3 })
+                .opacity(this.tabDotOpacity[index])
             }
             .layoutWeight(1)
             .height('100%')
@@ -387,8 +512,8 @@ struct Index {
             })
           }, (item: TabItem, index: number) => index.toString())
         }
-        .width('85%')   // TabBar 宽度 85%
-        .height(80)     // TabBar 高度 80vp
+        .width('85%')
+        .height(80)
         .padding({ top: 10, bottom: 12 })
         // === 毛玻璃效果 ===
         .backgroundColor('rgba(255, 255, 255, 0.68)')
@@ -416,12 +541,10 @@ struct Index {
           offsetY: 6
         })
       }
-      .alignItems(HorizontalAlign.Center)
-      .width('100%')
-      .height(80)
-      .position({ y: 40 })  // 底部安全区 20vp + 上方间距
     }
     .width('100%')
-    .height(120)  // 内层 Stack 总高度（含底部安全区）
+    .height(140)  // TabBar 80 + 底部安全区 60
+    .padding({ bottom: 60 })  // 底部安全区 60vp（状态栏+悬浮间距）
+    .backgroundColor(Color.Transparent)  // 背景透明，让下层 Tabs 可点击
   }
 }

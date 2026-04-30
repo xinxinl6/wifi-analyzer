@@ -5,7 +5,7 @@ import {
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
-  RADIUS_MD, RADIUS_LG, SAFE_AREA_BOTTOM
+  RADIUS_MD, RADIUS_LG, SAFE_AREA_BOTTOM, SAFE_AREA_TOP
 } from '@wifi-analyzer/design-system'
 import { RouterManager } from '@wifi-analyzer/core'
 import promptAction from '@ohos.promptAction'
@@ -84,7 +84,7 @@ export struct AboutPage {
           Blank()
         }
         .width('100%')
-        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: SAFE_AREA_BOTTOM })
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SAFE_AREA_TOP, bottom: SAFE_AREA_BOTTOM })
         .alignItems(VerticalAlign.Center)
 
         // ===== 内容区域 =====
