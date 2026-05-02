@@ -47,6 +47,15 @@ export struct IpGeoPage {
   // 查询历史
   @State queryHistory: string[] = []
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.myIp = ''
     this.detectMyIp()
@@ -81,14 +90,14 @@ export struct IpGeoPage {
   private validateInput(ip: string): string {
     const trimmed = ip.trim()
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
     if (trimmed.length > 45) { // IPv6 最大长度
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
     // 支持IPv4或域名
     if (!ValidationPatterns.isValidIpv4(trimmed) && !ValidationPatterns.isValidDomain(trimmed)) {
-      return $r('app.string.err_invalid_ip_or_domain').toString()
+      return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
     return ''
   }

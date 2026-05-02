@@ -56,6 +56,15 @@ export struct DnsLookupPage {
   // 引擎
   private engine: DnsLookupEngine = new DnsLookupEngine()
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   // 筛选记录类型
   @State filterType: string = 'all' // 'all' | 'A' | 'AAAA' | 'CNAME' | 'MX' | 'NS' | 'TXT'
 
@@ -119,17 +128,17 @@ export struct DnsLookupPage {
 
     // 检查是否为空
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
 
     // 检查长度限制（域名最大253字符）
     if (trimmed.length > 253) {
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
 
     // 验证域名格式
     if (!ValidationPatterns.isValidDomain(trimmed)) {
-      return $r('app.string.err_invalid_domain').toString()
+      return this.getString($r('app.string.err_invalid_domain'))
     }
 
     return ''

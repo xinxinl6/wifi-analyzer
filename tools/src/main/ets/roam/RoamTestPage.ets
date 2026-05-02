@@ -52,6 +52,15 @@ export struct RoamTestPage {
   // 引擎
   private engine: RoamTestEngine = new RoamTestEngine()
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.loadCurrentInfo()
   }
@@ -124,10 +133,10 @@ export struct RoamTestPage {
   }
 
   getRssiLevel(rssi: number): RssiLevel {
-    if (rssi >= -50) return { label: $r('app.string.rssi_excellent').toString(), color: COLOR_SUCCESS }
-    if (rssi >= -60) return { label: $r('app.string.rssi_good').toString(), color: COLOR_INFO }
-    if (rssi >= -70) return { label: $r('app.string.rssi_average').toString(), color: COLOR_WARNING }
-    return { label: $r('app.string.rssi_poor').toString(), color: COLOR_DANGER }
+    if (rssi >= -50) return { label: this.getString($r('app.string.rssi_excellent')), color: COLOR_SUCCESS }
+    if (rssi >= -60) return { label: this.getString($r('app.string.rssi_good')), color: COLOR_INFO }
+    if (rssi >= -70) return { label: this.getString($r('app.string.rssi_average')), color: COLOR_WARNING }
+    return { label: this.getString($r('app.string.rssi_poor')), color: COLOR_DANGER }
   }
 
   getStabilityColor(score: number): string {
@@ -137,11 +146,11 @@ export struct RoamTestPage {
   }
 
   getStabilityLabel(score: number): string {
-    if (score >= 90) return $r('app.string.stability_very_stable').toString()
-    if (score >= 80) return $r('app.string.stability_stable').toString()
-    if (score >= 60) return $r('app.string.rssi_average').toString()
-    if (score >= 40) return $r('app.string.stability_unstable').toString()
-    return $r('app.string.stability_very_unstable').toString()
+    if (score >= 90) return this.getString($r('app.string.stability_very_stable'))
+    if (score >= 80) return this.getString($r('app.string.stability_stable'))
+    if (score >= 60) return this.getString($r('app.string.rssi_average'))
+    if (score >= 40) return this.getString($r('app.string.stability_unstable'))
+    return this.getString($r('app.string.stability_very_unstable'))
   }
 
   // ==================== 页面入口 ====================

@@ -136,6 +136,15 @@ export struct PingTestPage {
   // 最新单条 ping 结果（实时显示用）
   @State lastPingResult: PingResult | null = null
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.quickAddressList = [
       { name: 'www.baidu.com', url: 'https://www.baidu.com' },
@@ -203,6 +212,16 @@ export struct PingTestPage {
     }
   }
 
+  // 仅填充网关地址到输入框（不立即开始Ping）
+  onFillGateway(): void {
+    if (this.detectedGateway !== '') {
+      this.inputText = this.detectedGateway
+    } else {
+      // 如果未检测到，显示默认网关
+      this.inputText = '192.168.1.1'
+    }
+  }
+
   // ==================== 业务逻辑 ====================
   onRecommendTap(index: number): void {
     // TCP Socket 方案：可以 ping 任意 IP + 常用端口
@@ -214,7 +233,7 @@ export struct PingTestPage {
         } else {
           this.inputText = '192.168.1.1'
         }
-        this.startContinuousPing()
+        // 仅填充地址，不立即开始Ping
         break
       case 1: // DNS
         if (this.detectedDns !== '') {
@@ -625,14 +644,14 @@ export struct PingTestPage {
   private validateInput(addr: string): string {
     const trimmed = addr.trim()
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
     if (trimmed.length > 255) {
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
     // 验证是否为有效的IP或域名
     if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
-      return $r('app.string.err_invalid_ip_or_domain').toString()
+      return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
     // 特殊处理内网IP - Ping测试支持内网，所以这里只做提示不阻止
     return ''
@@ -648,10 +667,10 @@ export struct PingTestPage {
 
   getHostLabel(): string {
     if (this.targetHost.indexOf('.') > 0 && !this.targetHost.startsWith('http')) {
-      if (/^\d+\.\d+\.\d+\.\d+$/.test(this.targetHost)) return $r('app.string.target_ip').toString()
-      return $r('app.string.domain').toString()
+      if (/^\d+\.\d+\.\d+\.\d+$/.test(this.targetHost)) return this.getString($r('app.string.target_ip'))
+      return this.getString($r('app.string.domain'))
     }
-    return $r('app.string.target').toString()
+    return this.getString($r('app.string.target'))
   }
 
   // ==================== 页面入口 ====================
@@ -726,6 +745,7 @@ export struct PingTestPage {
             quickAddressList: this.quickAddressList,
             onInputChange: (value: string) => { this.inputText = value },
             onRecommendTap: (index: number) => this.onRecommendTap(index),
+            onFillGateway: () => this.onFillGateway(),
             onStartPing: () => this.startContinuousPing(),
             hasQuickAddresses: () => this.hasQuickAddresses()
           })

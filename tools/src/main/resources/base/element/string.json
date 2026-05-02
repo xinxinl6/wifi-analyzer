@@ -1,0 +1,432 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WiFi Analyzer Tools"
+    },
+    {
+      "name": "ToolsAbility_desc",
+      "value": "WiFi Analyzer Tools"
+    },
+    {
+      "name": "ToolsAbility_label",
+      "value": "WiFi Tools"
+    },
+    {
+      "name": "gateway",
+      "value": "网关"
+    },
+    {
+      "name": "dns",
+      "value": "DNS"
+    },
+    {
+      "name": "baidu",
+      "value": "百度"
+    },
+    {
+      "name": "route_trace",
+      "value": "路由追踪"
+    },
+    {
+      "name": "trace",
+      "value": "追踪"
+    },
+    {
+      "name": "input_ip_hint",
+      "value": "输入IP地址或域名"
+    },
+    {
+      "name": "recommended_target",
+      "value": "推荐目标"
+    },
+    {
+      "name": "feature_intro",
+      "value": "功能介绍"
+    },
+    {
+      "name": "path_detection",
+      "value": "路径探测"
+    },
+    {
+      "name": "path_desc",
+      "value": "追踪网络数据包经过的路由节点"
+    },
+    {
+      "name": "latency_analysis",
+      "value": "时延分析"
+    },
+    {
+      "name": "latency_analysis_desc",
+      "value": "测量每个节点的响应时间"
+    },
+    {
+      "name": "statistics_report",
+      "value": "统计报告"
+    },
+    {
+      "name": "statistics_report_desc",
+      "value": "汇总路由追踪的统计数据"
+    },
+    {
+      "name": "total_hops",
+      "value": "总跳数"
+    },
+    {
+      "name": "hop_success",
+      "value": "成功"
+    },
+    {
+      "name": "hop_failed",
+      "value": "失败"
+    },
+    {
+      "name": "end_to_end",
+      "value": "端到端"
+    },
+    {
+      "name": "route_path",
+      "value": "路由路径"
+    },
+    {
+      "name": "hops_count",
+      "value": "跳"
+    },
+    {
+      "name": "tracing",
+      "value": "追踪中..."
+    },
+    {
+      "name": "trace_complete",
+      "value": "追踪完成"
+    },
+    {
+      "name": "no_response",
+      "value": "无响应"
+    },
+    {
+      "name": "timeout",
+      "value": "超时"
+    },
+    {
+      "name": "gateway_tag",
+      "value": "网关"
+    },
+    {
+      "name": "target_tag",
+      "value": "目标"
+    },
+    {
+      "name": "tracing_path",
+      "value": "正在探测路由..."
+    },
+    {
+      "name": "trace_duration_hint",
+      "value": "请耐心等待，结果将实时更新"
+    },
+    {
+      "name": "stop_trace",
+      "value": "停止"
+    },
+    {
+      "name": "re_trace",
+      "value": "重新追踪"
+    },
+    {
+      "name": "very_fast",
+      "value": "极快"
+    },
+    {
+      "name": "good_speed",
+      "value": "良好"
+    },
+    {
+      "name": "normal_speed",
+      "value": "一般"
+    },
+    {
+      "name": "slow_speed",
+      "value": "较慢"
+    },
+    {
+      "name": "latency_very_fast",
+      "value": "极快"
+    },
+    {
+      "name": "latency_good",
+      "value": "良好"
+    },
+    {
+      "name": "latency_slow",
+      "value": "较慢"
+    },
+    {
+      "name": "rssi_average",
+      "value": "一般"
+    },
+    {
+      "name": "err_empty_input",
+      "value": "请输入内容"
+    },
+    {
+      "name": "err_input_too_long",
+      "value": "输入内容过长"
+    },
+    {
+      "name": "err_invalid_ip_or_domain",
+      "value": "请输入有效的IP地址或域名"
+    },
+    {
+      "name": "err_invalid_domain",
+      "value": "请输入有效的域名"
+    },
+    {
+      "name": "err_invalid_ip",
+      "value": "请输入有效的IP地址"
+    },
+    {
+      "name": "err_invalid_mac",
+      "value": "请输入有效的MAC地址"
+    },
+    {
+      "name": "err_private_ip",
+      "value": "不支持内网IP地址扫描"
+    },
+    {
+      "name": "port_open",
+      "value": "开放"
+    },
+    {
+      "name": "port_closed",
+      "value": "关闭"
+    },
+    {
+      "name": "port_status_open",
+      "value": "开放"
+    },
+    {
+      "name": "port_status_closed",
+      "value": "关闭"
+    },
+    {
+      "name": "port_status_filtered",
+      "value": "过滤"
+    },
+    {
+      "name": "timeout_status",
+      "value": "超时"
+    },
+    {
+      "name": "unknown",
+      "value": "未知"
+    },
+    {
+      "name": "scan_action",
+      "value": "扫描"
+    },
+    {
+      "name": "scanning_port",
+      "value": "正在扫描端口"
+    },
+    {
+      "name": "scan_complete",
+      "value": "扫描完成"
+    },
+    {
+      "name": "scan_stopped",
+      "value": "扫描已停止"
+    },
+    {
+      "name": "progress_label",
+      "value": "进度"
+    },
+    {
+      "name": "scanned",
+      "value": "已扫描"
+    },
+    {
+      "name": "all_ports",
+      "value": "所有端口"
+    },
+    {
+      "name": "ports_total",
+      "value": "个端口"
+    },
+    {
+      "name": "discovered_open_ports",
+      "value": "发现开放端口"
+    },
+    {
+      "name": "device_count_suffix",
+      "value": "个"
+    },
+    {
+      "name": "port_service",
+      "value": "服务"
+    },
+    {
+      "name": "stop_scan",
+      "value": "停止扫描"
+    },
+    {
+      "name": "re_scan",
+      "value": "重新扫描"
+    },
+    {
+      "name": "port_count_ports",
+      "value": "个端口"
+    },
+    {
+      "name": "port_scan_intro",
+      "value": "端口扫描"
+    },
+    {
+      "name": "port_scan_intro_desc",
+      "value": "探测目标主机的开放端口"
+    },
+    {
+      "name": "scan_preset",
+      "value": "扫描方案"
+    },
+    {
+      "name": "dns_server",
+      "value": "DNS服务器"
+    },
+    {
+      "name": "record_type",
+      "value": "记录类型"
+    },
+    {
+      "name": "ipv4_address",
+      "value": "IPv4地址"
+    },
+    {
+      "name": "ipv6_address",
+      "value": "IPv6地址"
+    },
+    {
+      "name": "alias_record",
+      "value": "别名记录"
+    },
+    {
+      "name": "mail_server",
+      "value": "邮件服务器"
+    },
+    {
+      "name": "name_server",
+      "value": "域名服务器"
+    },
+    {
+      "name": "text_record",
+      "value": "文本记录"
+    },
+    {
+      "name": "input_domain_hint",
+      "value": "输入域名"
+    },
+    {
+      "name": "query_action",
+      "value": "查询"
+    },
+    {
+      "name": "common_domains",
+      "value": "常用域名"
+    },
+    {
+      "name": "dns_query_intro",
+      "value": "DNS查询"
+    },
+    {
+      "name": "dns_query_intro_desc",
+      "value": "查询域名的DNS解析记录"
+    },
+    {
+      "name": "dns_type_a",
+      "value": "A记录"
+    },
+    {
+      "name": "dns_type_aaaa",
+      "value": "AAAA记录"
+    },
+    {
+      "name": "dns_type_cname",
+      "value": "CNAME记录"
+    },
+    {
+      "name": "dns_type_mx",
+      "value": "MX记录"
+    },
+    {
+      "name": "dns_type_ns",
+      "value": "NS记录"
+    },
+    {
+      "name": "all_types",
+      "value": "全部"
+    },
+    {
+      "name": "records_count",
+      "value": "条记录"
+    },
+    {
+      "name": "dns_records",
+      "value": "DNS记录"
+    },
+    {
+      "name": "querying_dns",
+      "value": "正在查询..."
+    },
+    {
+      "name": "query_failed",
+      "value": "查询失败"
+    },
+    {
+      "name": "re_query",
+      "value": "重新查询"
+    },
+    {
+      "name": "target_ip",
+      "value": "IP地址"
+    },
+    {
+      "name": "domain_name",
+      "value": "域名"
+    },
+    {
+      "name": "domain",
+      "value": "域名"
+    },
+    {
+      "name": "target",
+      "value": "目标"
+    },
+    {
+      "name": "rssi_excellent",
+      "value": "信号极好"
+    },
+    {
+      "name": "rssi_good",
+      "value": "信号良好"
+    },
+    {
+      "name": "rssi_poor",
+      "value": "信号较差"
+    },
+    {
+      "name": "stability_very_stable",
+      "value": "非常稳定"
+    },
+    {
+      "name": "stability_stable",
+      "value": "稳定"
+    },
+    {
+      "name": "stability_unstable",
+      "value": "不稳定"
+    },
+    {
+      "name": "stability_very_unstable",
+      "value": "非常不稳定"
+    }
+  ]
+}

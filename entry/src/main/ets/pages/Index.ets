@@ -543,8 +543,8 @@ struct Index {
       }
     }
     .width('100%')
-    .height(140)  // TabBar 80 + 底部安全区 60
-    .padding({ bottom: 60 })  // 底部安全区 60vp（状态栏+悬浮间距）
+    .height(104)  // TabBar 80 + 底部安全区 24
+    .padding({ bottom: 24 })  // 底部安全区 24vp（贴近底部，留出导航条空间）
     .backgroundColor(Color.Transparent)  // 背景透明，让下层 Tabs 可点击
   }
 }

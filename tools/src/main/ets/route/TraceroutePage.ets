@@ -51,6 +51,15 @@ export struct TraceroutePage {
   private engine: TracerouteEngine = new TracerouteEngine()
   private pulseTimerId: number = -1
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.detectGateway()
   }
@@ -90,17 +99,17 @@ export struct TraceroutePage {
 
     // 检查是否为空
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
 
     // 检查长度限制
     if (trimmed.length > 255) {
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
 
     // 验证IP或域名格式
     if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
-      return $r('app.string.err_invalid_ip_or_domain').toString()
+      return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
 
     return ''
@@ -205,10 +214,10 @@ export struct TraceroutePage {
   // 获取时延标签（兼容字符串）
   getLatencyLabel(latency: number): string {
     if (latency < 0) return ''
-    if (latency <= 10) return $r('app.string.latency_very_fast').toString()
-    if (latency <= 50) return $r('app.string.latency_good').toString()
-    if (latency <= 100) return $r('app.string.rssi_average').toString()
-    return $r('app.string.latency_slow').toString()
+    if (latency <= 10) return this.getString($r('app.string.latency_very_fast'))
+    if (latency <= 50) return this.getString($r('app.string.latency_good'))
+    if (latency <= 100) return this.getString($r('app.string.rssi_average'))
+    return this.getString($r('app.string.latency_slow'))
   }
 
   isLastHop(index: number): boolean {
@@ -311,7 +320,7 @@ export struct TraceroutePage {
   @Builder SearchBarSection() {
     Row({ space: SPACE_SM }) {
       Image($r('app.media.ic_route'))
-        .width(18).height(18)
+        .width(20).height(20)
         .fillColor(COLOR_SKY_BLUE)
 
       TextInput({ placeholder: $r('app.string.input_ip_hint'), text: this.inputText })
@@ -358,9 +367,9 @@ export struct TraceroutePage {
         ForEach(this.recommendItems, (item: Resource, index: number) => {
           Row({ space: 5 }) {
             Text(index === 0 ? '🛡' : index === 1 ? '🔍' : '🌐')
-              .fontSize(12)
+              .fontSize(14)
             Text(item)
-              .fontSize(FONT_SIZE_SM)
+              .fontSize(FONT_SIZE_MD)
               .fontColor(COLOR_SKY_BLUE)
               .fontWeight(FONT_WEIGHT_MEDIUM)
           }

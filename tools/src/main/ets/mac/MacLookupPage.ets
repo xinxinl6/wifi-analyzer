@@ -40,6 +40,15 @@ export struct MacLookupPage {
   // 引擎
   private engine: MacLookupEngine = new MacLookupEngine()
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.historyList = this.engine.getHistory()
   }
@@ -50,13 +59,13 @@ export struct MacLookupPage {
   private validateInput(mac: string): string {
     const trimmed = mac.trim()
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
     if (trimmed.length > 17) { // 标准 MAC 地址最大长度
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
     if (!ValidationPatterns.isValidMac(trimmed)) {
-      return $r('app.string.err_invalid_mac').toString()
+      return this.getString($r('app.string.err_invalid_mac'))
     }
     return ''
   }

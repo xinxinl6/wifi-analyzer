@@ -55,6 +55,15 @@ export struct PortScanPage {
   @State pulseOpacity: number = 1.0
   private pulseTimerId: number = -1
 
+  // 获取资源字符串的辅助方法
+  private getString(str: Resource): string {
+    try {
+      return getContext(this).resourceManager.getStringSync(str.id)
+    } catch {
+      return ''
+    }
+  }
+
   aboutToAppear(): void {
     this.loadPresets()
     this.detectGateway()
@@ -129,10 +138,10 @@ export struct PortScanPage {
   // 获取状态文字（兼容字符串）
   getStatusText(status: string): string {
     switch (status) {
-      case 'open': return $r('app.string.port_status_open').toString()
-      case 'closed': return $r('app.string.port_status_closed').toString()
-      case 'filtered': return $r('app.string.port_status_filtered').toString()
-      default: return $r('app.string.unknown').toString()
+      case 'open': return this.getString($r('app.string.port_status_open'))
+      case 'closed': return this.getString($r('app.string.port_status_closed'))
+      case 'filtered': return this.getString($r('app.string.port_status_filtered'))
+      default: return this.getString($r('app.string.unknown'))
     }
   }
 
@@ -144,22 +153,22 @@ export struct PortScanPage {
 
     // 检查是否为空
     if (trimmed.length === 0) {
-      return $r('app.string.err_empty_input').toString()
+      return this.getString($r('app.string.err_empty_input'))
     }
 
     // 检查长度限制（域名/IP最大255字符）
     if (trimmed.length > 255) {
-      return $r('app.string.err_input_too_long').toString()
+      return this.getString($r('app.string.err_input_too_long'))
     }
 
     // 检查是否为内网IP（安全限制）
     if (ValidationPatterns.isValidIpv4(trimmed) && ValidationPatterns.isPrivateIp(trimmed)) {
-      return $r('app.string.err_private_ip').toString()
+      return this.getString($r('app.string.err_private_ip'))
     }
 
     // 验证IP或域名格式
     if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
-      return $r('app.string.err_invalid_ip_or_domain').toString()
+      return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
 
     return ''

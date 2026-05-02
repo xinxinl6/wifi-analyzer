@@ -1,3 +1,9 @@
+# Windows 保留文件名
+nul
+con
+prn
+aux
+
 # HarmonyOS / DevEco Studio
 .idea/
 .gradle/

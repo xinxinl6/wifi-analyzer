@@ -22,6 +22,8 @@ export interface IdleViewProps {
   quickAddressList: QuickAddressItem[]
   onInputChange: (value: string) => void
   onRecommendTap: (index: number) => void
+  // 新增：仅填充网关地址（不立即开始Ping）
+  onFillGateway: () => void
   onStartPing: () => void
   hasQuickAddresses: () => boolean
 }
@@ -37,6 +39,7 @@ export struct IdleView {
 
   onInputChange: (value: string) => void = () => {}
   onRecommendTap: (index: number) => void = () => {}
+  onFillGateway: () => void = () => {}
   onStartPing: () => void = () => {}
   hasQuickAddresses: () => boolean = () => false
 
@@ -78,7 +81,7 @@ export struct IdleView {
   @Builder SearchBarSection() {
     Row({ space: SPACE_SM }) {
       Image($r('app.media.ic_ping'))
-        .width(18).height(18)
+        .width(20).height(20)
         .fillColor(COLOR_SKY_BLUE)
 
       TextInput({ placeholder: $r('app.string.input_ip_hint'), text: this.inputText })
@@ -134,7 +137,7 @@ export struct IdleView {
             Circle().width(7).height(7).fill(COLOR_WARNING)
           }
           Text($r('app.string.gateway'))
-            .fontSize(FONT_SIZE_SM)
+            .fontSize(FONT_SIZE_MD)
             .fontColor(
               this.gatewayStatus === 'loading' ? COLOR_TEXT_TERTIARY :
                 (this.gatewayStatus === 'ready' ? COLOR_SKY_BLUE : COLOR_WARNING)
@@ -150,14 +153,14 @@ export struct IdleView {
         .borderColor(
           this.gatewayStatus === 'ready' ? COLOR_GLASS_SKY_TAG_BORDER : 'rgba(148,163,184,0.2)'
         )
-        .onClick(() => this.onRecommendTap(0))
+        .onClick(() => this.onFillGateway())
 
         // DNS 标签
         Row({ space: 5 }) {
           Circle().width(7).height(7)
             .fill(this.detectedDns !== '' ? COLOR_SUCCESS : COLOR_TEXT_TERTIARY)
           Text($r('app.string.dns'))
-            .fontSize(FONT_SIZE_SM)
+            .fontSize(FONT_SIZE_MD)
             .fontColor(COLOR_SKY_BLUE)
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }
@@ -170,9 +173,9 @@ export struct IdleView {
 
         // 百度标签
         Row({ space: 5 }) {
-          Text('🌐').fontSize(12)
+          Text('🌐').fontSize(14)
           Text($r('app.string.baidu'))
-            .fontSize(FONT_SIZE_SM)
+            .fontSize(FONT_SIZE_MD)
             .fontColor(COLOR_SKY_BLUE)
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }

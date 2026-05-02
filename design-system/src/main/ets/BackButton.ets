@@ -10,15 +10,17 @@ import {
   COLOR_SKY_BLUE,
   COLOR_GLASS_SKY_TAG_BG,
   COLOR_GLASS_BORDER,
-  FONT_SIZE_MD,
-  FONT_SIZE_LG,
-  FONT_WEIGHT_MEDIUM,
+} from './Color'
+import {
   SAFE_AREA_TOP,
   SPACE_LG,
-  SPACE_MD,
   RADIUS_3XL,
   BUTTON_HEIGHT_SM,
-} from '@wifi-analyzer/design-system'
+} from './Size'
+import {
+  FONT_SIZE_MD,
+  FONT_WEIGHT_MEDIUM,
+} from './Typography'
 
 // 底部胶囊返回按钮（用于 ActionButtons）
 @Component
