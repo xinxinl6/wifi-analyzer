@@ -30,8 +30,9 @@ import {
   AnimationTapScale
 } from '@wifi-analyzer/design-system'
 import { EventBus } from '../utils/EventBus'
-import { launchXiaoyi, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
-import { common } from '@kit.AbilityKit'
+import { getAIAnalysisUrl, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
+import web_webview from '@ohos.web.webview'
+import { promptAction } from '@kit.ArkUI'
 
 // ============================================
 // AI 事件定义
@@ -164,6 +165,14 @@ export struct AuroraAIFabButton {
   @State private glowOpacity: number = 0.4
   @State private fabMessage: string = ''
 
+  // AI 分析面板状态
+  @State private showAIAnalysis: boolean = false
+  @State private aiWebViewUrl: string = ''
+  @State private aiLoading: boolean = false
+
+  // AI 分析面板控制器
+  private aiAnalysisController: web_webview.WebviewController = new web_webview.WebviewController()
+
   aboutToAppear(): void {
     // 脉冲光晕动画
     this.getUIContext().animateTo({
@@ -176,93 +185,190 @@ export struct AuroraAIFabButton {
     })
   }
 
-  // 调用小艺助手
-  private async launchXiaoyi(): Promise<void> {
-    try {
-      // 构建网络分析查询
-      const networkInfo: WifiNetworkInfo = {
-        ssid: this.wifiSsid,
-        signal: this.wifiSignal,
-        channel: this.wifiChannel,
-        frequency: 0
+  // 打开 AI 分析面板（使用 WebView 避免系统弹窗）
+  private openAIAnalysis(): void {
+    // 构建网络分析查询
+    const networkInfo: WifiNetworkInfo = {
+      ssid: this.wifiSsid,
+      signal: this.wifiSignal,
+      channel: this.wifiChannel,
+      frequency: 0
+    }
+    const query = buildNetworkQuery(networkInfo)
+
+    // 直接获取搜索URL，不尝试启动小艺（避免系统弹窗）
+    const url = getAIAnalysisUrl(query)
+    this.aiWebViewUrl = url
+    this.showAIAnalysis = true
+    this.aiLoading = true
+
+    // 显示加载提示
+    promptAction.showToast({
+      message: '正在为您分析网络...',
+      duration: 2000
+    })
+
+    // 通知父组件
+    EventBus.emit(FAB_CLICK_EVENT_ID)
+  }
+
+  // 关闭 AI 分析面板
+  private closeAIAnalysis(): void {
+    this.showAIAnalysis = false
+    this.aiWebViewUrl = ''
+  }
+
+  @Builder
+  AIAnalysisWebViewPanel() {
+    if (this.showAIAnalysis) {
+      Stack({ alignContent: Alignment.Bottom }) {
+        // 遮罩层
+        Column()
+          .width('100%')
+          .height('100%')
+          .backgroundColor('rgba(0,0,0,0.6)')
+          .onClick(() => {
+            this.closeAIAnalysis()
+          })
+
+        // WebView 面板内容
+        Column({ space: 0 }) {
+          // 顶部拖拽指示条
+          Column()
+            .width(40)
+            .height(4)
+            .backgroundColor('rgba(148,163,184,0.4)')
+            .borderRadius(2)
+            .margin({ top: 12, bottom: 8 })
+
+          // 标题栏
+          Row() {
+            Text('网络优化分析')
+              .fontSize(18)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+
+            Blank()
+
+            // 关闭按钮
+            Image($r('app.media.ic_close'))
+              .width(24)
+              .height(24)
+              .fillColor(COLOR_TEXT_GLASS_TERTIARY)
+              .onClick(() => {
+                this.closeAIAnalysis()
+              })
+          }
+          .width('100%')
+          .padding({ left: 20, right: 20, bottom: 12 })
+
+          // 加载指示器
+          if (this.aiLoading) {
+            Row() {
+              LoadingProgress()
+                .width(24)
+                .height(24)
+                .color(COLOR_AURORA_PRIMARY)
+              Text('正在加载...')
+                .fontSize(14)
+                .fontColor(COLOR_TEXT_GLASS_SECONDARY)
+                .margin({ left: 8 })
+            }
+            .padding(16)
+            .width('100%')
+          }
+
+          // WebView 内容
+          Web({ src: this.aiWebViewUrl, controller: this.aiAnalysisController })
+            .width('100%')
+            .layoutWeight(1)
+            .onPageBegin(() => {
+              this.aiLoading = true
+            })
+            .onPageEnd(() => {
+              this.aiLoading = false
+            })
+            .onErrorReceive((event) => {
+              console.error('WebView error: ' + (event?.error?.getErrorInfo() || 'Unknown error'))
+              this.aiLoading = false
+            })
+        }
+        .width('100%')
+        .height('85%')
+        .backgroundColor('rgba(20,38,72,0.98)')
+        .borderRadius({ topLeft: 24, topRight: 24 })
       }
-      const query = buildNetworkQuery(networkInfo)
-
-      // 获取 UIAbilityContext
-      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
-
-      // 调用小艺
-      const result = await launchXiaoyi(context, query)
-      this.fabMessage = result.message
-
-      // 如果启动成功，通过事件总线通知父组件
-      if (result.success) {
-        EventBus.emit(FAB_CLICK_EVENT_ID)
-      }
-    } catch (error) {
-      this.fabMessage = $r('app.string.ai_launch_failed').toString()
+      .zIndex(999)
     }
   }
 
   build() {
-    if (this.fabVisible) {
-      Stack({ alignContent: Alignment.Center }) {
-        // 外层呼吸光晕
-        Circle()
-          .width(72)
-          .height(72)
-          .fill(`rgba(74,144,217,${this.glowOpacity * 0.3})`)
-          .scale({ x: this.glowScale, y: this.glowScale })
+    Stack() {
+      // FAB 按钮
+      if (this.fabVisible) {
+        Stack({ alignContent: Alignment.BottomEnd }) {
+          // 外层呼吸光晕
+          Circle()
+            .width(72)
+            .height(72)
+            .fill(`rgba(74,144,217,${this.glowOpacity * 0.3})`)
+            .scale({ x: this.glowScale, y: this.glowScale })
 
-        // 内层光晕
-        Circle()
-          .width(64)
-          .height(64)
-          .fill(`rgba(74,144,217,0.15)`)
+          // 内层光晕
+          Circle()
+            .width(64)
+            .height(64)
+            .fill(`rgba(74,144,217,0.15)`)
 
-        // 主按钮
-        Column()
-          .width(56)
-          .height(56)
-          .borderRadius(28)
-          .backgroundColor(COLOR_AURORA_PRIMARY)
-          .shadow({
-            radius: 16,
-            color: 'rgba(74,144,217,0.5)',
-            offsetX: 0,
-            offsetY: 4
-          })
-          .scale({ x: this.fabScale, y: this.fabScale })
-          .onTouch((event: TouchEvent) => {
-            if (event.type === TouchType.Down) {
-              this.getUIContext().animateTo(AnimationTapScale, () => {
-                this.fabScale = 0.88
-              })
-            } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-              this.getUIContext().animateTo({
-                duration: DURATION_NORMAL,
-                curve: Curve.EaseOut
-              }, () => {
-                this.fabScale = 1.0
-              })
+          // 主按钮
+          Column()
+            .width(56)
+            .height(56)
+            .borderRadius(28)
+            .backgroundColor(COLOR_AURORA_PRIMARY)
+            .shadow({
+              radius: 16,
+              color: 'rgba(74,144,217,0.5)',
+              offsetX: 0,
+              offsetY: 4
+            })
+            .scale({ x: this.fabScale, y: this.fabScale })
+            .onTouch((event: TouchEvent) => {
+              if (event.type === TouchType.Down) {
+                this.getUIContext().animateTo(AnimationTapScale, () => {
+                  this.fabScale = 0.88
+                })
+              } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                this.getUIContext().animateTo({
+                  duration: DURATION_NORMAL,
+                  curve: Curve.EaseOut
+                }, () => {
+                  this.fabScale = 1.0
+                })
+              }
+            })
+            .onClick(() => {
+              // 打开 AI 分析面板（使用 WebView）
+              this.openAIAnalysis()
+            }) {
+            // AI 图标
+            Row() {
+              Image($r('app.media.ic_ai_assistant'))
+                .width(26)
+                .height(26)
+                .fillColor('#FFFFFF')
             }
-          })
-          .onClick(() => {
-            // 调用小艺助手
-            this.launchXiaoyi()
-          }) {
-          // AI 图标
-          Row() {
-            Image($r('app.media.ic_ai_assistant'))
-              .width(26)
-              .height(26)
-              .fillColor('#FFFFFF')
           }
         }
+        .width('100%')
+        .height('100%')
       }
-      .width(72)
-      .height(72)
+
+      // AI 分析 WebView 面板（全屏遮罩）- 充满整个父容器
+      this.AIAnalysisWebViewPanel()
     }
+    .width('100%')
+    .height('100%')
   }
 }
 

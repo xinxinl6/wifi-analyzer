@@ -155,27 +155,77 @@ export class PermissionManager {
   static async openAppSettings(context: common.UIAbilityContext): Promise<boolean> {
     try {
       console.log('[PermissionManager] Opening app settings...')
-      // 通过 want 打开应用详情页面
-      const want: Want = {
-        action: 'action.settings.app.info'
+
+      // 获取当前应用的 bundleName
+      const bundleName: string = context.abilityInfo.bundleName
+      console.log('[PermissionManager] Current app bundleName:', bundleName)
+
+      // 方法1：跳转到应用权限设置页面（HarmonyOS 标准方式）
+      // bundleName 和 abilityName 是固定值
+      // uri: 'application_info_entry' 打开应用详情页
+      // parameters.pushParams 指定要打开哪个应用的设置
+      let want: Want = {
+        bundleName: 'com.huawei.hmos.settings',
+        abilityName: 'com.huawei.hmos.settings.MainAbility',
+        uri: 'application_info_entry',
+        parameters: {
+          pushParams: bundleName  // 指定跳转到当前应用的设置页面
+        }
       }
-      await context.startAbility(want)
-      console.log('[PermissionManager] App settings opened successfully')
-      return true
-    } catch (e) {
-      console.error('[PermissionManager] Failed to open app settings:', JSON.stringify(e))
-      // 尝试备用方案：打开系统设置
+
       try {
-        const want: Want = {
+        await context.startAbility(want)
+        console.log('[PermissionManager] Opened app permission settings successfully')
+        return true
+      } catch (e) {
+        console.warn('[PermissionManager] HarmonyOS settings failed:', JSON.stringify(e))
+      }
+
+      // 方法2：尝试 OpenHarmony 通用设置应用
+      try {
+        want = {
+          bundleName: 'com.ohos.settings',
+          abilityName: 'com.ohos.settings.MainAbility',
+          uri: 'application_info_entry',
+          parameters: {
+            pushParams: bundleName
+          }
+        }
+        await context.startAbility(want)
+        console.log('[PermissionManager] Opened via OpenHarmony settings')
+        return true
+      } catch (e) {
+        console.warn('[PermissionManager] OpenHarmony settings failed:', JSON.stringify(e))
+      }
+
+      // 方法3：打开系统设置主页（让用户手动找到应用）
+      try {
+        want = {
+          bundleName: 'com.huawei.hmos.settings',
+          abilityName: 'com.huawei.hmos.settings.MainAbility'
+        }
+        await context.startAbility(want)
+        console.log('[PermissionManager] Opened settings main page')
+        return true
+      } catch (e) {
+        console.warn('[PermissionManager] Settings main page failed:', JSON.stringify(e))
+      }
+
+      // 方法4：尝试隐式 Want
+      try {
+        want = {
           action: 'action.settings'
         }
         await context.startAbility(want)
-        console.log('[PermissionManager] Opened system settings as fallback')
         return true
-      } catch (fallbackError) {
-        console.error('[PermissionManager] Fallback to system settings also failed:', JSON.stringify(fallbackError))
+      } catch (e) {
+        console.error('[PermissionManager] All methods failed:', JSON.stringify(e))
         return false
       }
+
+    } catch (e) {
+      console.error('[PermissionManager] Fatal error:', JSON.stringify(e))
+      return false
     }
   }
 

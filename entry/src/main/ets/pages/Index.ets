@@ -19,7 +19,6 @@ import {
 
 // Aurora V2 页面组件
 import { AuroraDashboard } from '../components/AuroraDashboard'
-import { AuroraAIPanel, AuroraAIFabButton, FAB_CLICK_EVENT_ID } from '../components/AuroraAIModule'
 
 // 原有页面组件（可逐步迁移）
 import { WifiListSection } from '../components/WifiListSection'
@@ -80,9 +79,6 @@ struct Index {
   // 权限拒绝弹窗控制
   @State showPermissionDeniedDialog: boolean = false
 
-  // Aurora V2 — AI 助手状态
-  @State showAIPanel: boolean = false
-
   // 子页面显示状态
   @StorageLink('showPingPage') showPingPage: boolean = false
   @StorageLink('showTraceroutePage') showTraceroutePage: boolean = false
@@ -120,11 +116,6 @@ struct Index {
 
   aboutToAppear(): void {
     console.log('[Index] === aboutToAppear START ===')
-
-    // 订阅 AI FAB 点击事件
-    EventBus.on(FAB_CLICK_EVENT_ID, () => {
-      this.showAIPanel = !this.showAIPanel
-    })
 
     // 初始化 AppStorage 路由模式
     RouterManager.initAppStorageMode()
@@ -349,17 +340,6 @@ struct Index {
         this.buildMainContent()
       }
 
-      // AI 助手悬浮按钮
-      if (!this.hasOverlayPage()) {
-        AuroraAIFabButton({
-          fabVisible: true,
-          wifiSsid: this.wifiState.connectedSsid,
-          wifiSignal: this.wifiState.connectedSignal,
-          wifiChannel: this.wifiState.connectedChannel
-        })
-        .position({ x: '85%', y: '70%' })
-      }
-
       // 权限拒绝弹窗
       if (this.showPermissionDeniedDialog) {
         this.buildPermissionDeniedDialog()
@@ -382,7 +362,7 @@ struct Index {
           .margin({ bottom: 12 })
 
         // 提示文字
-        Text('WiFi分析仪需要位置权限才能扫描周围的WiFi网络。\n请在设置中开启位置权限。')
+        Text('WiFi分析仪需要位置权限才能扫描周围的WiFi网络。\n\n请到「设置 → 应用 → WiFi分析仪 → 权限」中开启「位置信息」权限。')
           .fontSize(14)
           .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(30,41,59,0.7)')
           .textAlign(TextAlign.Center)
@@ -404,7 +384,7 @@ struct Index {
             })
 
           // 去设置按钮
-          Button('去设置')
+          Button('打开设置')
             .fontSize(15)
             .fontWeight(FontWeight.Medium)
             .fontColor('#FFFFFF')

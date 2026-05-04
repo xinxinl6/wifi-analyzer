@@ -1,6 +1,7 @@
 // 网络诊断工具 - 获取真实的网络状态数据
 
 import { connection, http } from '@kit.NetworkKit'
+import { wifiManager } from '@kit.ConnectivityKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import {
   DiagnosticsConfig,
@@ -126,65 +127,91 @@ export class NetworkDiagnostics {
     }
   }
 
-  // 获取本地IP地址 - 使用 getAddressesByName 或默认网络获取本地IP
+  // 将数字IP地址转换为点分十进制格式
+  private convertIpNumberToString(ipNumber: number): string {
+    if (!ipNumber || ipNumber === 0) {
+      return ''
+    }
+    return ((ipNumber >>> 24) & 0xFF) + '.' +
+           ((ipNumber >> 16) & 0xFF) + '.' +
+           ((ipNumber >> 8) & 0xFF) + '.' +
+           (ipNumber & 0xFF)
+  }
+
+  // 获取本地IP地址 - 使用 wifiManager.getIpInfo() 获取WiFi连接的IP地址
   private fetchLocalIp(): void {
     try {
       this.pendingTasks++
       let foundLocalIp: string = ''
 
-      // 方案一：通过默认网络获取连接属性来获取本地IP
-      const netHandle: connection.NetHandle | null = connection.getDefaultNetSync()
-      if (netHandle) {
-        // 尝试获取网络地址信息
-        connection.getAddressesByName('localhost', (err: BusinessError, addresses: connection.NetAddress[]) => {
+      // 方案一：使用 wifiManager.getIpInfo() 获取WiFi连接的IP信息（推荐方式）
+      try {
+        const ipInfo = wifiManager.getIpInfo()
+        if (ipInfo && ipInfo.ipAddress && ipInfo.ipAddress !== 0) {
+          const ipStr = this.convertIpNumberToString(ipInfo.ipAddress)
+          if (ipStr && ipStr !== '0.0.0.0') {
+            foundLocalIp = ipStr
+            LoggerConfig.debug('NetworkDiagnostics', 'Found local IP via wifiManager:', ipStr)
+          }
+        }
+      } catch (wifiError) {
+        LoggerConfig.warn('NetworkDiagnostics', 'wifiManager.getIpInfo() failed:', String(wifiError))
+      }
+
+      // 方案二：如果 wifiManager 没有获取到，尝试通过默认网络获取
+      if (foundLocalIp === '') {
+        const netHandle: connection.NetHandle | null = connection.getDefaultNetSync()
+        if (netHandle && netHandle.netId !== 0) {
           try {
-            if (!err && addresses && addresses.length > 0) {
-              for (let i = 0; i < addresses.length; i++) {
-                const addr = addresses[i]
-                if (addr && addr.address) {
-                  const ip: string = addr.address
-                  // 过滤回环地址和IPv6本地链路
-                  if (ip !== '127.0.0.1' && !ip.startsWith('::') && !ip.startsWith('fe80')) {
-                    foundLocalIp = ip
-                    LoggerConfig.debug('NetworkDiagnostics', 'Found local IP:', ip)
-                    break
+            connection.getAddressesByName('localhost', (err: BusinessError, addresses: connection.NetAddress[]) => {
+              try {
+                if (!err && addresses && addresses.length > 0) {
+                  for (let i = 0; i < addresses.length; i++) {
+                    const addr = addresses[i]
+                    if (addr && addr.address) {
+                      const ip: string = addr.address
+                      // 过滤回环地址和IPv6本地链路
+                      if (ip !== '127.0.0.1' && !ip.startsWith('::') && !ip.startsWith('fe80') && !ip.startsWith('::1')) {
+                        foundLocalIp = ip
+                        LoggerConfig.debug('NetworkDiagnostics', 'Found local IP via getAddressesByName:', ip)
+                        break
+                      }
+                    }
                   }
                 }
+              } finally {
+                // 更新结果
+                if (foundLocalIp !== '') {
+                  this.currentState.localIp = foundLocalIp
+                } else {
+                  this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
+                }
+                this.checkAllTasksCompleted()
               }
-            }
-
-            if (foundLocalIp !== '') {
-              this.currentState.localIp = foundLocalIp
-            } else if (netHandle.netId) {
-              // 使用 netId 尝试构造局域网 IP（备选方案）
-              this.currentState.localIp = '已连接'
-              LoggerConfig.debug('NetworkDiagnostics', 'Connected via netId:', netHandle.netId)
-            } else {
-              this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-            }
-          } finally {
-            this.checkAllTasksCompleted()
+            })
+            return  // 异步方式，early return
+          } catch (connError) {
+            LoggerConfig.warn('NetworkDiagnostics', 'getAddressesByName failed:', String(connError))
           }
-        })
+        }
+      }
+
+      // 同步方式更新结果
+      if (foundLocalIp !== '') {
+        this.currentState.localIp = foundLocalIp
       } else {
-        LoggerConfig.warn('NetworkDiagnostics', 'getDefaultNetSync returned null')
         this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-        this.pendingTasks++
-        this.checkAllTasksCompleted()
       }
+      this.checkAllTasksCompleted()
+
     } catch (error) {
-      if (error instanceof Error) {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp error:', error.message)
-      } else {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp unknown error')
-      }
+      LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp error:', String(error))
       this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      this.pendingTasks++
       this.checkAllTasksCompleted()
     }
   }
 
-  // 获取网关地址 - 使用 getConnectionProperties 回调模式（动态提取真实网关）
+  // 获取网关地址 - 使用 getConnectionProperties 回调模式（动态提取真实网关和DNS）
   private fetchGateway(): void {
     try {
       this.pendingTasks++
@@ -196,9 +223,13 @@ export class NetworkDiagnostics {
             if (err) {
               LoggerConfig.warn('NetworkDiagnostics', 'getConnectionProperties error:', err.message)
               this.currentState.gateway = DiagnosticsConfig.DEFAULT_GATEWAY
+              this.currentState.dns = DnsConfig.ALI_DNS
             } else {
               // 从 routes 数组中提取真实网关（使用原生 RouteInfo 类型）
               let gwIp: string = ''
+              let dnsServers: string[] = []
+
+              // 获取真实网关
               if (data.routes && data.routes.length > 0) {
                 for (let r = 0; r < data.routes.length; r++) {
                   const route = data.routes[r]
@@ -212,36 +243,48 @@ export class NetworkDiagnostics {
                 }
               }
 
-              // 备选：使用 DNS 服务器地址
-              if (gwIp === '' && data.dnses && data.dnses.length > 0) {
-                gwIp = data.dnses[0].address || ''
-                LoggerConfig.debug('NetworkDiagnostics', 'Using first DNS as fallback:', gwIp)
+              // 获取真实DNS服务器列表
+              if (data.dnses && data.dnses.length > 0) {
+                for (let d = 0; d < data.dnses.length; d++) {
+                  const dns = data.dnses[d]
+                  if (dns && dns.address) {
+                    const dnsIp = dns.address
+                    // 过滤IPv6和本地地址
+                    if (!dnsIp.startsWith('::') && dnsIp !== '0.0.0.0' && dnsIp !== '127.0.0.1') {
+                      dnsServers.push(dnsIp)
+                      LoggerConfig.debug('NetworkDiagnostics', 'Found DNS server:', dnsIp)
+                    }
+                  }
+                }
               }
 
+              // 更新网关
               if (gwIp === '') {
                 LoggerConfig.warn('NetworkDiagnostics', 'Could not get real gateway')
                 gwIp = DiagnosticsConfig.DEFAULT_GATEWAY
               }
-
               this.currentState.gateway = gwIp
-              this.currentState.dns = DnsConfig.ALI_DNS
+
+              // 更新DNS（使用第一个真实DNS，没有则使用配置的DNS）
+              if (dnsServers.length > 0) {
+                this.currentState.dns = dnsServers[0]
+              } else {
+                this.currentState.dns = DnsConfig.ALI_DNS
+                LoggerConfig.debug('NetworkDiagnostics', 'Using configured DNS as fallback')
+              }
             }
             this.checkAllTasksCompleted()
           }
         )
       } else {
         this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-        this.pendingTasks++
+        this.currentState.dns = DnsConfig.ALI_DNS
         this.checkAllTasksCompleted()
       }
     } catch (error) {
-      if (error instanceof Error) {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchGateway error:', error.message)
-      } else {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchGateway unknown error')
-      }
+      LoggerConfig.error('NetworkDiagnostics', 'fetchGateway error:', String(error))
       this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      this.pendingTasks++
+      this.currentState.dns = DnsConfig.ALI_DNS
       this.checkAllTasksCompleted()
     }
   }
@@ -273,7 +316,7 @@ export class NetworkDiagnostics {
                   this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
                 }
               } catch (parseError) {
-                LoggerConfig.warn('NetworkDiagnostics', 'parse publicIp error:', parseError)
+                LoggerConfig.warn('NetworkDiagnostics', 'parse publicIp error:', String(parseError))
                 this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
               }
             } else {
@@ -292,11 +335,7 @@ export class NetworkDiagnostics {
       )
     } catch (error) {
       httpRequest?.destroy()
-      if (error instanceof Error) {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', error.message)
-      } else {
-        LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp unknown error')
-      }
+      LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', String(error))
       this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
       this.pendingTasks++
       this.checkAllTasksCompleted()

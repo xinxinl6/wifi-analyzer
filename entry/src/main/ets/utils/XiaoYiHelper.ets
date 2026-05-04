@@ -1,14 +1,11 @@
 /**
  * 小艺助手调用工具类
  * 提供启动华为小艺智能助手的功能
+ * 支持降级为应用内嵌 WebView 显示 AI 分析结果
  */
 import { Want } from '@kit.AbilityKit'
 import { common } from '@kit.AbilityKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
-
-// 日志标签
-const TAG = 'XiaoYiHelper'
-const DOMAIN = 0xFF00
 
 // 小艺助手包名
 const XIAOYI_BUNDLE_NAME = 'com.huawei.hiai'
@@ -30,26 +27,32 @@ export interface WifiNetworkInfo {
 export class LaunchResult {
   success: boolean = false
   message: string = ''
+  fallbackUrl: string = ''
 
-  constructor(success: boolean, message: string) {
+  constructor(success: boolean, message: string, fallbackUrl: string = '') {
     this.success = success
     this.message = message
+    this.fallbackUrl = fallbackUrl
   }
 }
+
+// 日志标签
+const TAG = 'XiaoYiHelper'
+const DOMAIN = 0xFF00
 
 /**
  * 日志辅助函数
  */
-function logInfo(message: string, params?: string): void {
-  hilog.info(DOMAIN, TAG, message, params || '')
+function logInfo(msg: string, ...params: string[]): void {
+  hilog.info(DOMAIN, TAG, '%{public}s', msg + ' ' + params.join(' '))
 }
 
-function logWarn(message: string, params?: string): void {
-  hilog.warn(DOMAIN, TAG, message, params || '')
+function logWarn(msg: string): void {
+  hilog.warn(DOMAIN, TAG, '%{public}s', msg)
 }
 
-function logError(message: string, params?: string): void {
-  hilog.error(DOMAIN, TAG, message, params || '')
+function logError(msg: string): void {
+  hilog.error(DOMAIN, TAG, '%{public}s', msg)
 }
 
 /**
@@ -60,26 +63,38 @@ export function isXiaoyiSupported(): boolean {
 }
 
 /**
- * 启动小艺助手
+ * 启动小艺助手（支持降级方案）
+ * 如果小艺不可用，返回降级URL供应用内WebView使用
  */
 export async function launchXiaoyi(context: common.UIAbilityContext, query: string): Promise<LaunchResult> {
-  logInfo('准备启动小艺助手，查询内容: %{public}s', query)
+  logInfo('准备启动小艺助手，查询内容: ' + query)
 
-  // 尝试方案1
+  // 方案1: 直接启动小艺主界面
   const result1 = await tryLaunchXiaoyiDirect(context, query)
   if (result1.success) {
     return result1
   }
 
-  // 尝试方案2
+  // 方案2: 通过Want启动
   const result2 = await tryLaunchByWant(context, query)
   if (result2.success) {
     return result2
   }
 
-  // 尝试方案3
-  const result3 = await tryLaunchBySearch(context, query)
+  // 方案3: 降级方案 - 返回搜索URL供内嵌WebView使用
+  const result3 = getSearchFallbackUrl(query)
   return result3
+}
+
+/**
+ * 获取AI分析URL（不尝试启动小艺，避免系统弹窗）
+ * 直接返回搜索URL供应用内WebView使用
+ */
+export function getAIAnalysisUrl(query: string): string {
+  const searchQuery = encodeURIComponent(query + ' WiFi网络优化建议')
+  const bingUrl = 'https://www.bing.com/search?q=' + searchQuery
+  logInfo('获取AI分析URL: ' + bingUrl)
+  return bingUrl
 }
 
 /**
@@ -92,15 +107,14 @@ async function tryLaunchXiaoyiDirect(context: common.UIAbilityContext, query: st
       bundleName: XIAOYI_BUNDLE_NAME,
       abilityName: XIAOYI_ABILITY_NAME,
       uri: 'hiapp://aiassistant?query=' + encodedQuery
-    }
+    } as Want
 
     await context.startAbility(want)
 
     logInfo('方案1成功: 直接启动小艺')
     return new LaunchResult(true, '已启动小艺助手')
   } catch (err) {
-    const errMsg = JSON.stringify(err as Error)
-    logWarn('方案1失败: %{public}s', errMsg)
+    logWarn('方案1失败')
     return new LaunchResult(false, '方案1失败')
   }
 }
@@ -113,41 +127,29 @@ async function tryLaunchByWant(context: common.UIAbilityContext, query: string):
     const encodedQuery = encodeURIComponent(query)
     const want: Want = {
       action: 'aiassist.intent.action.ASSIST',
-      entities: ['entity.system.ai.assistant'],
       uri: 'hiapp://aiassistant?query=' + encodedQuery
-    }
+    } as Want
 
     await context.startAbility(want)
 
     logInfo('方案2成功: 通过Want启动')
     return new LaunchResult(true, '已通过系统启动小艺')
   } catch (err) {
-    const errMsg = JSON.stringify(err as Error)
-    logWarn('方案2失败: %{public}s', errMsg)
+    logWarn('方案2失败')
     return new LaunchResult(false, '方案2失败')
   }
 }
 
 /**
- * 方案3: 通过浏览器搜索
+ * 方案3（降级方案）: 获取搜索URL供内嵌WebView使用
+ * 不再尝试启动外部应用，避免系统错误弹窗
  */
-async function tryLaunchBySearch(context: common.UIAbilityContext, query: string): Promise<LaunchResult> {
-  try {
-    const searchQuery = encodeURIComponent(query + ' WiFi网络优化')
-    const want: Want = {
-      action: 'ohos.want.action.VIEW',
-      uri: 'https://www.baidu.com/s?wd=' + searchQuery
-    }
+function getSearchFallbackUrl(query: string): LaunchResult {
+  const searchQuery = encodeURIComponent(query + ' WiFi网络优化建议')
+  const bingUrl = 'https://www.bing.com/search?q=' + searchQuery
 
-    await context.startAbility(want)
-
-    logInfo('方案3成功: 通过浏览器搜索')
-    return new LaunchResult(true, '已在浏览器中搜索网络优化建议')
-  } catch (err) {
-    const errMsg = JSON.stringify(err as Error)
-    logError('方案3失败: %{public}s', errMsg)
-    return new LaunchResult(false, '所有启动方式均失败')
-  }
+  logInfo('降级方案: 返回内嵌WebView URL')
+  return new LaunchResult(true, '正在为您分析网络...', bingUrl)
 }
 
 /**
@@ -183,6 +185,6 @@ export function buildNetworkQuery(info: WifiNetworkInfo): string {
     '当前在' + band + '频段' + channel + '信道。' +
     '请给出网络优化建议，比如是否应该切换到其他信道或频段？'
 
-  logInfo('构建查询: %{public}s', query)
+  logInfo('构建查询: ' + query)
   return query
 }

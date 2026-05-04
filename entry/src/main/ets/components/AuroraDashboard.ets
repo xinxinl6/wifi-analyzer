@@ -49,6 +49,11 @@ import {
 import { SharedWifiState, NetworkDiagnosticsResult, defaultDiagnosticsResult, networkDiagnostics, RouterManager, RouteName } from '@wifi-analyzer/core'
 import { AuroraSignalIndicator } from './AuroraGlassComponents'
 
+// AI 功能相关
+import { getAIAnalysisUrl, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
+import { promptAction } from '@kit.ArkUI'
+import web_webview from '@ohos.web.webview'
+
 // ============================================
 // Aurora 连接状态卡片（极光渐变版）
 // ============================================
@@ -258,6 +263,9 @@ export struct AuroraNetworkGrid {
   @Prop isDarkMode: boolean = false
   @State diagnostics: NetworkDiagnosticsResult = defaultDiagnosticsResult
 
+  // AI 分析点击回调（不使用 @Prop 装饰器，直接作为普通属性传递）
+  onAIAnalysisClick: () => void = () => {}
+
   // 根据模式获取文字颜色
   private get textPrimary(): string {
     return this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY
@@ -345,7 +353,7 @@ export struct AuroraNetworkGrid {
 
         Blank()
 
-        // AI 分析入口
+        // AI 分析入口（点击调用小艺助手，降级为浏览器搜索）
         Row({ space: 4 }) {
           Image($r('app.media.ic_ai_assistant'))
             .width(14)
@@ -358,6 +366,12 @@ export struct AuroraNetworkGrid {
         .padding(6)
         .backgroundColor(COLOR_GLASS_AURORA_LIGHT)
         .borderRadius(8)
+        .onClick(() => {
+          // 调用 AI 分析回调
+          if (this.onAIAnalysisClick) {
+            this.onAIAnalysisClick()
+          }
+        })
       }
       .width('100%')
 
@@ -602,30 +616,161 @@ export struct AuroraDashboard {
   @Consume('wifiState') wifiState: SharedWifiState
   @Prop isDarkMode: boolean = false
 
-  build() {
-    Column() {
-      Scroll() {
-        Column({ space: 16 }) {
-          // 连接状态卡片
-          AuroraConnectionCard({ isDarkMode: this.isDarkMode })
+  // AI 分析面板状态
+  @State private showAIAnalysis: boolean = false
+  @State private aiWebViewUrl: string = ''
+  @State private aiLoading: boolean = false
 
-          // 网络信息网格
-          AuroraNetworkGrid({ isDarkMode: this.isDarkMode })
+  // AI 分析面板控制器
+  private aiAnalysisController: web_webview.WebviewController = new web_webview.WebviewController()
 
-          // 快速工具网格
-          AuroraToolsGrid({ isDarkMode: this.isDarkMode })
+  // 打开 AI 分析面板
+  private openAIAnalysis(): void {
+    // 构建网络分析查询
+    const networkInfo: WifiNetworkInfo = {
+      ssid: this.wifiState.connectedSsid,
+      signal: this.wifiState.connectedSignal,
+      channel: this.wifiState.connectedChannel,
+      frequency: this.wifiState.connectedFreq
+    }
+    const query = buildNetworkQuery(networkInfo)
 
-          // 底部安全区
-          Row()
-            .height(100)
+    // 直接获取搜索URL，不尝试启动小艺（避免系统弹窗）
+    const url = getAIAnalysisUrl(query)
+    this.aiWebViewUrl = url
+    this.showAIAnalysis = true
+    this.aiLoading = true
+
+    promptAction.showToast({
+      message: '正在为您分析网络...',
+      duration: 2000
+    })
+  }
+
+  // 关闭 AI 分析面板
+  private closeAIAnalysis(): void {
+    this.showAIAnalysis = false
+    this.aiWebViewUrl = ''
+  }
+
+  @Builder
+  AIAnalysisWebViewPanel() {
+    if (this.showAIAnalysis) {
+      Stack({ alignContent: Alignment.Bottom }) {
+        // 遮罩层
+        Column()
+          .width('100%')
+          .height('100%')
+          .backgroundColor('rgba(0,0,0,0.6)')
+          .onClick(() => {
+            this.closeAIAnalysis()
+          })
+
+        // WebView 面板内容
+        Column({ space: 0 }) {
+          // 顶部拖拽指示条
+          Column()
+            .width(40)
+            .height(4)
+            .backgroundColor('rgba(148,163,184,0.4)')
+            .borderRadius(2)
+            .margin({ top: 12, bottom: 8 })
+
+          // 标题栏
+          Row() {
+            Text('网络优化分析')
+              .fontSize(18)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY)
+
+            Blank()
+
+            // 关闭按钮
+            Image($r('app.media.ic_close'))
+              .width(24)
+              .height(24)
+              .fillColor(this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY)
+              .onClick(() => {
+                this.closeAIAnalysis()
+              })
+          }
+          .width('100%')
+          .padding({ left: 20, right: 20, bottom: 12 })
+
+          // 加载指示器
+          if (this.aiLoading) {
+            Row() {
+              LoadingProgress()
+                .width(24)
+                .height(24)
+                .color(COLOR_AURORA_PRIMARY)
+              Text('正在加载...')
+                .fontSize(14)
+                .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_SECONDARY : COLOR_TEXT_LIGHT_SECONDARY)
+                .margin({ left: 8 })
+            }
+            .padding(16)
+            .width('100%')
+          }
+
+          // WebView 内容
+          Web({ src: this.aiWebViewUrl, controller: this.aiAnalysisController })
+            .width('100%')
+            .layoutWeight(1)
+            .onPageBegin(() => {
+              this.aiLoading = true
+            })
+            .onPageEnd(() => {
+              this.aiLoading = false
+            })
+            .onErrorReceive((event) => {
+              console.error('WebView error: ' + (event?.error?.getErrorInfo() || 'Unknown error'))
+              this.aiLoading = false
+            })
         }
-        .padding({ left: 16, right: 16, top: 16, bottom: 16 })
         .width('100%')
+        .height('85%')
+        .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.98)' : 'rgba(248,250,252,0.98)')
+        .borderRadius({ topLeft: 24, topRight: 24 })
       }
-      .scrollBar(BarState.Off)
-      .edgeEffect(EdgeEffect.Spring)
+      .zIndex(999)
+    }
+  }
+
+  build() {
+    Stack() {
+      Column() {
+        Scroll() {
+          Column({ space: 16 }) {
+            // 连接状态卡片
+            AuroraConnectionCard({ isDarkMode: this.isDarkMode })
+
+            // 网络信息网格
+            AuroraNetworkGrid({
+              isDarkMode: this.isDarkMode,
+              onAIAnalysisClick: () => this.openAIAnalysis()
+            })
+
+            // 快速工具网格
+            AuroraToolsGrid({ isDarkMode: this.isDarkMode })
+
+            // 底部安全区
+            Row()
+              .height(100)
+          }
+          .padding({ left: 16, right: 16, top: 16, bottom: 16 })
+          .width('100%')
+        }
+        .scrollBar(BarState.Off)
+        .edgeEffect(EdgeEffect.Spring)
+        .width('100%')
+        .layoutWeight(1)
+      }
       .width('100%')
-      .layoutWeight(1)
+      .height('100%')
+
+      // AI 分析 WebView 面板
+      this.AIAnalysisWebViewPanel()
     }
     .width('100%')
     .height('100%')
