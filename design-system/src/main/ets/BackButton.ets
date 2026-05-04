@@ -25,7 +25,7 @@ import {
 // 底部胶囊返回按钮（用于 ActionButtons）
 @Component
 export struct BackButtonCapsule {
-  private onBack: () => void = () => {}
+  onBack: () => void = () => {}
 
   build() {
     Row() {
@@ -48,7 +48,7 @@ export struct BackButtonCapsule {
 // 毛玻璃风格返回按钮（用于毛玻璃主题页面如 TraceroutePage）
 @Component
 export struct BackButtonGlass {
-  private onBack: () => void = () => {}
+  onBack: () => void = () => {}
 
   build() {
     Row() {
@@ -69,7 +69,7 @@ export struct BackButtonGlass {
 // 顶部返回按钮栏（用于 TraceroutePage 等自定义导航栏页面）
 @Component
 export struct TopBackBar {
-  private onBack: () => void = () => {}
+  onBack: () => void = () => {}
 
   build() {
     Row() {

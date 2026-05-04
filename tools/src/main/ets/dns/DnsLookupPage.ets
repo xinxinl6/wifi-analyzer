@@ -12,6 +12,7 @@ import {
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
   BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  adaptiveBackgroundList, adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveCardBg, adaptiveFadeColor,
 } from '@wifi-analyzer/design-system'
 import { BackButtonCapsule } from '@wifi-analyzer/design-system'
 import { DnsLookupEngine, DnsLookupResult, DnsRecord, DnsRecordType, DnsServerPreset, DnsLookupConfig } from '../dnslookup/DnsLookupEngine'
@@ -59,7 +60,8 @@ export struct DnsLookupPage {
   // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
-      return getContext(this).resourceManager.getStringSync(str.id)
+      const ctx = this.getUIContext().getHostContext()
+      return ctx ? ctx.resourceManager.getStringSync(str.id) : ''
     } catch {
       return ''
     }

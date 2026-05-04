@@ -3,7 +3,21 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY, COLOR_SU
   COLOR_DIVIDER_WEAK, COLOR_CARD_SHADOW,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_WEIGHT_MEDIUM,
   SPACE_MD, SPACE_LG, RADIUS_LG, CARD_SHADOW_RADIUS,
-  TAB_BAR_SAFE_BOTTOM } from '@wifi-analyzer/design-system'
+  TAB_BAR_SAFE_BOTTOM,
+  // 暗色模式自适应工具
+  adaptiveBackgroundList,
+  adaptiveGlowLarge,
+  adaptiveGlowMedium,
+  adaptiveTextPrimary,
+  adaptiveTextSecondary,
+  adaptiveTextTertiary,
+  adaptiveCardBg,
+  COLOR_TEXT_GLASS_PRIMARY,
+  COLOR_TEXT_GLASS_SECONDARY,
+  COLOR_TEXT_GLASS_TERTIARY,
+  COLOR_GLASS_DARK_SURFACE,
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_DARK_BORDER } from '@wifi-analyzer/design-system'
 import { ToolItem, RouterManager, RouteName } from '@wifi-analyzer/core'
 import { isMediumOrLarger } from '../utils/ResponsiveUtils'
 
@@ -31,6 +45,7 @@ const ADVANCED_TOOLS: ToolItem[] = [
 
 @Component
 export struct ToolsSection {
+  @Consume('isDarkMode') isDarkMode: boolean
   build() {
     Stack() {
       // ===== Aurora 天蓝渐变背景 =====
@@ -39,25 +54,20 @@ export struct ToolsSection {
         .height('100%')
         .linearGradient({
           direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
+          colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // 主内容层
@@ -108,7 +118,7 @@ export struct ToolsSection {
     Column({ space: 0 }) {
       Text($r('app.string.other'))
         .fontSize(FONT_SIZE_SM)
-        .fontColor(COLOR_TEXT_SECONDARY)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
         .fontWeight(FONT_WEIGHT_MEDIUM)
         .width('100%')
         .padding({ left: 8, bottom: 6 })
@@ -130,23 +140,23 @@ export struct ToolsSection {
           Text($r('app.string.about_wifi_analyzer'))
             .fontSize(FONT_SIZE_MD)
             .fontWeight(FONT_WEIGHT_MEDIUM)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
           Text($r('app.string.version_info'))
             .fontSize(FONT_SIZE_XS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
         .alignItems(HorizontalAlign.Start)
         .layoutWeight(1)
 
         Text('›')
           .fontSize(20)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
           .lineHeight(20)
       }
       .width('100%')
       .height(60)
       .padding({ left: 14, right: 14 })
-      .backgroundColor(COLOR_SURFACE)
+      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.85)' : COLOR_SURFACE)
       .borderRadius(RADIUS_LG)
       .shadow({ radius: CARD_SHADOW_RADIUS, color: COLOR_CARD_SHADOW, offsetX: 0, offsetY: 1 })
       .onClick(() => { RouterManager.navigate('about') })
@@ -160,7 +170,7 @@ export struct ToolsSection {
       // 分组标题
       Text(title)
         .fontSize(FONT_SIZE_SM)
-        .fontColor(COLOR_TEXT_SECONDARY)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
         .fontWeight(FONT_WEIGHT_MEDIUM)
         .width('100%')
         .padding({ left: 8, bottom: 6 })
@@ -188,10 +198,10 @@ export struct ToolsSection {
                 Text(item.name)
                   .fontSize(FONT_SIZE_MD)
                   .fontWeight(FONT_WEIGHT_MEDIUM)
-                  .fontColor(COLOR_TEXT_PRIMARY)
+                  .fontColor(adaptiveTextPrimary(this.isDarkMode))
                 Text(item.desc)
                   .fontSize(FONT_SIZE_XS)
-                  .fontColor(COLOR_TEXT_TERTIARY)
+                  .fontColor(adaptiveTextTertiary(this.isDarkMode))
               }
               .alignItems(HorizontalAlign.Start)
               .layoutWeight(1)
@@ -199,7 +209,7 @@ export struct ToolsSection {
               // 右箭头
               Text('›')
                 .fontSize(20)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .lineHeight(20)
             }
             .width('100%')
@@ -223,7 +233,7 @@ export struct ToolsSection {
         })
       }
       .width('100%')
-      .backgroundColor(COLOR_SURFACE)
+      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.85)' : COLOR_SURFACE)
       .borderRadius(RADIUS_LG)
       .shadow({ radius: CARD_SHADOW_RADIUS, color: COLOR_CARD_SHADOW, offsetX: 0, offsetY: 1 })
       .clip(true)

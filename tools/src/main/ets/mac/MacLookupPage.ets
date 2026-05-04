@@ -43,7 +43,8 @@ export struct MacLookupPage {
   // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
-      return getContext(this).resourceManager.getStringSync(str.id)
+      const ctx = this.getUIContext().getHostContext()
+      return ctx ? ctx.resourceManager.getStringSync(str.id) : ''
     } catch {
       return ''
     }

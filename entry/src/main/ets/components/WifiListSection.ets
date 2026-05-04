@@ -31,7 +31,21 @@ import {
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_CARD, RADIUS_BUTTON,
   DURATION_FAST, DURATION_NORMAL, AnimationTapScale,
-  TAB_BAR_SAFE_BOTTOM
+  TAB_BAR_SAFE_BOTTOM,
+  // 暗色模式自适应工具
+  adaptiveBackgroundList,
+  adaptiveGlowLarge,
+  adaptiveGlowMedium,
+  adaptiveTextPrimary,
+  adaptiveTextSecondary,
+  adaptiveTextTertiary,
+  adaptiveCardBg,
+  adaptiveFadeColor,
+  adaptiveDivider,
+  COLOR_TEXT_GLASS_PRIMARY as COLOR_TEXT_GLASS_PRIMARY_ALT,
+  COLOR_GLASS_DARK_SURFACE,
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_DARK_BORDER
 } from '@wifi-analyzer/design-system'
 import { WifiItem, SharedWifiState, WifiDataManager } from '@wifi-analyzer/core'
 
@@ -50,6 +64,7 @@ interface FilterChipConfig {
 @Component
 export struct WifiListSection {
   @Consume('wifiState') wifiState: SharedWifiState
+  @Consume('isDarkMode') isDarkMode: boolean
 
   @State localFilter: string = 'all'
   @State private cachedFilteredList: WifiItem[] = []
@@ -81,7 +96,7 @@ export struct WifiListSection {
     this.modalOpacity = 1
     this.modalTranslateY = 60
     // 下一帧开始位移动画
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 280,
       curve: Curve.Linear
     }, () => {
@@ -92,7 +107,7 @@ export struct WifiListSection {
   // 关闭详情弹窗（带线性动画）
   closeDetail(): void {
     // 线性动画：遮罩淡出 + 弹窗下滑
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 220,
       curve: Curve.Linear,
       onFinish: () => {
@@ -141,31 +156,26 @@ export struct WifiListSection {
       .height('100%')
       .linearGradient({
         direction: GradientDirection.Bottom,
-        colors: [
-          ['#F7FBFF', 0],
-          ['#F0F8FF', 0.4],
-          ['#F8FCFF', 0.75],
-          ['#FDFDFF', 1]
-        ]
+        colors: adaptiveBackgroundList(this.isDarkMode)
       })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.07)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.06)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       Circle()
         .width(120)
         .height(120)
-        .fill('rgba(74,144,217,0.04)')
+        .fill(this.isDarkMode ? 'rgba(74,144,217,0.08)' : 'rgba(74,144,217,0.04)')
         .position({ x: '80%', y: '10%' })
 
       // ===== 主内容 =====
@@ -179,11 +189,11 @@ export struct WifiListSection {
               Text($r('app.string.app_name'))
                 .fontSize(22)
                 .fontWeight(FontWeight.Bold)
-                .fontColor(COLOR_TEXT_LIGHT_PRIMARY)
+                .fontColor(adaptiveTextPrimary(this.isDarkMode))
 
               Text($r('app.string.networks_found'))
                 .fontSize(FONT_SIZE_SM)
-                .fontColor(COLOR_TEXT_LIGHT_SECONDARY)
+                .fontColor(adaptiveTextSecondary(this.isDarkMode))
                 .margin({ top: 2 })
             }
             .alignItems(HorizontalAlign.Start)
@@ -263,7 +273,9 @@ export struct WifiListSection {
             .translate({ y: -60 })
             .linearGradient({
               direction: GradientDirection.Top,
-              colors: [['rgba(253,253,255,0)', 1], ['rgba(253,253,255,0.95)', 0]]
+              colors: this.isDarkMode
+                ? [['rgba(10,22,40,0)', 1], ['rgba(10,22,40,0.95)', 0]]
+                : [['rgba(253,253,255,0)', 1], ['rgba(253,253,255,0.95)', 0]]
             })
             .hitTestBehavior(HitTestMode.None)
         }
@@ -279,7 +291,7 @@ export struct WifiListSection {
         Column()
           .width('100%')
           .height('100%')
-          .backgroundColor('rgba(15,30,60,0.35)')
+          .backgroundColor(this.isDarkMode ? 'rgba(0,0,0,0.55)' : 'rgba(15,30,60,0.35)')
           .backdropBlur(4)
           .opacity(this.overlayOpacity)
           .onClick(() => { this.closeDetail() })
@@ -303,7 +315,7 @@ export struct WifiListSection {
               Text($r('app.string.wifi_detail'))
                 .fontSize(FONT_SIZE_LG)
                 .fontWeight(FontWeight.Bold)
-                .fontColor(COLOR_TEXT_LIGHT_PRIMARY)
+                .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY)
 
               if (this.selectedItem.isConnected) {
                 Text($r('app.string.connected'))
@@ -319,7 +331,7 @@ export struct WifiListSection {
             Column() {
               Text('×')
                 .fontSize(20)
-                .fontColor(COLOR_TEXT_LIGHT_SECONDARY)
+                .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_SECONDARY : COLOR_TEXT_LIGHT_SECONDARY)
             }
             .width(32)
             .height(32)
@@ -355,7 +367,7 @@ export struct WifiListSection {
         }
         .width('88%')
         // Aurora 毛玻璃底板
-        .backgroundColor('rgba(240,248,255,0.92)')
+        .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.92)' : 'rgba(240,248,255,0.92)')
         .borderRadius(RADIUS_CARD)
         .border({ width: 1, color: COLOR_GLASS_AURORA_BORDER })
         .backdropBlur(20)
@@ -422,7 +434,7 @@ export struct WifiListSection {
           Text(item.ssid || '(隐藏网络)')
             .fontSize(FONT_SIZE_LG)
             .fontWeight(FONT_WEIGHT_MEDIUM)
-            .fontColor(COLOR_TEXT_LIGHT_PRIMARY)
+            .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .layoutWeight(1)
@@ -442,7 +454,7 @@ export struct WifiListSection {
 
         Text((item.bssid || '') + ' · ' + (item.freq >= 4.0 ? '5GHz' : '2.4GHz') + ' · CH ' + item.channel + ' · ' + (item.bandwidth || '--MHz'))
           .fontSize(FONT_SIZE_SM)
-          .fontColor(COLOR_TEXT_LIGHT_TERTIARY)
+          .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY)
           .margin({ top: 3 })
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -459,7 +471,7 @@ export struct WifiListSection {
 
         Text(item.security || 'Open')
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_LIGHT_TERTIARY)
+          .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY)
           .padding({ left: 6, right: 6, top: 2, bottom: 2 })
           .backgroundColor('rgba(74,144,217,0.08)')
           .borderRadius(RADIUS_SM)
@@ -495,7 +507,7 @@ export struct WifiListSection {
       this.overlayOpacity = 1
       this.modalOpacity = 1
       this.modalTranslateY = 60
-      animateTo({ duration: 280, curve: Curve.Linear }, () => {
+      this.getUIContext().animateTo({ duration: 280, curve: Curve.Linear }, () => {
         this.modalTranslateY = 0
       })
     })
@@ -614,12 +626,12 @@ export struct WifiListSection {
         Text($r('app.string.no_scan_result'))
           .fontSize(FONT_SIZE_LG)
           .fontWeight(FontWeight.Medium)
-          .fontColor(COLOR_TEXT_LIGHT_PRIMARY)
+          .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY)
           .textAlign(TextAlign.Center)
 
         Text($r('app.string.grant_permission_hint'))
           .fontSize(FONT_SIZE_SM)
-          .fontColor(COLOR_TEXT_LIGHT_SECONDARY)
+          .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_SECONDARY : COLOR_TEXT_LIGHT_SECONDARY)
           .textAlign(TextAlign.Center)
           .width('80%')
       }
@@ -635,13 +647,13 @@ export struct WifiListSection {
     Row({ space: SPACE_MD }) {
       Text(label)
         .fontSize(FONT_SIZE_SM)
-        .fontColor(COLOR_TEXT_LIGHT_TERTIARY)
+        .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY)
         .width('35%')
 
       Text(value)
         .fontSize(FONT_SIZE_SM)
         .fontWeight(FontWeight.Medium)
-        .fontColor(COLOR_TEXT_LIGHT_PRIMARY)
+        .fontColor(this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY)
         .layoutWeight(1)
         .textAlign(TextAlign.End)
     }

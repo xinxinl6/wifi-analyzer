@@ -2,7 +2,8 @@
 // 职责：Ping 历史记录展示、清空
 // 优化版本：天蓝色玻璃拟态风格
 
-import { COLOR_TEXT_PRIMARY, COLOR_TEXT_TERTIARY, COLOR_TEXT_SECONDARY,
+import { adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveCardBg, adaptiveDivider,
+  COLOR_TEXT_PRIMARY, COLOR_TEXT_TERTIARY, COLOR_TEXT_SECONDARY,
   COLOR_BACKGROUND, COLOR_SURFACE, COLOR_PRIMARY, COLOR_DANGER,
   COLOR_BORDER, COLOR_SUCCESS, COLOR_WARNING,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_3XL, FONT_SIZE_4XL,
@@ -12,11 +13,13 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_TERTIARY, COLOR_TEXT_SECONDARY,
   // 玻璃拟态
   COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_GLASS_WHITE, COLOR_GLASS_SKY_LIGHT,
   COLOR_SKY_BLUE_DIVIDER,
+  COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
   GLASS_BLUR_MD, GLASS_BLUR_LG, GLASS_SHADOW_MD, GLASS_SHADOW_LG } from '@wifi-analyzer/design-system'
 import { PingResult } from './PingTestPage'
 
 // ==================== Props 接口 ====================
 export interface HistoryModalProps {
+  isDarkMode: boolean
   pingHistory: PingResult[]
   onClose: () => void
   getGlobalHistForModal: () => Array<PingResult>
@@ -37,6 +40,7 @@ interface PingStats {
 // ==================== 历史记录弹窗 ====================
 @Component
 export struct HistoryModal {
+  @Prop isDarkMode: boolean = false
   @State pingHistory: PingResult[] = []
   onClose: () => void = () => {}
   getGlobalHistForModal: () => Array<PingResult> = () => new Array<PingResult>()
@@ -72,7 +76,7 @@ export struct HistoryModal {
         Column()
           .width(48)
           .height(4)
-          .backgroundColor(COLOR_TEXT_TERTIARY)
+          .backgroundColor(adaptiveTextTertiary(this.isDarkMode))
           .borderRadius(2)
           .margin({ top: SPACE_SM, bottom: SPACE_MD })
 
@@ -81,7 +85,7 @@ export struct HistoryModal {
           Text($r('app.string.history'))
             .fontSize(FONT_SIZE_XL)
             .fontWeight(FONT_WEIGHT_BOLD)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
 
           Blank()
 
@@ -98,7 +102,7 @@ export struct HistoryModal {
 
           Text('\u00D7')
             .fontSize(FONT_SIZE_4XL)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
             .margin({ left: SPACE_SM })
             .onClick(() => { this.onClose() })
         }
@@ -130,7 +134,7 @@ export struct HistoryModal {
         Column().height(SPACE_XL).width('100%')
       }
       .width('100%')
-      .backgroundColor(COLOR_SURFACE)
+      .backgroundColor(this.isDarkMode ? 'rgba(30,41,59,0.95)' : COLOR_SURFACE)
       .borderRadius({ topLeft: RADIUS_2XL, topRight: RADIUS_2XL })
     }
     .zIndex(999)
@@ -140,16 +144,16 @@ export struct HistoryModal {
     Column({ space: SPACE_MD }) {
       // 统计数字行
       Row() {
-        this.StatItem('总数', String(this.getStats().total), COLOR_TEXT_PRIMARY)
-        Column().width(1).height(32).backgroundColor(COLOR_BORDER)
+        this.StatItem('总数', String(this.getStats().total), adaptiveTextPrimary(this.isDarkMode))
+        Column().width(1).height(32).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_BORDER)
         this.StatItem('平均延迟', this.getStats().avgLatency > 0 ? String(this.getStats().avgLatency) + ' ms' : '--', COLOR_SKY_BLUE)
-        Column().width(1).height(32).backgroundColor(COLOR_BORDER)
+        Column().width(1).height(32).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_BORDER)
         this.StatItem('丢包率', this.getStats().lossRate > 0 ? String(this.getStats().lossRate) + '%' : '0%', this.getStats().lossRate > 0 ? COLOR_DANGER : COLOR_SUCCESS)
       }
       .width('100%')
       .padding({ top: SPACE_SM, bottom: SPACE_SM })
 
-      Divider().color(COLOR_BORDER)
+      Divider().color(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_BORDER)
 
       // 延迟范围行
       Row() {
@@ -163,7 +167,7 @@ export struct HistoryModal {
     }
     .width('100%')
     .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_SM, bottom: SPACE_MD })
-    .backgroundColor(COLOR_BACKGROUND)
+    .backgroundColor(this.isDarkMode ? 'rgba(15,30,60,0.6)' : COLOR_BACKGROUND)
     .margin({ left: SPACE_LG, right: SPACE_LG, bottom: SPACE_MD })
     .borderRadius(RADIUS_LG)
   }
@@ -176,7 +180,7 @@ export struct HistoryModal {
         .fontColor(valueColor)
       Text(label)
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .layoutWeight(1)
     .alignItems(HorizontalAlign.Center)
@@ -186,14 +190,14 @@ export struct HistoryModal {
     Row({ space: SPACE_XS }) {
       Text(label)
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
       Text(value)
         .fontSize(FONT_SIZE_SM)
         .fontWeight(FONT_WEIGHT_MEDIUM)
-        .fontColor(COLOR_TEXT_SECONDARY)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
       Text(unit)
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
   }
 
@@ -202,13 +206,13 @@ export struct HistoryModal {
       Column()
         .width(64)
         .height(64)
-        .backgroundColor(COLOR_BACKGROUND)
+        .backgroundColor(this.isDarkMode ? 'rgba(15,30,60,0.6)' : COLOR_BACKGROUND)
         .borderRadius(32)
         .align(Alignment.Center)
 
       Text($r('app.string.no_records'))
         .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .width('100%')
     .height(200)
@@ -221,20 +225,20 @@ export struct HistoryModal {
       // 序号
       Text(String(index + 1))
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
         .width(24)
         .textAlign(TextAlign.Center)
 
       Column({ space: 4 }) {
         Text(result.address)
           .fontSize(FONT_SIZE_SM)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
         Text(new Date(result.timestamp).toLocaleTimeString())
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
@@ -251,7 +255,7 @@ export struct HistoryModal {
 
           Text(String(result.timeMs) + ' ms')
             .fontSize(FONT_SIZE_SM)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }
       } else if (result.status === 'timeout') {
@@ -282,7 +286,7 @@ export struct HistoryModal {
     }
     .width('100%')
     .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_SM, bottom: SPACE_SM })
-    .backgroundColor(COLOR_BACKGROUND)
+    .backgroundColor(this.isDarkMode ? 'rgba(15,30,60,0.4)' : COLOR_BACKGROUND)
     .borderRadius(RADIUS_MD)
     .stateStyles({ pressed: { opacity: 0.8 } })
   }

@@ -2,10 +2,13 @@
 import {
   COLOR_PRIMARY, COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_SURFACE, COLOR_BACKGROUND, COLOR_BORDER, COLOR_DIVIDER,
+  COLOR_GLASS_WHITE, COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER, COLOR_GLASS_BORDER,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
-  RADIUS_MD, RADIUS_LG, SAFE_AREA_BOTTOM, SAFE_AREA_TOP
+  RADIUS_MD, RADIUS_LG, SAFE_AREA_BOTTOM, SAFE_AREA_TOP, GLASS_BLUR_LG, GLASS_SHADOW_LG, GLASS_SHADOW_XL,
+  adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
+  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
 import { RouterManager } from '@wifi-analyzer/core'
 import promptAction from '@ohos.promptAction'
@@ -21,6 +24,8 @@ interface AboutListItem {
 // ==================== 组件 ====================
 @Component
 export struct AboutPage {
+  @Consume isDarkMode: boolean = false
+
   // 应用版本信息
   private appVersion: string = 'v1.0.1'
   private buildNumber: string = '1000001'
@@ -42,25 +47,20 @@ export struct AboutPage {
         .height('100%')
         .linearGradient({
           direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
+          colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // ===== 主内容层 =====
@@ -78,7 +78,7 @@ export struct AboutPage {
           }
           .padding({ left: 4, right: 12, top: 6, bottom: 6 })
           .borderRadius(20)
-          .backgroundColor('rgba(255,255,255,0.60)')
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.60)')
           .onClick(() => RouterManager.goBack())
 
           Blank()
@@ -107,7 +107,7 @@ export struct AboutPage {
               Text($r('app.string.app_name_wifi_analyzer'))
                 .fontSize(FONT_SIZE_2XL)
                 .fontWeight(FONT_WEIGHT_BOLD)
-                .fontColor(COLOR_TEXT_PRIMARY)
+                .fontColor(adaptiveTextPrimary(this.isDarkMode))
 
               // 版本号
               Text() {
@@ -115,7 +115,7 @@ export struct AboutPage {
                 Span(' ' + this.appVersion)
               }
                 .fontSize(FONT_SIZE_SM)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .margin({ bottom: 32 })
             }
             .width('100%')
@@ -128,13 +128,13 @@ export struct AboutPage {
                   Row() {
                     Text(item.label)
                       .fontSize(FONT_SIZE_MD)
-                      .fontColor(COLOR_TEXT_PRIMARY)
+                      .fontColor(adaptiveTextPrimary(this.isDarkMode))
                       .layoutWeight(1)
 
                     if (item.value !== '') {
                       Text(item.value)
                         .fontSize(FONT_SIZE_SM)
-                        .fontColor(COLOR_TEXT_TERTIARY)
+                        .fontColor(adaptiveTextTertiary(this.isDarkMode))
                         .margin({ right: 4 })
                     }
 
@@ -142,19 +142,19 @@ export struct AboutPage {
                       Image($r('app.media.ic_arrow_right'))
                         .width(16)
                         .height(16)
-                        .fillColor(COLOR_TEXT_TERTIARY)
+                        .fillColor(adaptiveTextTertiary(this.isDarkMode))
                     }
                   }
                   .width('100%')
                   .height(52)
                   .padding({ left: SPACE_LG, right: SPACE_LG })
-                  .backgroundColor('rgba(255,255,255,0.60)')
+                  .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.60)')
                   .onClick(() => { this.onItemClick(item.action) })
 
                   // 分割线（最后一项不显示）
                   if (index < this.listItems.length - 1) {
                     Divider()
-                      .color('rgba(0,0,0,0.06)')
+                      .color(adaptiveDivider(this.isDarkMode))
                       .strokeWidth(0.5)
                       .padding({ left: SPACE_LG })
                       .margin({ left: SPACE_LG })
@@ -165,6 +165,11 @@ export struct AboutPage {
             }
             .width('100%')
             .borderRadius(RADIUS_LG)
+            .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+            .borderWidth(1.5)
+            .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+            .backdropBlur(GLASS_BLUR_LG)
+            .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(74,144,217,0.10)', offsetX: 0, offsetY: 4 })
             .clip(true)
             .margin({ left: 16, right: 16, top: 8 })
             .width('calc(100% - 32vp)')
@@ -176,7 +181,7 @@ export struct AboutPage {
                 Span('：1218478630@qq.com')
               }
                 .fontSize(FONT_SIZE_XS)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .textAlign(TextAlign.Center)
 
               Text() {
@@ -184,12 +189,12 @@ export struct AboutPage {
                 Span(': ' + this.buildNumber)
               }
                 .fontSize(FONT_SIZE_XS)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .textAlign(TextAlign.Center)
 
               Text($r('app.string.copyright'))
                 .fontSize(FONT_SIZE_XS)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .textAlign(TextAlign.Center)
             }
             .width('100%')

@@ -209,6 +209,102 @@ export const COLOR_TEXT_DARK_TERTIARY = '#7AA3C0'    // 深色弱文字
 export const COLOR_CLOUD_1 = 'rgba(255,255,255,0.5)'
 export const COLOR_CLOUD_2 = 'rgba(255,255,255,0.4)'
 
+// ---------- 暗色模式 Aurora 渐变色值 ----------
+// 暗色背景渐变色值（用于 .linearGradient({ colors: [...] }) 的颜色数组）
+export const COLOR_BG_DARK_LIST: Array<[ResourceColor, number]> = [
+  ['#0F2942', 0],
+  ['#0A1E3A', 0.4],
+  ['#0A1628', 0.75],
+  ['#080E1E', 1]
+]
+
+// 亮色背景渐变色值（用于 .linearGradient({ colors: [...] }) 的颜色数组）
+export const COLOR_BG_LIGHT_LIST: Array<[ResourceColor, number]> = [
+  ['#F7FBFF', 0],
+  ['#F0F8FF', 0.4],
+  ['#F8FCFF', 0.75],
+  ['#FDFDFF', 1]
+]
+
+// ---------- 暗色模式 Aurora 光晕装饰色值 ----------
+export const COLOR_GLOW_DARK_1 = 'rgba(74,144,217,0.12)'   // 暗色大光晕
+export const COLOR_GLOW_DARK_2 = 'rgba(135,206,235,0.10)'  // 暗色中光晕
+export const COLOR_GLOW_DARK_3 = 'rgba(74,144,217,0.08)'   // 暗色小光晕
+
+// 亮色模式光晕装饰色值
+export const COLOR_GLOW_LIGHT_1 = 'rgba(74,144,217,0.07)'
+export const COLOR_GLOW_LIGHT_2 = 'rgba(135,206,235,0.06)'
+export const COLOR_GLOW_LIGHT_3 = 'rgba(74,144,217,0.04)'
+
+// ---------- 暗色模式卡片背景色 ----------
+// 暗色模式毛玻璃卡片（浅色卡片）背景
+export const COLOR_CARD_DARK = 'rgba(15,30,60,0.60)'        // 暗色卡片底色
+export const COLOR_CARD_DARK_SOLID = 'rgba(20,38,72,0.80)'  // 暗色实心卡片
+
+// 暗色模式分割线
+export const COLOR_DIVIDER_DARK = 'rgba(255,255,255,0.08)'  // 暗色分隔线
+
+// ---------- 暗色模式表格/图表 ----------
+export const COLOR_CHART_GRID_DARK = 'rgba(255,255,255,0.08)'  // 暗色图表网格线
+export const COLOR_FADE_DARK_TOP = 'rgba(10,22,40,0.60)'     // 暗色顶部渐变遮罩
+export const COLOR_FADE_DARK_BOTTOM = 'rgba(10,22,40,0.60)'  // 暗色底部渐变遮罩
+
+// ---------- 工具函数：自适应颜色 ----------
+// 根据 isDark 返回对应的背景渐变色数组
+export function adaptiveBackgroundList(isDark: boolean): Array<[ResourceColor, number]> {
+  return isDark ? COLOR_BG_DARK_LIST : COLOR_BG_LIGHT_LIST
+}
+
+// 根据 isDark 返回大光晕颜色
+export function adaptiveGlowLarge(isDark: boolean): string {
+  return isDark ? COLOR_GLOW_DARK_1 : COLOR_GLOW_LIGHT_1
+}
+
+// 根据 isDark 返回中光晕颜色
+export function adaptiveGlowMedium(isDark: boolean): string {
+  return isDark ? COLOR_GLOW_DARK_2 : COLOR_GLOW_LIGHT_2
+}
+
+// 根据 isDark 返回小光晕颜色
+export function adaptiveGlowSmall(isDark: boolean): string {
+  return isDark ? COLOR_GLOW_DARK_3 : COLOR_GLOW_LIGHT_3
+}
+
+// 根据 isDark 返回文字色
+export function adaptiveTextPrimary(isDark: boolean): string {
+  return isDark ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY
+}
+
+// 根据 isDark 返回次要文字色
+export function adaptiveTextSecondary(isDark: boolean): string {
+  return isDark ? COLOR_TEXT_GLASS_SECONDARY : COLOR_TEXT_LIGHT_SECONDARY
+}
+
+// 根据 isDark 返回弱文字色
+export function adaptiveTextTertiary(isDark: boolean): string {
+  return isDark ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY
+}
+
+// 根据 isDark 返回卡片背景色
+export function adaptiveCardBg(isDark: boolean): string {
+  return isDark ? COLOR_CARD_DARK : COLOR_GLASS_CARD
+}
+
+// 根据 isDark 返回渐变遮罩色
+export function adaptiveFadeColor(isDark: boolean): string {
+  return isDark ? COLOR_FADE_DARK_BOTTOM : COLOR_FADE_BOTTOM
+}
+
+// 根据 isDark 返回图表网格色
+export function adaptiveChartGrid(isDark: boolean): string {
+  return isDark ? COLOR_CHART_GRID_DARK : COLOR_CHART_GRID
+}
+
+// 根据 isDark 返回分割线色
+export function adaptiveDivider(isDark: boolean): string {
+  return isDark ? COLOR_DIVIDER_DARK : COLOR_DIVIDER_WEAK
+}
+
 // 工具类函数：添加透明度
 export function withOpacity(color: string, opacity: number): string {
   // 简化实现，实际应处理hex颜色转换

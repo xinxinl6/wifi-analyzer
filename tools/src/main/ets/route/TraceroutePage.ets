@@ -5,14 +5,17 @@ import promptAction from '@ohos.promptAction'
 import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_BACKGROUND, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING,
   COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
-  COLOR_GLASS_WHITE, COLOR_GLASS_SKY_SOLID, COLOR_GLASS_BORDER, COLOR_GLASS_SKY_LIGHT,
+  COLOR_GLASS_WHITE, COLOR_GLASS_SKY_SOLID, COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
+  COLOR_GLASS_BORDER, COLOR_GLASS_SKY_LIGHT,
   COLOR_GLASS_SKY_ACTIVE, COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER,
   COLOR_GLASS_SKY_SHADOW_MED, COLOR_GLASS_SKY_LINE,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
-  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, GLASS_SHADOW_3XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP } from '@wifi-analyzer/design-system'
+  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, GLASS_SHADOW_3XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
+  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider } from '@wifi-analyzer/design-system'
 import {
   TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteStats, DnsResolveResult
 } from '../traceroute/TracerouteEngine'
@@ -30,6 +33,7 @@ interface QuickTargetItem {
 
 @Component
 export struct TraceroutePage {
+  @Consume isDarkMode: boolean = false
   @State detectedGateway: string = ''
   @State inputText: string = ''
   @State viewMode: string = 'idle'
@@ -54,7 +58,8 @@ export struct TraceroutePage {
   // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
-      return getContext(this).resourceManager.getStringSync(str.id)
+      const ctx = this.getUIContext().getHostContext()
+      return ctx ? ctx.resourceManager.getStringSync(str.id) : ''
     } catch {
       return ''
     }
@@ -239,25 +244,20 @@ export struct TraceroutePage {
         .height('100%')
         .linearGradient({
           direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
+          colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // 主内容
@@ -291,10 +291,10 @@ export struct TraceroutePage {
           Text($r('app.string.route_trace'))
             .fontSize(FONT_SIZE_2XL)
             .fontWeight(FONT_WEIGHT_BOLD)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
           Text($r('app.string.path_desc'))
             .fontSize(FONT_SIZE_SM)
-            .fontColor(COLOR_TEXT_SECONDARY)
+            .fontColor(adaptiveTextSecondary(this.isDarkMode))
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
@@ -326,8 +326,8 @@ export struct TraceroutePage {
       TextInput({ placeholder: $r('app.string.input_ip_hint'), text: this.inputText })
         .layoutWeight(1)
         .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_PRIMARY)
-        .placeholderColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextPrimary(this.isDarkMode))
+        .placeholderColor(adaptiveTextTertiary(this.isDarkMode))
         .backgroundColor(Color.Transparent)
         .onChange((value: string) => { this.inputText = value })
         .onSubmit(() => this.startTrace())
@@ -347,12 +347,12 @@ export struct TraceroutePage {
     }
     .width('100%')
     .padding({ left: 16, right: 12, top: 13, bottom: 13 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
-    .shadow({ radius: GLASS_SHADOW_XL, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 推荐标签
@@ -360,7 +360,7 @@ export struct TraceroutePage {
     Column({ space: 8 }) {
       Text($r('app.string.recommended_target'))
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
         .alignSelf(ItemAlign.Start)
 
       Row({ space: SPACE_SM }) {
@@ -374,10 +374,10 @@ export struct TraceroutePage {
               .fontWeight(FONT_WEIGHT_MEDIUM)
           }
           .padding({ left: 14, right: 14, top: 7, bottom: 7 })
-          .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+          .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
           .borderRadius(999)
           .borderWidth(1)
-          .borderColor(COLOR_GLASS_SKY_TAG_BORDER)
+          .borderColor(this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
           .onClick(() => this.onRecommendTap(index))
         }, (item: Resource, index: number): string => String(index))
       }
@@ -395,24 +395,24 @@ export struct TraceroutePage {
         Text($r('app.string.feature_intro'))
           .fontSize(FONT_SIZE_SM)
           .fontWeight(FONT_WEIGHT_BOLD)
-          .fontColor(COLOR_TEXT_SECONDARY)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
       }
       .width('100%')
       .padding({ bottom: 12 })
 
       Column({ space: 0 }) {
         this.FeatureItem($r('app.media.ic_route'), $r('app.string.path_detection'), $r('app.string.path_desc'), '🛰')
-        Column().width('100%').height(0.5).backgroundColor(COLOR_GLASS_SKY_LIGHT)
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
         this.FeatureItem($r('app.media.ic_device'), $r('app.string.latency_analysis'), $r('app.string.latency_analysis_desc'), '⚡')
-        Column().width('100%').height(0.5).backgroundColor(COLOR_GLASS_SKY_LIGHT)
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
         this.FeatureItem($r('app.media.ic_dns'), $r('app.string.statistics_report'), $r('app.string.statistics_report_desc'), '📊')
       }
-      .backgroundColor(COLOR_GLASS_WHITE)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
       .borderRadius(18)
       .borderWidth(1.5)
-      .borderColor(COLOR_GLASS_BORDER)
+      .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
       .backdropBlur(GLASS_BLUR_LG)
-      .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+      .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
       .clip(true)
     }
     .width('100%')
@@ -423,23 +423,23 @@ export struct TraceroutePage {
       // 图标容器
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(38).height(38)
-          .fill(COLOR_GLASS_SKY_ACTIVE)
+          .fill(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_ACTIVE)
         Text(emoji).fontSize(16)
       }
 
       Column({ space: 3 }) {
         Text(title)
           .fontSize(FONT_SIZE_MD)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
         Text(desc)
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_SECONDARY)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
-      Text('›').fontSize(18).fontColor('rgba(14,165,233,0.5)')
+      Text('›').fontSize(18).fontColor(this.isDarkMode ? 'rgba(14,165,233,0.5)' : 'rgba(14,165,233,0.5)')
     }
     .width('100%')
     .padding({ left: 16, right: 14, top: 14, bottom: 14 })
@@ -486,7 +486,7 @@ export struct TraceroutePage {
       // 脉冲图标
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(44).height(44)
-          .fill(COLOR_GLASS_SKY_LIGHT)
+          .fill(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_LIGHT)
           .opacity(this.isRunning ? this.pulseOpacity : 1.0)
         Circle().width(36).height(36)
           .fill(this.isRunning ? COLOR_SKY_BLUE : (this.viewMode === 'completed' ? COLOR_SUCCESS : COLOR_SKY_BLUE))
@@ -496,7 +496,7 @@ export struct TraceroutePage {
       Column({ space: 4 }) {
         Text(this.targetHost)
           .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -505,7 +505,7 @@ export struct TraceroutePage {
           if (this.resolvedIp !== this.targetHost && this.resolvedIp.length > 0) {
             Text(this.resolvedIp)
               .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
+              .fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
           if (this.isRunning) {
             Row({ space: 4 }) {
@@ -529,14 +529,14 @@ export struct TraceroutePage {
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
-      // 搜索入口
+        // 搜索入口
       Row() {
         Text('🔍').fontSize(14)
       }
       .width(34).height(34)
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+      .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
       .borderRadius(10)
       .onClick(() => {
         this.viewMode = 'idle'
@@ -545,12 +545,12 @@ export struct TraceroutePage {
     }
     .width('100%')
     .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
-    .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 统计概览 — 4 格毛玻璃卡片
@@ -566,12 +566,12 @@ export struct TraceroutePage {
     }
     .width('100%')
     .padding({ top: 14, bottom: 14 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
-    .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   @Builder StatCell(label: Resource | string, value: string, valueColor: string) {
@@ -582,7 +582,7 @@ export struct TraceroutePage {
         .fontWeight(FONT_WEIGHT_BOLD)
       Text(label)
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .layoutWeight(1)
     .alignItems(HorizontalAlign.Center)
@@ -591,7 +591,7 @@ export struct TraceroutePage {
   @Builder StatDivider() {
     Column()
       .width(1).height(36)
-      .backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+      .backgroundColor(adaptiveDivider(this.isDarkMode))
   }
 
   // 路径可视化卡片 — 时间线
@@ -603,7 +603,7 @@ export struct TraceroutePage {
           Text('🛰').fontSize(14)
           Text($r('app.string.route_path'))
             .fontSize(FONT_SIZE_MD)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
             .fontWeight(FONT_WEIGHT_BOLD)
         }
         Blank()
@@ -615,14 +615,14 @@ export struct TraceroutePage {
           .fontSize(FONT_SIZE_XS)
           .fontColor(COLOR_SKY_BLUE)
           .padding({ left: 8, right: 8, top: 3, bottom: 3 })
-          .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+          .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
           .borderRadius(999)
       }
       .width('100%')
       .padding({ left: 16, right: 14, top: 14, bottom: 12 })
 
       // 分割线
-      Column().width('100%').height(0.5).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+      Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
 
       // 时间线列表
       Column({ space: 0 }) {
@@ -633,12 +633,12 @@ export struct TraceroutePage {
       .padding({ left: 14, right: 14, top: 8, bottom: 12 })
     }
     .width('100%')
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
-    .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
     .clip(true)
   }
 
@@ -661,7 +661,7 @@ export struct TraceroutePage {
             .fontSize(FONT_SIZE_XS)
             .fontColor(hop.status === 'success'
               ? (this.isLastHop(index) ? '#FFFFFF' : COLOR_SKY_BLUE)
-              : COLOR_TEXT_TERTIARY)
+              : adaptiveTextTertiary(this.isDarkMode))
             .fontWeight(FONT_WEIGHT_BOLD)
         }
 
@@ -670,7 +670,7 @@ export struct TraceroutePage {
           Column()
             .width(1.5)
             .layoutWeight(1)
-            .backgroundColor(hop.status === 'success' ? COLOR_GLASS_SKY_LINE : 'rgba(148,163,184,0.25)')
+            .backgroundColor(hop.status === 'success' ? COLOR_GLASS_SKY_LINE : (this.isDarkMode ? 'rgba(148,163,184,0.15)' : 'rgba(148,163,184,0.25)'))
             .margin({ top: 3, bottom: 3 })
         } else {
           Column().height(SPACE_SM)
@@ -684,7 +684,7 @@ export struct TraceroutePage {
         Row({ space: SPACE_SM }) {
           Text(hop.address === '*' ? $r('app.string.no_response') : hop.address)
             .fontSize(FONT_SIZE_SM)
-            .fontColor(hop.address === '*' ? COLOR_TEXT_TERTIARY : COLOR_TEXT_PRIMARY)
+            .fontColor(hop.address === '*' ? adaptiveTextTertiary(this.isDarkMode) : adaptiveTextPrimary(this.isDarkMode))
             .fontWeight(hop.address === '*' ? FontWeight.Normal : FONT_WEIGHT_BOLD)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -701,9 +701,9 @@ export struct TraceroutePage {
           } else {
             Text($r('app.string.timeout'))
               .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
+              .fontColor(adaptiveTextTertiary(this.isDarkMode))
               .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-              .backgroundColor('rgba(148,163,184,0.2)')
+              .backgroundColor(this.isDarkMode ? 'rgba(148,163,184,0.15)' : 'rgba(148,163,184,0.2)')
               .borderRadius(999)
           }
         }
@@ -713,7 +713,7 @@ export struct TraceroutePage {
         if (hop.hostname !== '' && hop.hostname !== '*') {
           Text(hop.hostname)
             .fontSize(FONT_SIZE_XS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
             .width('100%')
         }
 
@@ -724,7 +724,7 @@ export struct TraceroutePage {
               .fontSize(FONT_SIZE_XS)
               .fontColor(COLOR_SKY_BLUE)
               .padding({ left: 7, right: 7, top: 2, bottom: 2 })
-              .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+              .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
               .borderRadius(999)
           }
           if (this.isLastHop(index) && hop.address !== '*') {
@@ -732,7 +732,7 @@ export struct TraceroutePage {
               .fontSize(FONT_SIZE_XS)
               .fontColor(COLOR_SUCCESS)
               .padding({ left: 7, right: 7, top: 2, bottom: 2 })
-              .backgroundColor(COLOR_SUCCESS + '18')
+              .backgroundColor(this.isDarkMode ? 'rgba(16,185,129,0.15)' : (COLOR_SUCCESS + '18'))
               .borderRadius(999)
           }
           if (hop.latency > 0) {
@@ -740,7 +740,7 @@ export struct TraceroutePage {
               .fontSize(FONT_SIZE_XS)
               .fontColor(this.getLatencyColor(hop.latency))
               .padding({ left: 7, right: 7, top: 2, bottom: 2 })
-              .backgroundColor(this.getLatencyColor(hop.latency) + '15')
+              .backgroundColor(this.isDarkMode ? this.getLatencyColor(hop.latency) + '20' : this.getLatencyColor(hop.latency) + '15')
               .borderRadius(999)
           }
         }
@@ -767,19 +767,20 @@ export struct TraceroutePage {
       }
       Text($r('app.string.tracing_path'))
         .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_SECONDARY)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
       Text($r('app.string.trace_duration_hint'))
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .width('100%')
     .height(200)
     .justifyContent(FlexAlign.Center)
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 操作按钮
@@ -798,7 +799,7 @@ export struct TraceroutePage {
         .padding({ top: 13, bottom: 13 })
         .backgroundColor('rgba(239,68,68,0.85)')
         .borderRadius(999)
-        .shadow({ radius: GLASS_SHADOW_SM, color: 'rgba(239,68,68,0.35)', offsetX: 0, offsetY: 5 })
+        .shadow({ radius: GLASS_SHADOW_SM, color: this.isDarkMode ? 'rgba(239,68,68,0.5)' : 'rgba(239,68,68,0.35)', offsetX: 0, offsetY: 5 })
         .onClick(() => this.stopTrace())
       } else {
         Row() {

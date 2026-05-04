@@ -1,7 +1,8 @@
 // Ping 测试页面 - 天蓝色透明毛玻璃悬浮风格
 // 风格：天蓝色渐变背景 + 透明毛玻璃卡片 + 胶囊按钮
 
-import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
+import { adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
+  COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
   COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_BACKGROUND, COLOR_SUCCESS, COLOR_WARNING,
   COLOR_GLASS_WHITE, COLOR_GLASS_SKY_SOLID, COLOR_GLASS_BORDER, COLOR_GLASS_SKY_LIGHT,
@@ -76,6 +77,7 @@ interface PingTestPageProps {
 // ==================== 组件 ====================
 @Component
 export struct PingTestPage {
+  @Consume isDarkMode: boolean = false
   // 输入验证错误消息
   @State inputError: string = ''
   // 输入 & 网关检测
@@ -139,7 +141,8 @@ export struct PingTestPage {
   // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
-      return getContext(this).resourceManager.getStringSync(str.id)
+      const ctx = this.getUIContext().getHostContext()
+      return ctx ? ctx.resourceManager.getStringSync(str.id) : ''
     } catch {
       return ''
     }
@@ -682,25 +685,20 @@ export struct PingTestPage {
         .height('100%')
         .linearGradient({
           direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
+          colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // 主内容
@@ -716,6 +714,7 @@ export struct PingTestPage {
 
         if (this.viewMode === 'testing') {
           TestingView({
+            isDarkMode: this.isDarkMode,
             pingHistory: this.pingHistory,
             sessionStats: this.sessionStats,
             sessionSummaries: this.sessionSummaries,
@@ -738,6 +737,7 @@ export struct PingTestPage {
           })
         } else {
           IdleView({
+            isDarkMode: this.isDarkMode,
             inputText: this.inputText,
             gatewayStatus: this.gatewayStatus,
             detectedGateway: this.detectedGateway,
@@ -753,6 +753,7 @@ export struct PingTestPage {
 
         if (this.showHistoryModal) {
           HistoryModal({
+            isDarkMode: this.isDarkMode,
             pingHistory: this.pingHistory,
             onClose: () => { this.showHistoryModal = false },
             getGlobalHistForModal: () => this.getGlobalHistForModal(),

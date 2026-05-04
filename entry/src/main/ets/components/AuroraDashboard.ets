@@ -20,6 +20,9 @@ import {
   COLOR_GLASS_AURORA,
   COLOR_GLASS_AURORA_LIGHT,
   COLOR_GLASS_AURORA_BORDER,
+  // 暗色模式毛玻璃
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_DARK_BORDER,
   // 文字色（暗色模式）
   COLOR_TEXT_GLASS_PRIMARY,
   COLOR_TEXT_GLASS_SECONDARY,
@@ -70,6 +73,21 @@ export struct AuroraConnectionCard {
 
   private get textTertiary(): string {
     return this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY
+  }
+
+  // 根据模式获取卡片背景色
+  private get cardBg(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_CARD
+  }
+
+  // 根据模式获取边框颜色
+  private get cardBorder(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_BORDER : 'rgba(255,255,255,0)'
+  }
+
+  // 浅色模式无边框
+  private get cardBorderWidth(): number {
+    return this.isDarkMode ? 1 : 0
   }
 
   aboutToAppear(): void {
@@ -200,10 +218,10 @@ export struct AuroraConnectionCard {
     .width('100%')
     .padding(20)
     // Aurora 极光渐变背景
-    .backgroundColor(COLOR_GLASS_CARD)
+    .backgroundColor(this.cardBg)
     .border({
-      width: 1,
-      color: COLOR_GLASS_BORDER_MEDIUM,
+      width: this.cardBorderWidth,
+      color: this.cardBorder,
       radius: RADIUS_CARD
     })
     .shadow({
@@ -215,11 +233,11 @@ export struct AuroraConnectionCard {
     .scale({ x: this.cardScale, y: this.cardScale })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        animateTo(AnimationTapScale, () => {
+        this.getUIContext().animateTo(AnimationTapScale, () => {
           this.cardScale = 0.98
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
+        this.getUIContext().animateTo({
           duration: DURATION_NORMAL,
           curve: Curve.EaseOut
         }, () => {
@@ -247,6 +265,36 @@ export struct AuroraNetworkGrid {
 
   private get textTertiary(): string {
     return this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_TERTIARY
+  }
+
+  // 根据模式获取卡片背景色
+  private get cardBg(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_CARD
+  }
+
+  // 根据模式获取边框颜色
+  private get cardBorder(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT
+  }
+
+  // 根据模式获取网格项背景色
+  private get gridItemBg(): string {
+    return this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_GLASS_SURFACE_MEDIUM
+  }
+
+  // 根据模式获取网格项边框颜色
+  private get gridItemBorder(): string {
+    return this.isDarkMode ? 'rgba(255,255,255,0.06)' : COLOR_GLASS_BORDER_LIGHT
+  }
+
+  // 浅色模式无边框
+  private get gridBorderWidth(): number {
+    return this.isDarkMode ? 1 : 0
+  }
+
+  // 浅色模式网格项边框
+  private get gridItemBorderWidth(): number {
+    return this.isDarkMode ? 1 : 0
   }
 
   aboutToAppear(): void {
@@ -277,11 +325,11 @@ export struct AuroraNetworkGrid {
     }
     .width('100%')
     .padding(12)
-    .backgroundColor(COLOR_GLASS_SURFACE_MEDIUM)
+    .backgroundColor(this.gridItemBg)
     .borderRadius(12)
     .border({
-      width: 1,
-      color: COLOR_GLASS_BORDER_LIGHT,
+      width: this.gridItemBorderWidth,
+      color: this.isDarkMode ? this.gridItemBorder : 'rgba(0,0,0,0)',
       radius: 12
     })
   }
@@ -337,11 +385,11 @@ export struct AuroraNetworkGrid {
     }
     .width('100%')
     .padding(16)
-    .backgroundColor(COLOR_GLASS_CARD)
+    .backgroundColor(this.cardBg)
     .borderRadius(RADIUS_CARD)
     .border({
-      width: 1,
-      color: COLOR_GLASS_BORDER_LIGHT,
+      width: this.gridBorderWidth,
+      color: this.cardBorder,
       radius: RADIUS_CARD
     })
   }
@@ -359,6 +407,36 @@ export struct AuroraToolsGrid {
   // 根据模式获取文字颜色
   private get textPrimary(): string {
     return this.isDarkMode ? COLOR_TEXT_GLASS_PRIMARY : COLOR_TEXT_LIGHT_PRIMARY
+  }
+
+  // 根据模式获取卡片背景色
+  private get cardBg(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_CARD
+  }
+
+  // 根据模式获取边框颜色
+  private get cardBorder(): string {
+    return this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT
+  }
+
+  // 根据模式获取工具项背景色
+  private get toolItemBg(): string {
+    return this.isDarkMode ? 'rgba(255,255,255,0.06)' : COLOR_GLASS_SURFACE
+  }
+
+  // 根据模式获取工具项边框颜色
+  private get toolItemBorder(): string {
+    return this.isDarkMode ? 'rgba(255,255,255,0.05)' : COLOR_GLASS_BORDER_LIGHT
+  }
+
+  // 浅色模式无边框
+  private get toolBorderWidth(): number {
+    return this.isDarkMode ? 1 : 0
+  }
+
+  // 浅色模式工具项边框
+  private get toolItemBorderWidth(): number {
+    return this.isDarkMode ? 1 : 0
   }
 
   @Builder
@@ -394,21 +472,21 @@ export struct AuroraToolsGrid {
     }
     .width('100%')
     .padding(12)
-    .backgroundColor(COLOR_GLASS_SURFACE)
+    .backgroundColor(this.toolItemBg)
     .borderRadius(14)
     .border({
-      width: 1,
-      color: COLOR_GLASS_BORDER_LIGHT,
+      width: this.toolItemBorderWidth,
+      color: this.isDarkMode ? this.toolItemBorder : 'rgba(0,0,0,0)',
       radius: 14
     })
     .scale({ x: this.toolScale, y: this.toolScale })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        animateTo(AnimationTapScale, () => {
+        this.getUIContext().animateTo(AnimationTapScale, () => {
           this.toolScale = 0.92
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
+        this.getUIContext().animateTo({
           duration: DURATION_NORMAL,
           curve: Curve.EaseOut
         }, () => {
@@ -468,11 +546,11 @@ export struct AuroraToolsGrid {
     }
     .width('100%')
     .padding(15)
-    .backgroundColor(COLOR_GLASS_CARD)
+    .backgroundColor(this.cardBg)
     .borderRadius(RADIUS_CARD)
     .border({
-      width: 1,
-      color: COLOR_GLASS_BORDER_LIGHT,
+      width: this.toolBorderWidth,
+      color: this.cardBorder,
       radius: RADIUS_CARD
     })
   }

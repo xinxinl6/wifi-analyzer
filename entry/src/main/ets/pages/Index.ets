@@ -1,4 +1,4 @@
-import { common } from '@kit.AbilityKit'
+import { common, ConfigurationConstant } from '@kit.AbilityKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { EventBus } from '../utils/EventBus'
 import {
@@ -76,7 +76,7 @@ struct Index {
 
   @State permissionGranted: boolean = false
   @State currentIndex: number = 0
-  @State isDarkMode: boolean = false
+  @Provide('isDarkMode') isDarkMode: boolean = false
 
   // Aurora V2 — AI 助手状态
   @State showAIPanel: boolean = false
@@ -131,9 +131,9 @@ struct Index {
     try {
       const context = this.getUIContext().getHostContext() as common.UIAbilityContext
       if (context) {
-        // 读取暗色模式
+        // 读取暗色模式（COLOR_MODE_DARK = 1 表示暗色模式）
         const colorMode = context.config.colorMode
-        this.isDarkMode = (colorMode === 0)
+        this.isDarkMode = (colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
 
         // 直接请求权限并开始扫描
         this.requestPermissionsAndScan(context)
@@ -180,7 +180,7 @@ struct Index {
     const prevIndex = this.currentIndex
 
     // === 阶段 1：页面内容淡出 ===
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 100,
       curve: Curve.FastOutSlowIn
     }, () => {
@@ -206,7 +206,7 @@ struct Index {
     offsets1[index] = 4
     dots1[prevIndex] = 0
 
-    animateTo({ duration: 100, curve: Curve.FastOutSlowIn }, () => {
+    this.getUIContext().animateTo({ duration: 100, curve: Curve.FastOutSlowIn }, () => {
       this.tabScales = scales1
       this.tabOffsetY = offsets1
       this.tabDotOpacity = dots1
@@ -239,7 +239,7 @@ struct Index {
       dots2[index] = 1
 
       // 图标弹跳弹出 + 光晕出现
-      animateTo({ duration: 280, curve: Curve.FastOutSlowIn }, () => {
+      this.getUIContext().animateTo({ duration: 280, curve: Curve.FastOutSlowIn }, () => {
         this.tabScales = scales2
         this.tabOffsetY = offsets2
         this.tabGlows = glows2
@@ -247,7 +247,7 @@ struct Index {
       })
 
       // 页面内容淡入
-      animateTo({ duration: 250, curve: Curve.EaseOut }, () => {
+      this.getUIContext().animateTo({ duration: 250, curve: Curve.EaseOut }, () => {
         this.contentOpacity = 1
         this.contentOffsetY = 0
       })
@@ -259,7 +259,7 @@ struct Index {
       const offsets3 = [0, 0, 0, 0, 0]
       const glows3 = [0, 0, 0, 0, 0]
 
-      animateTo({ duration: 220, curve: Curve.EaseOut }, () => {
+      this.getUIContext().animateTo({ duration: 220, curve: Curve.EaseOut }, () => {
         this.tabScales = scales3
         this.tabOffsetY = offsets3
         this.tabGlows = glows3
@@ -471,15 +471,15 @@ struct Index {
                   .width(44)
                   .height(44)
                   .borderRadius(22)
-                  .backgroundColor('#007AFF')
-                  .opacity(this.tabGlows[index] * 0.12 + (this.currentIndex === index ? 0.10 : 0))
+                  .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.35)' : '#007AFF')
+                  .opacity(this.tabGlows[index] * (this.isDarkMode ? 0.20 : 0.12) + (this.currentIndex === index ? (this.isDarkMode ? 0.15 : 0.10) : 0))
                   .blur(8)
 
                 // Tab 图标（带弹跳位移 + 缩放）
                 Image(item.icon)
                   .width(26)
                   .height(26)
-                  .fillColor(this.currentIndex === index ? '#007AFF' : '#8E8E93')
+                  .fillColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : '#8E8E93'))
                   .scale({ x: this.tabScales[index], y: this.tabScales[index] })
                   .translate({ x: 0, y: this.tabOffsetY[index] })
               }
@@ -490,7 +490,7 @@ struct Index {
               Text(item.title)
                 .fontSize(11)
                 .fontWeight(this.currentIndex === index ? FontWeight.Medium : FontWeight.Normal)
-                .fontColor(this.currentIndex === index ? '#007AFF' : '#8E8E93')
+                .fontColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : '#8E8E93'))
                 .margin({ top: 2 })
                 .scale({ x: this.tabScales[index], y: this.tabScales[index] })
 
@@ -499,7 +499,7 @@ struct Index {
                 .width(4)
                 .height(4)
                 .borderRadius(2)
-                .backgroundColor('#007AFF')
+                .backgroundColor(COLOR_AURORA_PRIMARY)
                 .margin({ top: 3 })
                 .opacity(this.tabDotOpacity[index])
             }
@@ -516,27 +516,22 @@ struct Index {
         .height(80)
         .padding({ top: 10, bottom: 12 })
         // === 毛玻璃效果 ===
-        .backgroundColor('rgba(255, 255, 255, 0.68)')
+        .backgroundColor(this.isDarkMode ? 'rgba(30,41,59,0.75)' : 'rgba(255,255,255,0.68)')
         .backdropBlur(18)
-        .linearGradient({
-          direction: GradientDirection.Top,
-          colors: [
-            ['rgba(255, 255, 255, 0.45)', 0],
-            ['rgba(255, 255, 255, 0.14)', 0.5],
-            ['rgba(255, 255, 255, 0.08)', 1]
-          ]
-        })
+        .linearGradient(this.isDarkMode
+          ? { direction: GradientDirection.Top, colors: [['rgba(30,41,59,0.45)', 0], ['rgba(30,41,59,0.14)', 0.5], ['rgba(30,41,59,0.08)', 1]] }
+          : { direction: GradientDirection.Top, colors: [['rgba(255,255,255,0.45)', 0], ['rgba(255,255,255,0.14)', 0.5], ['rgba(255,255,255,0.08)', 1]] })
         .borderRadius(28)
         .border({
           width: { top: 0.5, bottom: 0 },
           color: {
-            top: 'rgba(255, 255, 255, 0.78)',
-            bottom: 'rgba(0, 0, 0, 0.04)'
+            top: this.isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.78)',
+            bottom: this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'
           }
         })
         .shadow({
           radius: 24,
-          color: 'rgba(0, 0, 0, 0.12)',
+          color: this.isDarkMode ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.12)',
           offsetX: 0,
           offsetY: 6
         })

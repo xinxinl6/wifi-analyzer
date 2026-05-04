@@ -6,7 +6,24 @@ import { COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_WARNING, COLOR
   COLOR_SIGNAL_EXCELLENT,
   COLOR_GLASS_BORDER_LIGHT, COLOR_SHADOW_GLASS,
   FONT_SIZE_XXS, FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL, FONT_SIZE_4XL, FONT_SIZE_6XL, FONT_WEIGHT_BOLD, FONT_WEIGHT_MEDIUM,
-  SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL, SPACE_2XL, RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_XL, RADIUS_FULL, STROKE_WIDTH_SM, STROKE_WIDTH_MD, CARD_RADIUS, CARD_SHADOW_RADIUS, TAB_BAR_SAFE_BOTTOM } from '@wifi-analyzer/design-system'
+  SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL, SPACE_2XL, RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_XL, RADIUS_FULL, STROKE_WIDTH_SM, STROKE_WIDTH_MD, CARD_RADIUS, CARD_SHADOW_RADIUS, TAB_BAR_SAFE_BOTTOM,
+  // 暗色模式自适应工具
+  adaptiveBackgroundList,
+  adaptiveGlowLarge,
+  adaptiveGlowMedium,
+  adaptiveTextPrimary,
+  adaptiveTextSecondary,
+  adaptiveTextTertiary,
+  adaptiveCardBg,
+  adaptiveFadeColor,
+  adaptiveDivider,
+  COLOR_TEXT_GLASS_PRIMARY,
+  COLOR_TEXT_GLASS_SECONDARY,
+  COLOR_TEXT_GLASS_TERTIARY,
+  COLOR_GLASS_DARK_SURFACE,
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_DARK_BORDER
+  } from '@wifi-analyzer/design-system'
 import { WifiItem, SharedWifiState } from '@wifi-analyzer/core'
 
 // 信道-AP数量对（用于排序）
@@ -30,6 +47,9 @@ interface ChannelCacheData {
 export struct ChannelSection {
   // 消费共享WiFi数据
   @Consume('wifiState') wifiState: SharedWifiState
+
+  // 暗色模式状态
+  @Consume('isDarkMode') isDarkMode: boolean
 
   // 当前选中的频段
   @State currentBand: string = '2.4'
@@ -231,25 +251,20 @@ export struct ChannelSection {
         .height('100%')
         .linearGradient({
           direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
+          colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // ===== 主内容层 =====
@@ -290,7 +305,9 @@ export struct ChannelSection {
             .translate({ y: -80 })
             .linearGradient({
               direction: GradientDirection.Top,
-              colors: [[COLOR_FADE_LIGHT, 0], ['rgba(245,247,250,0)', 1]]
+              colors: this.isDarkMode
+                ? [['rgba(10,22,40,0)', 1], ['rgba(10,22,40,0.95)', 0]]
+                : [[COLOR_FADE_LIGHT, 0], ['rgba(245,247,250,0)', 1]]
             })
             .hitTestBehavior(HitTestMode.None)
         }
@@ -352,7 +369,7 @@ export struct ChannelSection {
       Text(label)
         .fontSize(FONT_SIZE_MD)
         .fontWeight(this.currentBand === band ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
-        .fontColor(this.currentBand === band ? this.getBandColor() : COLOR_TEXT_SECONDARY)
+        .fontColor(this.currentBand === band ? this.getBandColor() : adaptiveTextSecondary(this.isDarkMode))
         .animation({ duration: 200 })
 
       Circle()
@@ -390,13 +407,13 @@ export struct ChannelSection {
           Text(this.getBandNameResource())
             .fontSize(FONT_SIZE_SM)
             .fontWeight(FONT_WEIGHT_BOLD)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
 
           Text(this.getBandDescriptionResource())
             .fontSize(FONT_SIZE_XXS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
         }
@@ -413,7 +430,7 @@ export struct ChannelSection {
 
           Text(this.getNetworkCountLabel())
             .fontSize(FONT_SIZE_XXS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
         .alignItems(HorizontalAlign.Center)
       }
@@ -425,7 +442,7 @@ export struct ChannelSection {
       Row() {
         Text(this.getBandRange())
           .fontSize(FONT_SIZE_XXS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
 
@@ -433,7 +450,7 @@ export struct ChannelSection {
 
         Text('CH' + this.cachedChannels[0] + '-' + this.cachedChannels[this.cachedChannels.length - 1])
           .fontSize(FONT_SIZE_XXS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
       }
@@ -444,9 +461,9 @@ export struct ChannelSection {
     .width('95%')
     .height(88)
     .padding(SPACE_MD)
-    .backgroundColor('rgba(255,255,255,0.60)')
+    .backgroundColor(adaptiveCardBg(this.isDarkMode))
     .borderRadius(CARD_RADIUS)
-    .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
+    .border({ width: 1, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT })
     .shadow({ radius: 8, color: COLOR_SHADOW_GLASS, offsetX: 0, offsetY: 2 })
     .backdropBlur(10)
     .margin({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: SPACE_MD })
@@ -459,7 +476,7 @@ export struct ChannelSection {
       Row() {
         Text($r('app.string.channel_distribution'))
           .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
 
         Blank()
@@ -484,9 +501,9 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    .backgroundColor('rgba(255,255,255,0.60)')
+    .backgroundColor(adaptiveCardBg(this.isDarkMode))
     .borderRadius(CARD_RADIUS)
-    .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
+    .border({ width: 1, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT })
     .shadow({ radius: 8, color: COLOR_SHADOW_GLASS, offsetX: 0, offsetY: 2 })
     .backdropBlur(10)
   }
@@ -507,13 +524,13 @@ export struct ChannelSection {
 
       Text(this.getEmptyTitleResource())
         .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
         .fontWeight(FONT_WEIGHT_MEDIUM)
         .margin({ top: SPACE_SM })
 
       Text(this.getEmptySubtitleResource())
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_SECONDARY)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
         .textAlign(TextAlign.Center)
     }
     .width('100%')
@@ -529,17 +546,17 @@ export struct ChannelSection {
         Row()
           .width('100%')
           .height(1)
-          .backgroundColor(COLOR_CHART_GRID)
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_CHART_GRID)
           .opacity(0.5)
         Row()
           .width('100%')
           .height(1)
-          .backgroundColor(COLOR_CHART_GRID)
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_CHART_GRID)
           .opacity(0.5)
         Row()
           .width('100%')
           .height(1)
-          .backgroundColor(COLOR_CHART_GRID)
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_CHART_GRID)
           .opacity(0.5)
         Blank()
       }
@@ -579,7 +596,7 @@ export struct ChannelSection {
               // 信道号
               Text(item.channel.toString())
                 .fontSize(13)
-                .fontColor(COLOR_TEXT_TERTIARY)
+                .fontColor(adaptiveTextTertiary(this.isDarkMode))
                 .margin({ top: 4 })
             }
             .justifyContent(FlexAlign.End)
@@ -608,7 +625,7 @@ export struct ChannelSection {
         .fill(color)
       Text(label)
         .fontSize(FONT_SIZE_XXS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
   }
 
@@ -618,7 +635,7 @@ export struct ChannelSection {
       Row() {
         Text($r('app.string.recommend_channels'))
           .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
 
         Blank()
@@ -626,7 +643,7 @@ export struct ChannelSection {
         if (this.cachedTotalCount > 0) {
           Text($r('app.string.least_interference'))
             .fontSize(FONT_SIZE_XXS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
             .padding({ left: SPACE_SM, right: SPACE_SM, top: 2, bottom: 2 })
             .backgroundColor(COLOR_CHANNEL_RECOMMEND_BG)
             .borderRadius(RADIUS_SM)
@@ -646,7 +663,7 @@ export struct ChannelSection {
         Row() {
           Text($r('app.string.no_recommend'))
             .fontSize(FONT_SIZE_SM)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
         .width('100%')
         .justifyContent(FlexAlign.Center)
@@ -655,9 +672,9 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    .backgroundColor('rgba(255,255,255,0.60)')
+    .backgroundColor(adaptiveCardBg(this.isDarkMode))
     .borderRadius(CARD_RADIUS)
-    .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
+    .border({ width: 1, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT })
     .shadow({ radius: 8, color: COLOR_SHADOW_GLASS, offsetX: 0, offsetY: 2 })
     .backdropBlur(10)
   }
@@ -683,7 +700,7 @@ export struct ChannelSection {
           Span($r('app.string.networks_unit'))
         }
           .fontSize(FONT_SIZE_XXS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
           .margin({ top: 2 })
       }
     }
@@ -706,14 +723,14 @@ export struct ChannelSection {
       Row() {
         Text($r('app.string.channel_detail'))
           .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
 
         Blank()
 
         Text(this.cachedChannels.length + ' 个信道')
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
       }
       .width('100%')
       .margin({ bottom: SPACE_MD })
@@ -725,9 +742,9 @@ export struct ChannelSection {
     }
     .width('100%')
     .padding(SPACE_LG)
-    .backgroundColor('rgba(255,255,255,0.60)')
+    .backgroundColor(adaptiveCardBg(this.isDarkMode))
     .borderRadius(CARD_RADIUS)
-    .border({ width: 1, color: COLOR_GLASS_BORDER_LIGHT })
+    .border({ width: 1, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_LIGHT })
     .shadow({ radius: 8, color: COLOR_SHADOW_GLASS, offsetX: 0, offsetY: 2 })
     .backdropBlur(10)
   }
@@ -746,7 +763,7 @@ export struct ChannelSection {
           Text('CH' + item.channel)
             .fontSize(FONT_SIZE_XS)
             .fontWeight(FONT_WEIGHT_MEDIUM)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
         }
         .width(50)
 
@@ -761,7 +778,7 @@ export struct ChannelSection {
             })
             .borderRadius(3)
         }
-        .backgroundColor(COLOR_CHART_GRID)
+        .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_CHART_GRID)
         .borderRadius(3)
         .layoutWeight(1)
 
@@ -774,7 +791,7 @@ export struct ChannelSection {
 
           Text($r('app.string.unit_count'))
             .fontSize(9)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
         .width(36)
         .justifyContent(FlexAlign.End)

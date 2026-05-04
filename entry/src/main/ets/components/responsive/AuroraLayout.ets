@@ -105,9 +105,9 @@ export struct AuroraBottomNav {
     .justifyContent(FlexAlign.Center)
     .scale({ x: this.tabScales[index] || 1, y: this.tabScales[index] || 1 })
     .onClick(() => {
-      animateTo({ duration: 80 }, () => { this.tabScales[index] = 0.88 })
+      this.getUIContext().animateTo({ duration: 80 }, () => { this.tabScales[index] = 0.88 })
       setTimeout(() => {
-        animateTo({ duration: 150 }, () => { this.tabScales[index] = 1 })
+        this.getUIContext().animateTo({ duration: 150 }, () => { this.tabScales[index] = 1 })
       }, 80)
       this.onSelect(index)
     })
@@ -266,7 +266,7 @@ export struct AuroraMainLayout {
           collapsed: this.sidebarCollapsed,
           onSelect: this.onTabChange,
           onToggleCollapse: () => {
-            animateTo({ duration: 200 }, () => { this.sidebarCollapsed = !this.sidebarCollapsed })
+            this.getUIContext().animateTo({ duration: 200 }, () => { this.sidebarCollapsed = !this.sidebarCollapsed })
           }
         })
         .width(this.sidebarCollapsed ? AuroraBreakpoints.SIDEBAR_WIDTH_COMPACT : AuroraBreakpoints.SIDEBAR_WIDTH_EXPANDED)

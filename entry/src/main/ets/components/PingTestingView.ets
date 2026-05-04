@@ -1,12 +1,14 @@
 // Ping 测试 - 测试视图组件
 // 天蓝色毛玻璃风格
 
-import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
+import { adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveCardBg, adaptiveDivider,
+  COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
   COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_BACKGROUND, COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER,
   COLOR_GLASS_WHITE, COLOR_GLASS_SKY_LIGHT, COLOR_GLASS_SKY_ACTIVE,
   COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER, COLOR_GLASS_SKY_SHADOW_MED,
-  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_2XL, FONT_SIZE_3XL,
+  COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
+  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
@@ -15,6 +17,7 @@ import { PingResult, PingStats, PingSessionSummary } from './PingTestPage'
 
 // ==================== Props 接口 ====================
 export interface TestingViewProps {
+  isDarkMode: boolean
   pingHistory: PingResult[]
   sessionStats: PingStats
   sessionSummaries: PingSessionSummary[]
@@ -39,6 +42,7 @@ export interface TestingViewProps {
 // ==================== 测试视图 ====================
 @Component
 export struct TestingView {
+  @Prop isDarkMode: boolean = false
   @State pingHistory: PingResult[] = []
   @State sessionStats: PingStats = {
     sentCount: 0, receivedCount: 0, lossRate: 0,
@@ -100,7 +104,7 @@ export struct TestingView {
     Row({ space: 14 }) {
       // 图标容器
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(44).height(44).fill(COLOR_GLASS_SKY_LIGHT)
+        Circle().width(44).height(44).fill(this.isDarkMode ? 'rgba(14,165,233,0.12)' : COLOR_GLASS_SKY_LIGHT)
         Circle().width(36).height(36)
           .fill(this.isTesting ? (this.isPaused ? COLOR_WARNING : COLOR_SKY_BLUE) : COLOR_SUCCESS)
         Image($r('app.media.ic_ping')).width(18).height(18).fillColor('#FFFFFF')
@@ -109,7 +113,7 @@ export struct TestingView {
       Column({ space: 4 }) {
         Text(this.targetHost)
           .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -118,7 +122,7 @@ export struct TestingView {
           if (this.resolvedIp !== this.targetHost && this.resolvedIp.length > 0) {
             Text(this.resolvedIp)
               .fontSize(FONT_SIZE_XS)
-              .fontColor(COLOR_TEXT_TERTIARY)
+              .fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
           if (this.isTesting) {
             Row({ space: 4 }) {
@@ -143,10 +147,10 @@ export struct TestingView {
     }
     .width('100%')
     .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
@@ -158,7 +162,7 @@ export struct TestingView {
       Column({ space: 4 }) {
         Text('#' + String(this.pingHistory.length))
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_TERTIARY)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
         Text(this.lastPingResult?.status === 'success' ? '✓' : '✗')
           .fontSize(FONT_SIZE_2XL)
           .fontColor(this.lastPingResult?.status === 'success' ? COLOR_SUCCESS : COLOR_DANGER)
@@ -176,7 +180,7 @@ export struct TestingView {
             .fontStyle(FontStyle.Normal)
           Text($r('app.string.response_time'))
             .fontSize(FONT_SIZE_XS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         } else {
           Text(this.lastPingResult?.status === 'timeout' ? '--' : 'ERR')
             .fontSize(48)
@@ -184,7 +188,7 @@ export struct TestingView {
             .fontWeight(FONT_WEIGHT_BOLD)
           Text(this.lastPingResult?.status === 'timeout' ? $r('app.string.ping_timeout') : $r('app.string.ping_error'))
             .fontSize(FONT_SIZE_XS)
-            .fontColor(COLOR_TEXT_TERTIARY)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
       }
       .alignItems(HorizontalAlign.Start)
@@ -192,10 +196,10 @@ export struct TestingView {
     }
     .width('100%')
     .padding({ left: 16, right: 16, top: 20, bottom: 20 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(20)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
@@ -213,7 +217,7 @@ export struct TestingView {
       }
       .width('100%')
 
-      Column().width('100%').height(0.5).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+      Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
 
       // 第二行：最大 / 最小 / 平均
       Row() {
@@ -225,7 +229,7 @@ export struct TestingView {
       }
       .width('100%')
 
-      Column().width('100%').height(0.5).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+      Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
 
       // 第三行：抖动 / 稳定性
       Row() {
@@ -236,10 +240,10 @@ export struct TestingView {
       .width('100%')
     }
     .width('100%')
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
     .clip(true)
@@ -253,7 +257,7 @@ export struct TestingView {
         .fontWeight(FONT_WEIGHT_BOLD)
       Text(label)
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .layoutWeight(1)
     .alignItems(HorizontalAlign.Center)
@@ -263,7 +267,7 @@ export struct TestingView {
   @Builder StatDivider() {
     Column()
       .width(1).height(36)
-      .backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
   }
 
   getStabilityColor(score: number): string {
@@ -309,15 +313,15 @@ export struct TestingView {
         Row({ space: SPACE_LG }) {
           Row({ space: 4 }) {
             Circle().width(8).height(8).fill(COLOR_SUCCESS)
-            Text($r('app.string.best')).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_SECONDARY)
+            Text($r('app.string.best')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
           }
           Row({ space: 4 }) {
             Circle().width(8).height(8).fill(COLOR_DANGER)
-            Text($r('app.string.worst')).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_SECONDARY)
+            Text($r('app.string.worst')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
           }
           Row({ space: 4 }) {
             Circle().width(8).height(8).fill(COLOR_SKY_BLUE)
-            Text($r('app.string.avg')).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_SECONDARY)
+            Text($r('app.string.avg')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
           }
         }
         .width('100%')
@@ -333,10 +337,10 @@ export struct TestingView {
     }
     .width('100%')
     .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
@@ -347,9 +351,9 @@ export struct TestingView {
       Row({ space: SPACE_XS }) {
         // Y 轴刻度列
         Column({ space: 0 }) {
-          Text(String(Math.round(this.chartMaxY))).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(20).textAlign(TextAlign.End)
-          Text(String(Math.round(this.chartMaxY * 0.5))).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(20).textAlign(TextAlign.End)
-          Text('0').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(20).textAlign(TextAlign.End)
+          Text(String(Math.round(this.chartMaxY))).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
+          Text(String(Math.round(this.chartMaxY * 0.5))).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
+          Text('0').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
         }
         .height(160).justifyContent(FlexAlign.SpaceBetween).alignItems(HorizontalAlign.End)
 
@@ -401,11 +405,10 @@ export struct TestingView {
                   .backgroundColor(
                     this.isChartBest(item) ? COLOR_SUCCESS :
                       (this.isChartWorst(item) ? COLOR_DANGER :
-                        (item.status === 'success' ? COLOR_SKY_BLUE : COLOR_SKY_BLUE_DIVIDER))
-                  )
+                        (item.status === 'success' ? COLOR_SKY_BLUE : COLOR_SKY_BLUE_DIVIDER)))
                 // 底部标签
                 Text(String(index + 1))
-                  .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+                  .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
               }
               .alignItems(HorizontalAlign.Center)
             }, (item: PingResult, index: number): string => String(index + '_' + item.timestamp))
@@ -426,9 +429,9 @@ export struct TestingView {
     if (this.sessionSummaries.length === 0) {
       Column({ space: SPACE_MD }) {
         Text($r('app.string.no_history_data'))
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_TERTIARY)
+          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
         Text($r('app.string.chart_hint'))
-          .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_TERTIARY)
+          .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
       }
       .width('100%').height(180).justifyContent(FlexAlign.Center)
     } else {
@@ -436,16 +439,16 @@ export struct TestingView {
         Row({ space: SPACE_XS }) {
           // Y 轴刻度列
           Column({ space: 0 }) {
-            Text('100').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(24).textAlign(TextAlign.End)
-            Text('50').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(24).textAlign(TextAlign.End)
-            Text('0').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(24).textAlign(TextAlign.End)
+            Text('100').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
+            Text('50').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
+            Text('0').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
           }
           .height(160).justifyContent(FlexAlign.SpaceBetween)
 
           // 折线图绘制区
           Stack({ alignContent: Alignment.Bottom }) {
             Column() {
-              Row().width('100%').height(80).border({ width: { bottom: 0.5 }, color: COLOR_SKY_BLUE_DIVIDER })
+              Row().width('100%').height(80).border({ width: { bottom: 0.5 }, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER })
               Row().width('100%').height(80)
             }.width('100%').height(160)
 
@@ -458,7 +461,7 @@ export struct TestingView {
                     .margin({ bottom: (summary.stabilityScore / 100) * 160 - 4 })
 
                   Text(this.formatTime(summary.timestamp))
-                    .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+                    .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
                     .margin({ top: 4 })
                 }.alignItems(HorizontalAlign.Center)
               }, (summary: PingSessionSummary, index: number): string => String(index + '_' + summary.timestamp))
@@ -488,10 +491,10 @@ export struct TestingView {
       .justifyContent(FlexAlign.Center)
       .layoutWeight(1)
       .padding({ top: 13, bottom: 13 })
-      .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+      .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
       .borderRadius(999)
       .borderWidth(1)
-      .borderColor(COLOR_GLASS_SKY_TAG_BORDER)
+      .borderColor(this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
       .onClick(() => this.onEndTest())
 
       // 暂停/继续按钮

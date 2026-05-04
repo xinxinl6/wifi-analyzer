@@ -1,11 +1,13 @@
 // Ping 测试 - 初始视图组件
 // 天蓝色毛玻璃风格
 
-import { COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
+import { adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveCardBg, adaptiveDivider,
+  COLOR_SKY_BLUE, COLOR_SKY_BLUE_LIGHT, COLOR_SKY_BLUE_DIVIDER,
   COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   COLOR_BACKGROUND, COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER,
   COLOR_GLASS_WHITE, COLOR_GLASS_SKY_LIGHT, COLOR_GLASS_SKY_ACTIVE,
   COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER, COLOR_GLASS_SKY_SHADOW_MED,
+  COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG,
@@ -15,6 +17,7 @@ import { PingResult, QuickAddressItem } from './PingTestPage'
 
 // ==================== Props 接口 ====================
 export interface IdleViewProps {
+  isDarkMode: boolean
   inputText: string
   gatewayStatus: string
   detectedGateway: string
@@ -31,6 +34,7 @@ export interface IdleViewProps {
 // ==================== 初始视图 ====================
 @Component
 export struct IdleView {
+  @Prop isDarkMode: boolean = false
   @Prop inputText: string = ''
   @Prop gatewayStatus: string = 'loading'
   @Prop detectedGateway: string = ''
@@ -51,10 +55,10 @@ export struct IdleView {
           Text($r('app.string.ping_test'))
             .fontSize(FONT_SIZE_3XL)
             .fontWeight(FONT_WEIGHT_BOLD)
-            .fontColor(COLOR_TEXT_PRIMARY)
+            .fontColor(adaptiveTextPrimary(this.isDarkMode))
           Text($r('app.string.ping_desc'))
             .fontSize(FONT_SIZE_SM)
-            .fontColor(COLOR_TEXT_SECONDARY)
+            .fontColor(adaptiveTextSecondary(this.isDarkMode))
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
@@ -87,8 +91,8 @@ export struct IdleView {
       TextInput({ placeholder: $r('app.string.input_ip_hint'), text: this.inputText })
         .layoutWeight(1)
         .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_PRIMARY)
-        .placeholderColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextPrimary(this.isDarkMode))
+        .placeholderColor(adaptiveTextTertiary(this.isDarkMode))
         .backgroundColor(Color.Transparent)
         .onChange((value: string) => { this.onInputChange(value) })
         .onSubmit(() => this.onStartPing())
@@ -108,10 +112,10 @@ export struct IdleView {
     }
     .width('100%')
     .padding({ left: 16, right: 12, top: 13, bottom: 13 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_XL, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
@@ -121,7 +125,7 @@ export struct IdleView {
     Column({ space: 8 }) {
       Text($r('app.string.recommended_target'))
         .fontSize(FONT_SIZE_XS)
-        .fontColor(COLOR_TEXT_TERTIARY)
+        .fontColor(adaptiveTextTertiary(this.isDarkMode))
         .alignSelf(ItemAlign.Start)
 
       Row({ space: SPACE_SM }) {
@@ -139,36 +143,40 @@ export struct IdleView {
           Text($r('app.string.gateway'))
             .fontSize(FONT_SIZE_MD)
             .fontColor(
-              this.gatewayStatus === 'loading' ? COLOR_TEXT_TERTIARY :
+              this.gatewayStatus === 'loading' ? adaptiveTextTertiary(this.isDarkMode) :
                 (this.gatewayStatus === 'ready' ? COLOR_SKY_BLUE : COLOR_WARNING)
             )
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }
         .padding({ left: 14, right: 14, top: 7, bottom: 7 })
         .backgroundColor(
-          this.gatewayStatus === 'ready' ? COLOR_GLASS_SKY_TAG_BG : 'rgba(148,163,184,0.08)'
+          this.gatewayStatus === 'ready'
+            ? (this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+            : (this.isDarkMode ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.08)')
         )
         .borderRadius(999)
         .borderWidth(1)
         .borderColor(
-          this.gatewayStatus === 'ready' ? COLOR_GLASS_SKY_TAG_BORDER : 'rgba(148,163,184,0.2)'
+          this.gatewayStatus === 'ready'
+            ? (this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
+            : (this.isDarkMode ? 'rgba(148,163,184,0.25)' : 'rgba(148,163,184,0.2)')
         )
         .onClick(() => this.onFillGateway())
 
         // DNS 标签
         Row({ space: 5 }) {
           Circle().width(7).height(7)
-            .fill(this.detectedDns !== '' ? COLOR_SUCCESS : COLOR_TEXT_TERTIARY)
+            .fill(this.detectedDns !== '' ? COLOR_SUCCESS : adaptiveTextTertiary(this.isDarkMode))
           Text($r('app.string.dns'))
             .fontSize(FONT_SIZE_MD)
             .fontColor(COLOR_SKY_BLUE)
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }
         .padding({ left: 14, right: 14, top: 7, bottom: 7 })
-        .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+        .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
         .borderRadius(999)
         .borderWidth(1)
-        .borderColor(COLOR_GLASS_SKY_TAG_BORDER)
+        .borderColor(this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
         .onClick(() => this.onRecommendTap(1))
 
         // 百度标签
@@ -180,10 +188,10 @@ export struct IdleView {
             .fontWeight(FONT_WEIGHT_MEDIUM)
         }
         .padding({ left: 14, right: 14, top: 7, bottom: 7 })
-        .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+        .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
         .borderRadius(999)
         .borderWidth(1)
-        .borderColor(COLOR_GLASS_SKY_TAG_BORDER)
+        .borderColor(this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
         .onClick(() => this.onRecommendTap(2))
       }
       .alignSelf(ItemAlign.Start)
@@ -200,22 +208,22 @@ export struct IdleView {
         Text($r('app.string.feature_intro'))
           .fontSize(FONT_SIZE_SM)
           .fontWeight(FONT_WEIGHT_BOLD)
-          .fontColor(COLOR_TEXT_SECONDARY)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
       }
       .width('100%')
       .padding({ bottom: 12 })
 
       Column({ space: 0 }) {
         this.FeatureItem($r('app.media.ic_ping'), $r('app.string.latency_detection'), $r('app.string.latency_detection_desc'), '⚡')
-        Column().width('100%').height(0.5).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
         this.FeatureItem($r('app.media.ic_stability'), $r('app.string.stability_analysis'), $r('app.string.stability_analysis_desc'), '📊')
-        Column().width('100%').height(0.5).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
+        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
         this.FeatureItem($r('app.media.ic_chart'), $r('app.string.history_trend'), $r('app.string.history_trend_desc'), '📈')
       }
-      .backgroundColor(COLOR_GLASS_WHITE)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
       .borderRadius(18)
       .borderWidth(1.5)
-      .borderColor(COLOR_GLASS_SKY_LIGHT)
+      .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
       .backdropBlur(GLASS_BLUR_LG)
       .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
       .clip(true)
@@ -235,11 +243,11 @@ export struct IdleView {
       Column({ space: 3 }) {
         Text(title)
           .fontSize(FONT_SIZE_MD)
-          .fontColor(COLOR_TEXT_PRIMARY)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
         Text(desc)
           .fontSize(FONT_SIZE_XS)
-          .fontColor(COLOR_TEXT_SECONDARY)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)

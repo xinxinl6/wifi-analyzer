@@ -80,7 +80,7 @@ export struct AuroraTabItem {
 
   // 点击按下
   private onPress(): void {
-    animateTo(AnimationTapScale, () => {
+    this.getUIContext().animateTo(AnimationTapScale, () => {
       this.scale = 0.90
       this.iconOpacity = 1.0
       this.textOpacity = 1.0
@@ -90,7 +90,7 @@ export struct AuroraTabItem {
 
   // 点击释放
   private onRelease(): void {
-    animateTo({
+    this.getUIContext().animateTo({
       duration: DURATION_NORMAL,
       curve: Curve.EaseOut
     }, () => {
@@ -239,7 +239,7 @@ export struct AuroraAIFab {
 
   aboutToAppear(): void {
     // 脉冲光晕动画
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 2000,
       curve: Curve.EaseInOut,
       iterations: -1,
@@ -273,11 +273,11 @@ export struct AuroraAIFab {
           .scale({ x: this.scale, y: this.scale })
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {
-              animateTo(AnimationTapScale, () => {
+              this.getUIContext().animateTo(AnimationTapScale, () => {
                 this.scale = 0.88
               })
             } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-              animateTo({
+              this.getUIContext().animateTo({
                 duration: DURATION_NORMAL,
                 curve: Curve.EaseOut
               }, () => {

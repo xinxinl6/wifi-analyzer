@@ -17,13 +17,27 @@ import { COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER,
   GLASS_BLUR_LG, GLASS_BLUR_XL, GLASS_BLUR_MAX,
   GLASS_SHADOW_SM, GLASS_SHADOW_MD, GLASS_SHADOW_LG, GLASS_SHADOW_XL,
   GLASS_SHADOW_2XL, GLASS_SHADOW_3XL, GLASS_SHADOW_MAX,
-  TAB_BAR_SAFE_BOTTOM } from '@wifi-analyzer/design-system'
+  TAB_BAR_SAFE_BOTTOM,
+  // 暗色模式自适应工具
+  adaptiveBackgroundList,
+  adaptiveGlowLarge,
+  adaptiveGlowMedium,
+  adaptiveTextPrimary,
+  adaptiveTextSecondary,
+  adaptiveTextTertiary,
+  COLOR_TEXT_GLASS_PRIMARY,
+  COLOR_TEXT_GLASS_SECONDARY,
+  COLOR_TEXT_GLASS_TERTIARY,
+  COLOR_GLASS_DARK_SURFACE,
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_DARK_BORDER } from '@wifi-analyzer/design-system'
 import { SpeedTestResult } from '@wifi-analyzer/core'
 import { SpeedTestEngine, SERVER_NODES, SpeedTestCallbacks, ServerNode } from '@wifi-analyzer/speed-test'
 
 @Component
 export struct SpeedTestSection {
   // 状态
+  @Consume('isDarkMode') isDarkMode: boolean
   @State selectedServerIndex: number = 0
   @State showServerPanel: boolean = false
   @State serverPopupScale: number = 0
@@ -59,27 +73,22 @@ export struct SpeedTestSection {
       Column() {}
         .width('100%')
         .height('100%')
-        .linearGradient({
-          direction: GradientDirection.Bottom,
-          colors: [
-            ['#C9E2F5', 0],
-            ['#D6E9F8', 0.4],
-            ['#E0F0FA', 0.75],
-            ['#EAF4FB', 1]
-          ]
-        })
+      .linearGradient({
+        direction: GradientDirection.Bottom,
+        colors: adaptiveBackgroundList(this.isDarkMode)
+      })
 
       // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
-        .fill('rgba(74,144,217,0.12)')
+        .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
 
       Circle()
         .width(180)
         .height(180)
-        .fill('rgba(135,206,235,0.10)')
+        .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
       // 主内容
@@ -116,33 +125,33 @@ export struct SpeedTestSection {
       .width(42).height(42)
       .justifyContent(FlexAlign.Center)
       .alignItems(HorizontalAlign.Center)
-      .backgroundColor(COLOR_GLASS_SKY_ACTIVE)
+      .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.20)' : COLOR_GLASS_SKY_ACTIVE)
       .borderRadius(14)
 
       Column({ space: 4 }) {
-        Text($r('app.string.select_speed_server')).fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_SECONDARY)
-        Text(this.getServerName()).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(COLOR_TEXT_PRIMARY)
+        Text($r('app.string.select_speed_server')).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
+        Text(this.getServerName()).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
       Column() {
-        Text('›').fontSize(FONT_SIZE_3XL).fontColor(COLOR_SKY_BLUE)
+        Text('›').fontSize(FONT_SIZE_3XL).fontColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_SKY_BLUE)
       }
       .width(28).height(28)
       .justifyContent(FlexAlign.Center)
       .alignItems(HorizontalAlign.Center)
-      .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+      .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_TAG_BG)
       .borderRadius(8)
     }
     .width('100%')
     .padding({ left: 16, right: 16, top: 14, bottom: 14 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
-    .shadow({ radius: GLASS_SHADOW_XL, color: COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
     .backdropBlur(GLASS_BLUR_LG)
     .borderWidth(1)
-    .borderColor('rgba(255,255,255,0.6)')
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : 'rgba(255,255,255,0.6)')
     .onClick(() => { this.showServerPanelWithAnimation() })
   }
 
@@ -163,7 +172,7 @@ export struct SpeedTestSection {
               Text($r('app.string.speed_test_complete')).fontSize(FONT_SIZE_LG).fontColor(COLOR_SKY_BLUE)
             }
           } else {
-            Text($r('app.string.speed_test_title')).fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_TERTIARY)
+            Text($r('app.string.speed_test_title')).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
         }
         .width('100%')
@@ -174,11 +183,11 @@ export struct SpeedTestSection {
         Stack() {
           // 外圈渐变背景
           Circle().width(GAUGE_SIZE_XL).height(GAUGE_SIZE_XL)
-            .fill(COLOR_SKY_BLUE_GAUGE_BG)
+            .fill(this.isDarkMode ? 'rgba(74,144,217,0.12)' : COLOR_SKY_BLUE_GAUGE_BG)
 
           // 背景轨道
           Circle().width(GAUGE_SIZE_XL - 16).height(GAUGE_SIZE_XL - 16)
-            .fill('rgba(255,255,255,0.9)')
+            .fill(this.isDarkMode ? 'rgba(20,38,72,0.90)' : 'rgba(255,255,255,0.90)')
             .strokeWidth(1)
             .stroke(COLOR_SKY_BLUE_DIVIDER)
 
@@ -194,11 +203,11 @@ export struct SpeedTestSection {
           // 中心数值
           Column({ space: 4 }) {
             Text(this.currentPhase === 'ping' ? 'ms' : 'Mbps')
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_TERTIARY).letterSpacing(3)
+              .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode)).letterSpacing(3)
             Text(this.formatDisplaySpeed())
               .fontSize(58).fontWeight(FontWeight.Bold).fontColor(COLOR_SKY_BLUE).letterSpacing(-2)
             Text(this.getSpeedLabelResource())
-              .fontSize(FONT_SIZE_XL).fontColor(COLOR_TEXT_SECONDARY)
+              .fontSize(FONT_SIZE_XL).fontColor(adaptiveTextSecondary(this.isDarkMode))
           }
         }
         .width(GAUGE_SIZE_XL).height(GAUGE_SIZE_XL).margin({ top: 10, bottom: 10 })
@@ -210,10 +219,10 @@ export struct SpeedTestSection {
             Column({ space: SPACE_SM }) {
               Text(this.displayDownloadSpeed > 0 ? this.displayDownloadSpeed.toFixed(1) : '--')
                 .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'download' ? COLOR_SKY_BLUE : COLOR_TEXT_PRIMARY)
+                .fontColor(this.currentPhase === 'download' ? COLOR_SKY_BLUE : adaptiveTextPrimary(this.isDarkMode))
               Row({ space: 3 }) {
                 Text('↓').fontSize(FONT_SIZE_XS).fontColor(COLOR_SKY_BLUE)
-                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
               }
             }.layoutWeight(1).alignItems(HorizontalAlign.Center)
 
@@ -223,10 +232,10 @@ export struct SpeedTestSection {
             Column({ space: SPACE_SM }) {
               Text(this.displayPing > 0 ? this.displayPing.toFixed(0) : '--')
                 .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'ping' ? COLOR_WARNING : COLOR_TEXT_PRIMARY)
+                .fontColor(this.currentPhase === 'ping' ? COLOR_WARNING : adaptiveTextPrimary(this.isDarkMode))
               Row({ space: 3 }) {
                 Text('⊙').fontSize(FONT_SIZE_XS).fontColor(COLOR_WARNING)
-                Text('ms').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+                Text('ms').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
               }
             }.layoutWeight(1).alignItems(HorizontalAlign.Center)
 
@@ -236,10 +245,10 @@ export struct SpeedTestSection {
             Column({ space: SPACE_SM }) {
               Text(this.displayUploadSpeed > 0 ? this.displayUploadSpeed.toFixed(1) : '--')
                 .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'upload' ? COLOR_SUCCESS : COLOR_TEXT_PRIMARY)
+                .fontColor(this.currentPhase === 'upload' ? COLOR_SUCCESS : adaptiveTextPrimary(this.isDarkMode))
               Row({ space: 3 }) {
                 Text('↑').fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS)
-                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
               }
             }.layoutWeight(1).alignItems(HorizontalAlign.Center)
           }
@@ -248,9 +257,9 @@ export struct SpeedTestSection {
         }
       }
       .width('100%')
-      .backgroundColor(COLOR_GLASS_WHITE_SOLID)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE_SOLID)
       .borderRadius({ topLeft: 24, topRight: 24 })
-      .shadow({ radius: GLASS_SHADOW_2XL, color: 'rgba(14,165,233,0.15)', offsetX: 0, offsetY: 8 })
+      .shadow({ radius: GLASS_SHADOW_2XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(14,165,233,0.15)', offsetX: 0, offsetY: 8 })
     }
     .width('100%')
     .borderRadius(24)
@@ -287,42 +296,42 @@ export struct SpeedTestSection {
       Row() {
         Row({ space: 8 }) {
           Circle().width(8).height(8).fill(COLOR_SUCCESS)
-          Text($r('app.string.test_result')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(COLOR_TEXT_PRIMARY)
+          Text($r('app.string.test_result')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
         }
-        Text(this.getServerName()).fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_SECONDARY)
+        Text(this.getServerName()).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
       }.width('100%').justifyContent(FlexAlign.SpaceBetween)
 
       Row() {
         Column({ space: 4 }) {
-          Text($r('app.string.download')).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text($r('app.string.download')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
           Text(this.displayDownloadSpeed > 0 ? this.displayDownloadSpeed.toFixed(1) : '--')
             .fontSize(32).fontWeight(FontWeight.Bold).fontColor(COLOR_SKY_BLUE)
-          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
         }.layoutWeight(1).alignItems(HorizontalAlign.Center)
 
         Column({ space: 4 }) {
-          Text($r('app.string.upload')).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text($r('app.string.upload')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
           Text(this.displayUploadSpeed > 0 ? this.displayUploadSpeed.toFixed(1) : '--')
             .fontSize(32).fontWeight(FontWeight.Bold).fontColor(COLOR_SUCCESS)
-          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
         }.layoutWeight(1).alignItems(HorizontalAlign.Center)
 
         Column({ space: 4 }) {
-          Text($r('app.string.ping')).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text($r('app.string.ping')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
           Text(this.displayPing > 0 ? this.displayPing.toFixed(0) : '--')
             .fontSize(32).fontWeight(FontWeight.Bold).fontColor(this.getPingColor())
-          Text('ms').fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
+          Text('ms').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
         }.layoutWeight(1).alignItems(HorizontalAlign.Center)
       }.width('100%')
     }
     .width('100%')
     .padding({ left: 18, right: 18, top: 18, bottom: 18 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(20)
-    .shadow({ radius: GLASS_SHADOW_2XL, color: COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
+    .shadow({ radius: GLASS_SHADOW_2XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
     .backdropBlur(GLASS_BLUR_XL)
     .borderWidth(1)
-    .borderColor(COLOR_GLASS_BORDER)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
   }
 
   // 历史记录 - 天蓝色毛玻璃
@@ -331,7 +340,7 @@ export struct SpeedTestSection {
       Row() {
         Row({ space: 8 }) {
           Text('📊').fontSize(FONT_SIZE_3XL)
-          Text($r('app.string.speed_history')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(COLOR_TEXT_PRIMARY)
+          Text($r('app.string.speed_history')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
         }
       }.width('100%')
 
@@ -342,7 +351,7 @@ export struct SpeedTestSection {
       } else {
         Column({ space: 12 }) {
           Text('📈').fontSize(42)
-          Text($r('app.string.no_test_record')).fontSize(FONT_SIZE_XL).fontColor(COLOR_TEXT_SECONDARY)
+          Text($r('app.string.no_test_record')).fontSize(FONT_SIZE_XL).fontColor(adaptiveTextSecondary(this.isDarkMode))
         }
         .width('100%')
         .padding({ top: 28, bottom: 28 })
@@ -352,12 +361,12 @@ export struct SpeedTestSection {
     }
     .width('100%')
     .padding({ left: 18, right: 18, top: 18, bottom: 18 })
-    .backgroundColor(COLOR_GLASS_WHITE)
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(20)
     .backdropBlur(GLASS_BLUR_XL)
     .borderWidth(1)
-    .borderColor(COLOR_GLASS_SKY_LIGHT)
-    .shadow({ radius: GLASS_SHADOW_XL, color: COLOR_SKY_BLUE_GAUGE_BG, offsetX: 0, offsetY: 3 })
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_SKY_BLUE_GAUGE_BG, offsetX: 0, offsetY: 3 })
   }
 
   @Builder buildHistoryRow(item: SpeedTestResult) {
@@ -369,28 +378,29 @@ export struct SpeedTestSection {
         Row({ space: 20 }) {
           Row({ space: SPACE_SM }) {
             Text('↓').fontSize(FONT_SIZE_LG).fontColor(COLOR_SKY_BLUE).fontWeight(FontWeight.Bold)
-            Text(item.downloadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(COLOR_TEXT_PRIMARY)
-            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+            Text(item.downloadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
+            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
           Row({ space: SPACE_SM }) {
             Text('↑').fontSize(FONT_SIZE_LG).fontColor(COLOR_SUCCESS).fontWeight(FontWeight.Bold)
-            Text(item.uploadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(COLOR_TEXT_PRIMARY)
-            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+            Text(item.uploadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
+            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
         }
-        Text(item.timeLabel).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_TERTIARY)
+        Text(item.timeLabel).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
       }.alignItems(HorizontalAlign.Start).layoutWeight(1)
 
       Column({ space: 2 }) {
         Text(item.pingMs.toFixed(0)).fontSize(FONT_SIZE_4XL).fontWeight(FONT_WEIGHT_BOLD)
           .fontColor(item.pingMs < 30 ? COLOR_SUCCESS : (item.pingMs < 80 ? COLOR_WARNING : COLOR_DANGER))
-        Text('ms').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+        Text('ms').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Center)
       .padding({ left: 14, right: 14, top: 10, bottom: 10 })
       .backgroundColor(
-        item.pingMs < 30 ? 'rgba(16,185,129,0.1)' :
-        (item.pingMs < 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)')
+        this.isDarkMode ?
+          (item.pingMs < 30 ? 'rgba(16,185,129,0.25)' : (item.pingMs < 80 ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.25)')) :
+          (item.pingMs < 30 ? 'rgba(16,185,129,0.1)' : (item.pingMs < 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)'))
       )
       .borderRadius(12)
     }
@@ -403,35 +413,35 @@ export struct SpeedTestSection {
       // 遮罩
       Column()
         .width('100%').height('100%')
-        .backgroundColor('rgba(0,0,0,0.25)')
+        .backgroundColor(this.isDarkMode ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)')
         .opacity(this.serverPopupOpacity)
         .onClick(() => { this.hideServerPanelWithAnimation() })
 
       // 弹窗内容 - 线性缩放动画，居中显示
       Column() {
         // 拖动手柄
-        Column().width(36).height(4).backgroundColor('rgba(74,144,217,0.40)').borderRadius(2)
+        Column().width(36).height(4).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(74,144,217,0.40)').borderRadius(2)
           .margin({ top: 12, bottom: 14 })
 
         // 标题栏
         Row() {
           Text($r('app.string.select_speed_server'))
-            .fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(COLOR_TEXT_PRIMARY)
+            .fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
           Blank()
           Column() {
-            Text('✕').fontSize(FONT_SIZE_2XL).fontColor(COLOR_SKY_BLUE)
+            Text('✕').fontSize(FONT_SIZE_2XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : COLOR_SKY_BLUE)
           }
           .width(36).height(36)
           .justifyContent(FlexAlign.Center)
           .alignItems(HorizontalAlign.Center)
-          .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.1)' : COLOR_GLASS_SKY_TAG_BG)
           .borderRadius(10)
           .onClick(() => { this.hideServerPanelWithAnimation() })
         }
         .width('100%')
         .padding({ left: 18, right: 18, bottom: 14 })
 
-        Column().width('100%').height(0.5).backgroundColor('rgba(74,144,217,0.15)')
+        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(74,144,217,0.15)')
 
         // 节点列表
         Scroll() {
@@ -444,23 +454,23 @@ export struct SpeedTestSection {
                   .margin({ right: 12 })
                 Text(server.name)
                   .fontSize(FONT_SIZE_2XL)
-                  .fontColor(index === this.selectedServerIndex ? COLOR_SKY_BLUE : COLOR_TEXT_PRIMARY)
+                  .fontColor(index === this.selectedServerIndex ? COLOR_SKY_BLUE : adaptiveTextPrimary(this.isDarkMode))
                   .layoutWeight(1)
                 if (server.latencyMs > 0) {
                   Text(server.latencyMs + 'ms')
-                    .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_TERTIARY)
+                    .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
                     .padding({ left: 10, right: 10, top: 4, bottom: 4 })
-                    .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
+                    .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.2)' : COLOR_GLASS_SKY_TAG_BG)
                     .borderRadius(8)
                     .margin({ right: 8 })
                 }
                 if (index === this.selectedServerIndex) {
-                  Text('✓').fontSize(FONT_SIZE_XL).fontColor(COLOR_SKY_BLUE).fontWeight(FontWeight.Bold)
+                  Text('✓').fontSize(FONT_SIZE_XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.9)' : COLOR_SKY_BLUE).fontWeight(FontWeight.Bold)
                 }
               }
               .width('100%')
               .padding({ top: 12, bottom: 12, left: 12, right: 16 })
-              .backgroundColor(index === this.selectedServerIndex ? COLOR_GLASS_SKY_ACTIVE : 'transparent')
+              .backgroundColor(index === this.selectedServerIndex ? (this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_ACTIVE) : 'transparent')
               .borderRadius(12)
               .onClick(() => {
                 this.selectedServerIndex = index
@@ -478,12 +488,12 @@ export struct SpeedTestSection {
       .width('88%')  // 宽度改为88%，居中显示
       .constraintSize({ maxHeight: '55%' })
       // WiFi 详细卡片样式：半透明白色 + 毛玻璃边框 + 阴影
-      .backgroundColor('rgba(255,255,255,0.78)')
+      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.78)' : 'rgba(255,255,255,0.78)')
       .borderRadius(20)
       .shadow({ radius: 8, color: 'rgba(0,0,0,0.10)', offsetX: 0, offsetY: 2 })
       .backdropBlur(10)
       .borderWidth(1)
-      .borderColor('rgba(255,255,255,0.20)')
+      .borderColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.20)')
       // 线性弹出动画：中心缩放
       .scale({ x: this.serverPopupScale, y: this.serverPopupScale, centerX: '50%', centerY: '50%' })
     }
@@ -492,7 +502,7 @@ export struct SpeedTestSection {
   // 显示弹窗（线性动画）
   private showServerPanelWithAnimation(): void {
     this.showServerPanel = true
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 280,
       curve: Curve.Linear,
       iterations: 1,
@@ -506,7 +516,7 @@ export struct SpeedTestSection {
 
   // 关闭弹窗（线性动画）
   private hideServerPanelWithAnimation(): void {
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 220,
       curve: Curve.Linear,
       iterations: 1,

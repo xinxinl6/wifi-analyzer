@@ -166,7 +166,7 @@ export struct AuroraAIFabButton {
 
   aboutToAppear(): void {
     // 脉冲光晕动画
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 2000,
       curve: Curve.EaseInOut,
       iterations: -1
@@ -189,7 +189,7 @@ export struct AuroraAIFabButton {
       const query = buildNetworkQuery(networkInfo)
 
       // 获取 UIAbilityContext
-      const context = getContext(this) as common.UIAbilityContext
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
 
       // 调用小艺
       const result = await launchXiaoyi(context, query)
@@ -235,11 +235,11 @@ export struct AuroraAIFabButton {
           .scale({ x: this.fabScale, y: this.fabScale })
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {
-              animateTo(AnimationTapScale, () => {
+              this.getUIContext().animateTo(AnimationTapScale, () => {
                 this.fabScale = 0.88
               })
             } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-              animateTo({
+              this.getUIContext().animateTo({
                 duration: DURATION_NORMAL,
                 curve: Curve.EaseOut
               }, () => {
@@ -304,7 +304,7 @@ export struct AuroraAIPanel {
   }
 
   private togglePanel(): void {
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 300,
       curve: Curve.EaseOut
     }, () => {

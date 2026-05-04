@@ -178,11 +178,11 @@ export struct AuroraEmphasisCard {
     .scale({ x: this.cardScale, y: this.cardScale })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        animateTo(AnimationTapScale, () => {
+        this.getUIContext().animateTo(AnimationTapScale, () => {
           this.cardScale = 0.98
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
+        this.getUIContext().animateTo({
           duration: DURATION_NORMAL,
           curve: Curve.EaseOut
         }, () => {
@@ -278,12 +278,12 @@ export struct AuroraListItem {
     .opacity(this.itemOpacity)
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        animateTo(AnimationTapScale, () => {
+        this.getUIContext().animateTo(AnimationTapScale, () => {
           this.itemScale = 0.98
           this.itemOpacity = 0.85
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
+        this.getUIContext().animateTo({
           duration: DURATION_NORMAL,
           curve: Curve.EaseOut
         }, () => {
@@ -312,7 +312,7 @@ export struct AuroraToolItem {
 
   aboutToAppear(): void {
     // 入场动画：轻微上浮
-    animateTo({
+    this.getUIContext().animateTo({
       duration: 400 + this.itemIndex * 50,
       curve: Curve.EaseOut
     }, () => {
@@ -359,11 +359,11 @@ export struct AuroraToolItem {
     .translate({ y: this.itemY })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        animateTo(AnimationTapScale, () => {
+        this.getUIContext().animateTo(AnimationTapScale, () => {
           this.itemScale = 0.92
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        animateTo({
+        this.getUIContext().animateTo({
           duration: DURATION_NORMAL,
           curve: Curve.EaseOut
         }, () => {
