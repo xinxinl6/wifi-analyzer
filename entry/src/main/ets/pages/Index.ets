@@ -77,6 +77,8 @@ struct Index {
   @State permissionGranted: boolean = false
   @State currentIndex: number = 0
   @Provide('isDarkMode') isDarkMode: boolean = false
+  // 权限拒绝弹窗控制
+  @State showPermissionDeniedDialog: boolean = false
 
   // Aurora V2 — AI 助手状态
   @State showAIPanel: boolean = false
@@ -268,8 +270,12 @@ struct Index {
   }
 
   // ==================== 权限请求 + 扫描流程 ====================
+  // 保存 context 引用，供弹窗回调使用
+  private abilityContext: common.UIAbilityContext | null = null
+
   async requestPermissionsAndScan(context: common.UIAbilityContext): Promise<void> {
     console.log('[Index] === requestPermissionsAndScan START ===')
+    this.abilityContext = context  // 保存 context 供后续使用
     try {
       const granted: boolean = await PermissionManager.requestPermissions(context)
       this.permissionGranted = granted
@@ -278,13 +284,31 @@ struct Index {
         console.log('[Index] Permissions OK, starting WiFi scan...')
         this.startWifiScan()
       } else {
-        console.warn('[Index] Permissions denied')
-        this.wifiState.error = $r('app.string.err_perm_denied')
+        console.warn('[Index] Permissions denied, showing dialog...')
+        // 显示权限拒绝弹窗
+        this.showPermissionDeniedDialog = true
       }
     } catch (e) {
       console.error('[Index] Permission error:', e)
       this.permissionGranted = false
-      this.wifiState.error = $r('app.string.err_perm_exception')
+      this.showPermissionDeniedDialog = true  // 出错时也显示弹窗
+    }
+  }
+
+  // 跳转到应用权限设置页面
+  private openAppSettings(): void {
+    console.log('[Index] Opening app settings...')
+    if (this.abilityContext) {
+      PermissionManager.openAppSettings(this.abilityContext)
+    }
+    this.showPermissionDeniedDialog = false
+  }
+
+  // 退出应用
+  private exitApp(): void {
+    console.log('[Index] Exiting app...')
+    if (this.abilityContext) {
+      PermissionManager.terminateApp(this.abilityContext)
     }
   }
 
@@ -335,9 +359,85 @@ struct Index {
         })
         .position({ x: '85%', y: '70%' })
       }
+
+      // 权限拒绝弹窗
+      if (this.showPermissionDeniedDialog) {
+        this.buildPermissionDeniedDialog()
+      }
     }
     .width('100%')
     .height('100%')
+  }
+
+  // 权限拒绝弹窗
+  @Builder
+  buildPermissionDeniedDialog() {
+    Column() {
+      Column() {
+        // 标题
+        Text('权限申请')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(this.isDarkMode ? '#FFFFFF' : '#1E293B')
+          .margin({ bottom: 12 })
+
+        // 提示文字
+        Text('WiFi分析仪需要位置权限才能扫描周围的WiFi网络。\n请在设置中开启位置权限。')
+          .fontSize(14)
+          .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(30,41,59,0.7)')
+          .textAlign(TextAlign.Center)
+          .lineHeight(22)
+          .margin({ bottom: 24 })
+
+        // 按钮区域
+        Row() {
+          // 退出按钮
+          Button('退出')
+            .fontSize(15)
+            .fontColor('#FF3B30')
+            .backgroundColor(this.isDarkMode ? 'rgba(255,59,48,0.15)' : 'rgba(255,59,48,0.1)')
+            .borderRadius(12)
+            .height(44)
+            .layoutWeight(1)
+            .onClick(() => {
+              this.exitApp()
+            })
+
+          // 去设置按钮
+          Button('去设置')
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor('#FFFFFF')
+            .backgroundColor('#007AFF')
+            .borderRadius(12)
+            .height(44)
+            .layoutWeight(1)
+            .margin({ left: 12 })
+            .onClick(() => {
+              this.openAppSettings()
+            })
+        }
+      }
+      .padding(24)
+      .backgroundColor(this.isDarkMode ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)')
+      .borderRadius(20)
+      .border({
+        width: 1,
+        color: this.isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'
+      })
+      .shadow({
+        radius: 24,
+        color: this.isDarkMode ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.15)',
+        offsetX: 0,
+        offsetY: 8
+      })
+      .width('85%')
+      .constraintSize({ maxWidth: 340 })
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('rgba(0,0,0,0.5)')
+    .justifyContent(FlexAlign.Center)
   }
 
   @Builder

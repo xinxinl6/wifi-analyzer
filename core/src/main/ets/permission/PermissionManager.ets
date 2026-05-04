@@ -2,7 +2,7 @@
 // user_grant 类型的权限（LOCATION、APPROXIMATELY_LOCATION）
 // 必须在运行时通过 API 弹窗请求用户授权
 
-import { abilityAccessCtrl, common, Permissions } from '@kit.AbilityKit'
+import { abilityAccessCtrl, common, Permissions, Want } from '@kit.AbilityKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 
 // 需要的权限列表 — 使用 Permissions 类型
@@ -149,6 +149,40 @@ export class PermissionManager {
       }
     }
     return results
+  }
+
+  // 跳转到应用权限设置页面
+  static async openAppSettings(context: common.UIAbilityContext): Promise<boolean> {
+    try {
+      console.log('[PermissionManager] Opening app settings...')
+      // 通过 want 打开应用详情页面
+      const want: Want = {
+        action: 'action.settings.app.info'
+      }
+      await context.startAbility(want)
+      console.log('[PermissionManager] App settings opened successfully')
+      return true
+    } catch (e) {
+      console.error('[PermissionManager] Failed to open app settings:', JSON.stringify(e))
+      // 尝试备用方案：打开系统设置
+      try {
+        const want: Want = {
+          action: 'action.settings'
+        }
+        await context.startAbility(want)
+        console.log('[PermissionManager] Opened system settings as fallback')
+        return true
+      } catch (fallbackError) {
+        console.error('[PermissionManager] Fallback to system settings also failed:', JSON.stringify(fallbackError))
+        return false
+      }
+    }
+  }
+
+  // 退出应用
+  static terminateApp(context: common.UIAbilityContext): void {
+    console.log('[PermissionManager] Terminating app...')
+    context.terminateSelf()
   }
 
 }
