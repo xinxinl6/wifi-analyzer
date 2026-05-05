@@ -7,6 +7,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@wifi-analyzer/core": "file:../core",
-    "@wifi-analyzer/design-system": "file:../design-system"
-  }
+    "@wifi-analyzer/design-system": "file:../design-system",
+    "@ohos-rs/traceroute": "^0.1.2"
+  },
+  "devDependencies": {},
+  "dynamicDependencies": {}
 }

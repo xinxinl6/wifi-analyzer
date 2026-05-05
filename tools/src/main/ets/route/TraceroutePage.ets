@@ -691,6 +691,7 @@ export struct TraceroutePage {
             .layoutWeight(1)
 
           if (hop.latency > 0) {
+            // 显示最优延迟
             Text(hop.latency + 'ms')
               .fontSize(FONT_SIZE_XS)
               .fontColor(this.getLatencyColor(hop.latency))
@@ -708,6 +709,21 @@ export struct TraceroutePage {
           }
         }
         .width('100%')
+
+        // 多次探测 RTT 详情行（来自真实 ICMP 探测）
+        if (hop.allRtt !== undefined && hop.allRtt.length > 1) {
+          Row({ space: 4 }) {
+            ForEach(hop.allRtt, (rtt: number, rttIdx: number) => {
+              Text(rtt + 'ms')
+                .fontSize(10)
+                .fontColor(this.getLatencyColor(rtt))
+                .padding({ left: 5, right: 5, top: 1, bottom: 1 })
+                .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)')
+                .borderRadius(4)
+            }, (rtt: number, rttIdx: number): string => String(rttIdx))
+          }
+          .width('100%')
+        }
 
         // 主机名
         if (hop.hostname !== '' && hop.hostname !== '*') {
