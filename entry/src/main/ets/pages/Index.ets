@@ -31,9 +31,10 @@ import { PingTestPage } from '../components/PingTestPage'
 import {
   TraceroutePage, DnsLookupPage, PortScanPage, SubnetCalcPage,
   IpGeoPage, PoeCalcPage, MacLookupPage, WolPage, LanScanPage,
-  RoamTestPage, FindDevicePage
+  RoamTestPage
 } from '@wifi-analyzer/tools'
 import { AboutPage } from '../components/AboutPage'
+import { ChannelPage } from '../components/ChannelPage'
 
 // 数据管理
 import { WifiDataManager, SharedWifiState, PermissionManager, RouterManager } from '@wifi-analyzer/core'
@@ -91,7 +92,7 @@ struct Index {
   @StorageLink('showWolPage') showWolPage: boolean = false
   @StorageLink('showLanScanPage') showLanScanPage: boolean = false
   @StorageLink('showRoamTestPage') showRoamTestPage: boolean = false
-  @StorageLink('showFindDevicePage') showFindDevicePage: boolean = false
+  @StorageLink('showChannelPage') showChannelPage: boolean = false
   @StorageLink('showAboutPage') showAboutPage: boolean = false
 
   // Tabs 控制器
@@ -114,11 +115,20 @@ struct Index {
   // 页面内容偏移量（切换时上滑入场）
   @State private contentOffsetY: number = 0
 
+  // Tab 切换订阅句柄
+  private tabUnsubscribe: (() => void) | null = null
+
   aboutToAppear(): void {
     console.log('[Index] === aboutToAppear START ===')
 
     // 初始化 AppStorage 路由模式
     RouterManager.initAppStorageMode()
+
+    // 订阅 Tab 切换事件
+    this.tabUnsubscribe = RouterManager.subscribeTab((tabIndex: number) => {
+      console.log('[Index] Tab navigation requested:', tabIndex)
+      this.onTabClick(tabIndex)
+    })
 
     // 直接通过 UIContext 获取 UIAbilityContext（不依赖 AppStorage 中转）
     try {
@@ -127,6 +137,8 @@ struct Index {
         // 读取暗色模式（COLOR_MODE_DARK = 1 表示暗色模式）
         const colorMode = context.config.colorMode
         this.isDarkMode = (colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
+        // 同步到 AppStorage，让独立页面也能访问
+        AppStorage.setOrCreate('isDarkMode', this.isDarkMode)
 
         // 直接请求权限并开始扫描
         this.requestPermissionsAndScan(context)
@@ -155,6 +167,11 @@ struct Index {
       clearInterval(this.scanTimerId)
       this.scanTimerId = -1
     }
+    // 清理 Tab 切换订阅
+    if (this.tabUnsubscribe) {
+      this.tabUnsubscribe()
+      this.tabUnsubscribe = null
+    }
   }
 
   // 检查是否有子页面显示
@@ -162,7 +179,7 @@ struct Index {
     return this.showPingPage || this.showTraceroutePage || this.showDnsPage ||
            this.showPortScanPage || this.showSubnetPage || this.showIpGeoPage ||
            this.showPoePage || this.showMacLookupPage || this.showWolPage ||
-           this.showLanScanPage || this.showRoamTestPage || this.showFindDevicePage ||
+           this.showLanScanPage || this.showRoamTestPage || this.showChannelPage ||
            this.showAboutPage
   }
 
@@ -308,6 +325,8 @@ struct Index {
       this.wifiState,
       (newState: SharedWifiState) => {
         this.wifiState = newState
+        // 同步到 AppStorage，让独立页面也能访问
+        AppStorage.setOrCreate('wifiState', newState)
       }
     )
   }
@@ -517,8 +536,8 @@ struct Index {
       if (this.showRoamTestPage) {
         RoamTestPage()
       }
-      if (this.showFindDevicePage) {
-        FindDevicePage()
+      if (this.showChannelPage) {
+        ChannelPage()
       }
       if (this.showAboutPage) {
         AboutPage()

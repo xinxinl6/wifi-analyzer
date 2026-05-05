@@ -427,6 +427,270 @@
     {
       "name": "stability_very_unstable",
       "value": "非常不稳定"
+    },
+    {
+      "name": "scanning_ports",
+      "value": "正在扫描端口"
+    },
+    {
+      "name": "scan_progress",
+      "value": "扫描进度"
+    },
+    {
+      "name": "current_port",
+      "value": "当前端口"
+    },
+    {
+      "name": "open_ports",
+      "value": "开放端口"
+    },
+    {
+      "name": "stop_action",
+      "value": "停止"
+    },
+    {
+      "name": "querying_ip",
+      "value": "正在查询IP归属..."
+    },
+    {
+      "name": "mac_lookup_intro",
+      "value": "MAC地址查询"
+    },
+    {
+      "name": "recent_lookups",
+      "value": "最近查询"
+    },
+    {
+      "name": "chinese_domain_support",
+      "value": "支持中文域名"
+    },
+    {
+      "name": "chinese_domain_desc",
+      "value": "自动识别并转换中文域名"
+    },
+    {
+      "name": "ip_family_all",
+      "value": "全部"
+    },
+    {
+      "name": "ip_family_ipv4",
+      "value": "IPv4"
+    },
+    {
+      "name": "ip_family_ipv6",
+      "value": "IPv6"
+    },
+    {
+      "name": "ip_family_label",
+      "value": "IP类型"
+    },
+    {
+      "name": "input_ip_subnet_hint",
+      "value": "输入IP地址或CIDR（如192.168.1.1/24）"
+    },
+    {
+      "name": "calculate_action",
+      "value": "计算"
+    },
+    {
+      "name": "cidr_format_hint",
+      "value": "支持CIDR格式，如 192.168.1.0/24"
+    },
+    {
+      "name": "common_subnets",
+      "value": "常用子网掩码"
+    },
+    {
+      "name": "network_addr",
+      "value": "网络地址"
+    },
+    {
+      "name": "broadcast_addr",
+      "value": "广播地址"
+    },
+    {
+      "name": "host_range",
+      "value": "主机范围"
+    },
+    {
+      "name": "start_ip",
+      "value": "起始IP"
+    },
+    {
+      "name": "end_ip",
+      "value": "结束IP"
+    },
+    {
+      "name": "usable_hosts",
+      "value": "可用主机数"
+    },
+    {
+      "name": "detail_info",
+      "value": "详细信息"
+    },
+    {
+      "name": "subnet_mask",
+      "value": "子网掩码"
+    },
+    {
+      "name": "wildcard_mask",
+      "value": "通配符掩码"
+    },
+    {
+      "name": "ip_class",
+      "value": "IP分类"
+    },
+    {
+      "name": "ip_type",
+      "value": "地址类型"
+    },
+    {
+      "name": "is_private",
+      "value": "私有地址"
+    },
+    {
+      "name": "yes",
+      "value": "是"
+    },
+    {
+      "name": "no",
+      "value": "否"
+    },
+    {
+      "name": "binary_subnet",
+      "value": "二进制掩码"
+    },
+    {
+      "name": "input_error",
+      "value": "输入错误"
+    },
+    {
+      "name": "subnet_calc_intro",
+      "value": "子网计算"
+    },
+    {
+      "name": "poe_standard",
+      "value": "PoE 标准"
+    },
+    {
+      "name": "poe_available",
+      "value": "PD端可用"
+    },
+    {
+      "name": "param_settings",
+      "value": "参数设置"
+    },
+    {
+      "name": "cable_length",
+      "value": "线缆长度"
+    },
+    {
+      "name": "cable_meter",
+      "value": "米"
+    },
+    {
+      "name": "cable_spec",
+      "value": "线缆规格"
+    },
+    {
+      "name": "device_power",
+      "value": "设备功率"
+    },
+    {
+      "name": "power_unit_w",
+      "value": "W"
+    },
+    {
+      "name": "common_devices",
+      "value": "常用设备"
+    },
+    {
+      "name": "delivered_power",
+      "value": "送达功率"
+    },
+    {
+      "name": "cable_loss",
+      "value": "线缆损耗"
+    },
+    {
+      "name": "efficiency",
+      "value": "供电效率"
+    },
+    {
+      "name": "power_sufficient",
+      "value": "供电充足"
+    },
+    {
+      "name": "power_insufficient",
+      "value": "供电不足"
+    },
+    {
+      "name": "config_can_meet",
+      "value": "当前配置可满足设备需求"
+    },
+    {
+      "name": "upgrade_poe_hint",
+      "value": "请升级PoE标准或减少线缆长度"
+    },
+    {
+      "name": "detail_data",
+      "value": "详细数据"
+    },
+    {
+      "name": "pse_output",
+      "value": "PSE输出"
+    },
+    {
+      "name": "pd_available",
+      "value": "PD可用功率"
+    },
+    {
+      "name": "actual_delivered",
+      "value": "实际送达"
+    },
+    {
+      "name": "device_required",
+      "value": "设备需求"
+    },
+    {
+      "name": "remaining_budget",
+      "value": "剩余预算"
+    },
+    {
+      "name": "power_pins",
+      "value": "供电线脚"
+    },
+    {
+      "name": "suggestion",
+      "value": "优化建议"
+    },
+    {
+      "name": "max_recommended_length",
+      "value": "最大推荐长度"
+    },
+    {
+      "name": "within_length_hint",
+      "value": "当前长度在安全范围内"
+    },
+    {
+      "name": "low_efficiency_hint",
+      "value": "效率偏低"
+    },
+    {
+      "name": "use_thicker_cable_hint",
+      "value": "建议使用更粗线规或缩短线缆长度"
+    },
+    {
+      "name": "sufficient_margin",
+      "value": "功率余量充足"
+    },
+    {
+      "name": "config_stable",
+      "value": "配置稳定，可靠性高"
+    },
+    {
+      "name": "poe_calc_intro",
+      "value": "PoE计算"
     }
   ]
 }

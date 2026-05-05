@@ -381,10 +381,6 @@
       "value": "漫游测试"
     },
     {
-      "name": "find_device",
-      "value": "设备发现"
-    },
-    {
       "name": "about",
       "value": "关于"
     },
@@ -778,7 +774,7 @@
     },
     {
       "name": "lan_scan_desc",
-      "value": "局域网扫描"
+      "value": "扫描我的网络"
     },
     {
       "name": "lan_scan_network",
@@ -911,26 +907,6 @@
     {
       "name": "roam_test_security",
       "value": "安全模式"
-    },
-    {
-      "name": "find_device_desc",
-      "value": "设备发现"
-    },
-    {
-      "name": "find_device_hint",
-      "value": "在局域网内搜索设备"
-    },
-    {
-      "name": "find_device_start",
-      "value": "开始发现"
-    },
-    {
-      "name": "find_device_stop",
-      "value": "停止发现"
-    },
-    {
-      "name": "find_device_found",
-      "value": "发现新设备"
     },
     {
       "name": "about_app",
@@ -1231,10 +1207,6 @@
     {
       "name": "desc_roam_test",
       "value": "监测WiFi漫游行为"
-    },
-    {
-      "name": "desc_find_device",
-      "value": "定位网络终端设备"
     },
     {
       "name": "quick_tools",
@@ -2305,10 +2277,6 @@
       "value": "再次测试"
     },
     {
-      "name": "find_device_title",
-      "value": "查找终端"
-    },
-    {
       "name": "back_with_arrow",
       "value": "<  返回"
     },
@@ -2415,14 +2383,6 @@
     {
       "name": "find_again",
       "value": "重新查找"
-    },
-    {
-      "name": "find_device_intro",
-      "value": "查找终端说明"
-    },
-    {
-      "name": "find_device_intro_desc",
-      "value": "结合局域网扫描和MAC厂商查询，快速定位并识别网络中的终端设备"
     },
     {
       "name": "about_title",

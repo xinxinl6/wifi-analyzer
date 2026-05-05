@@ -17,6 +17,7 @@ export type RouteName =
   | 'wol'
   | 'lanscan'
   | 'roamtest'
+  | 'channel'
   | 'finddevice'
   | 'about'
 
@@ -33,6 +34,7 @@ const ROUTE_TO_STORAGE_KEY: Record<string, string> = {
   'wol': 'showWolPage',
   'lanscan': 'showLanScanPage',
   'roamtest': 'showRoamTestPage',
+  'channel': 'showChannelPage',
   'finddevice': 'showFindDevicePage',
   'about': 'showAboutPage',
 }
@@ -50,6 +52,7 @@ const ROUTE_TO_PAGE: Record<string, string> = {
   'wol': 'WolPage',
   'lanscan': 'LanScanPage',
   'roamtest': 'RoamTestPage',
+  'channel': 'ChannelPage',
   'finddevice': 'FindDevicePage',
   'about': 'AboutPage',
 }
@@ -120,6 +123,37 @@ export class RouterManager {
       RouterManager.inSubPage = true
     }
     RouterManager.notifyChange(route)
+  }
+
+  // 导航到指定 Tab
+  static navigateToTab(tabIndex: number): void {
+    if (tabIndex < 0 || tabIndex > 4) {
+      console.error('[RouterManager] Invalid tab index:', tabIndex)
+      return
+    }
+    AppStorage.set('targetTabIndex', tabIndex)
+    RouterManager.notifyTabChange(tabIndex)
+  }
+
+  // Tab 变更回调
+  private static tabCallbacks: Array<(tabIndex: number) => void> = []
+
+  // 订阅 Tab 变更
+  static subscribeTab(callback: (tabIndex: number) => void): () => void {
+    RouterManager.tabCallbacks.push(callback)
+    return () => {
+      const index = RouterManager.tabCallbacks.indexOf(callback)
+      if (index > -1) {
+        RouterManager.tabCallbacks.splice(index, 1)
+      }
+    }
+  }
+
+  // 通知所有 Tab 订阅者
+  private static notifyTabChange(tabIndex: number): void {
+    for (const callback of RouterManager.tabCallbacks) {
+      callback(tabIndex)
+    }
   }
 
   // 返回上一页

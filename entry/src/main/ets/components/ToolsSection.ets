@@ -39,8 +39,7 @@ const NETWORK_TOOLS: ToolItem[] = [
 const ADVANCED_TOOLS: ToolItem[] = [
   { name: $r('app.string.wake_on_lan'), desc: $r('app.string.desc_wol'), icon: $r('app.media.ic_wol'), color: '#14B8A6', action: 'wol' },
   { name: $r('app.string.lan_scan'), desc: $r('app.string.desc_lan_scan'), icon: $r('app.media.ic_lan'), color: '#A855F7', action: 'lanscan' },
-  { name: $r('app.string.roam_test'), desc: $r('app.string.desc_roam_test'), icon: $r('app.media.ic_roaming'), color: '#F97316', action: 'roamtest' },
-  { name: $r('app.string.find_device'), desc: $r('app.string.desc_find_device'), icon: $r('app.media.ic_device'), color: '#059669', action: 'finddevice' }
+  { name: $r('app.string.roam_test'), desc: $r('app.string.desc_roam_test'), icon: $r('app.media.ic_roaming'), color: '#F97316', action: 'roamtest' }
 ]
 
 @Component

@@ -382,11 +382,10 @@ export struct DashboardSection {
       // 工具网格（大屏4列单行，普通屏幕2列2行）
       Grid() {
         GridItem() { this.ToolItem($r('app.string.roam_test'), $r('app.media.ic_roaming'), '#EEF2FF', COLOR_PRIMARY, false, -1, 'roamtest') }
-        GridItem() { this.ToolItem($r('app.string.find_device'), $r('app.media.ic_device'), '#E0F7FE', '#06B6D4', false, -1, 'finddevice') }
         GridItem() { this.ToolItem($r('app.string.tab_wifi'), $r('app.media.ic_surround'), '#ECFDF5', COLOR_SUCCESS, false, 1) }
         GridItem() { this.ToolItem($r('app.string.channel_analysis'), $r('app.media.ic_channel'), '#F0EBFF', COLOR_INFO, true) }
       }
-      .columnsTemplate(isMediumOrLarger() ? '1fr 1fr 1fr 1fr' : '1fr 1fr')
+      .columnsTemplate(isMediumOrLarger() ? '1fr 1fr 1fr' : '1fr 1fr')
       .rowsTemplate(isMediumOrLarger() ? '1fr' : '1fr 1fr')
       .columnsGap(SPACE_MD).rowsGap(SPACE_MD)
       .width('100%').height(isMediumOrLarger() ? 100 : 180)
@@ -423,8 +422,6 @@ export struct DashboardSection {
       // 工具子页面：统一通过 RouterManager 导航
       if (toolAction === 'roamtest') {
         RouterManager.navigate('roamtest')
-      } else if (toolAction === 'finddevice') {
-        RouterManager.navigate('finddevice')
       } else if (isChannelTool) {
         AppStorage.set('currentTab', 2)
       } else if (targetTab >= 0) {

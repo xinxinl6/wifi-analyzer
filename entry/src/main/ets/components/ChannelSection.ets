@@ -45,11 +45,23 @@ interface ChannelCacheData {
 
 @Component
 export struct ChannelSection {
-  // 消费共享WiFi数据
-  @Consume('wifiState') wifiState: SharedWifiState
+  // 从 AppStorage 读取共享WiFi数据（支持独立页面和Tab内容两种使用场景）
+  @StorageLink('wifiState') wifiState: SharedWifiState = {
+    wifiList: [],
+    connectedSsid: '',
+    connectedBssid: '',
+    connectedSignal: -100,
+    connectedFreq: 0,
+    connectedChannel: 0,
+    isScanning: false,
+    currentFilter: 'all',
+    isLoaded: false,
+    scanRequestCount: 0,
+    error: ''
+  }
 
   // 暗色模式状态
-  @Consume('isDarkMode') isDarkMode: boolean
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // 当前选中的频段
   @State currentBand: string = '2.4'

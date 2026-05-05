@@ -53,15 +53,25 @@ export struct BackButtonGlass {
   build() {
     Row() {
       Text('←')
-        .fontSize(20)
-        .fontColor(COLOR_SKY_BLUE)
-        .fontWeight(FONT_WEIGHT_MEDIUM)
+        .fontSize(22)
+        .fontColor('#FFFFFF')
+        .fontWeight('500')
+        .shadow({
+          radius: 8,
+          color: '#40000000',
+          offsetX: 0,
+          offsetY: 2
+        })
     }
-    .padding({ left: 10, right: 10, top: 6, bottom: 6 })
-    .borderRadius(20)
-    .backgroundColor(COLOR_GLASS_SKY_TAG_BG)
-    .borderWidth(1)
-    .borderColor(COLOR_GLASS_BORDER)
+    .padding({ left: 14, right: 14, top: 10, bottom: 10 })
+    .borderRadius(24)
+    .backgroundColor('rgba(0,120,212,0.85)')
+    .shadow({
+      radius: 12,
+      color: '#60000000',
+      offsetX: 0,
+      offsetY: 4
+    })
     .onClick(() => this.onBack())
   }
 }

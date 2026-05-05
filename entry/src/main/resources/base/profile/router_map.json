@@ -61,9 +61,9 @@
       "buildFunction": "RoamTestPageBuilder"
     },
     {
-      "name": "FindDevicePage",
+      "name": "ChannelPage",
       "pageSourceFile": "src/main/ets/components/NavDestinations.ets",
-      "buildFunction": "FindDevicePageBuilder"
+      "buildFunction": "ChannelPageBuilder"
     }
   ]
 }

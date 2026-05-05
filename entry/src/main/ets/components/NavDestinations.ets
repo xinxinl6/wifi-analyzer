@@ -4,9 +4,10 @@
 
 import { RouterManager } from '@wifi-analyzer/core'
 import { TraceroutePage, DnsLookupPage, PortScanPage, SubnetCalcPage, IpGeoPage,
-  PoeCalcPage, MacLookupPage, WolPage, LanScanPage, RoamTestPage, FindDevicePage } from '@wifi-analyzer/tools'
+  PoeCalcPage, MacLookupPage, WolPage, LanScanPage, RoamTestPage } from '@wifi-analyzer/tools'
 import { PingTestPage } from './PingTestPage'
 import { AboutPage } from './AboutPage'
+import { ChannelPage } from './ChannelPage'
 
 // ==================== NavDestination 包装函数 ====================
 // 每个子页面包裹在 NavDestination 中，提供标题栏和返回按钮
@@ -169,13 +170,13 @@ function RoamTestPageBuilder(name: string, param: Object) {
   })
 }
 
-// 设备查找
+// 信道分析
 @Builder
-function FindDevicePageBuilder(name: string, param: Object) {
+function ChannelPageBuilder(name: string, param: Object) {
   NavDestination() {
-    FindDevicePage()
+    ChannelPage()
   }
-  .title($r('app.string.find_device'))
+  .title($r('app.string.channel_analysis'))
   .onBackPressed(() => {
     RouterManager.goBack()
     return true

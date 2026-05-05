@@ -496,12 +496,17 @@ export struct AuroraToolsGrid {
     .scale({ x: this.toolScale, y: this.toolScale })
     .onTouch((event: TouchEvent) => {
       if (event.type === TouchType.Down) {
-        this.getUIContext().animateTo(AnimationTapScale, () => {
-          this.toolScale = 0.92
+        // 按下：缩小到 0.95
+        this.getUIContext().animateTo({
+          duration: 100,
+          curve: Curve.EaseOut
+        }, () => {
+          this.toolScale = 0.95
         })
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        // 松开：恢复 1.0
         this.getUIContext().animateTo({
-          duration: DURATION_NORMAL,
+          duration: 200,
           curve: Curve.EaseOut
         }, () => {
           this.toolScale = 1.0
@@ -511,8 +516,21 @@ export struct AuroraToolsGrid {
     .onClick(() => {
       const routeMap: Record<string, RouteName> = {
         'roamtest': 'roamtest',
-        'finddevice': 'finddevice'
+        'channel': 'channel'
       }
+      const tabMap: Record<string, number> = {
+        'wifi': 1,
+        'channel_tab': 2,
+        'speed': 3,
+        'tools': 4
+      }
+      // 先检查是否是 Tab 导航
+      const tabIndex = tabMap[action]
+      if (tabIndex !== undefined) {
+        RouterManager.navigateToTab(tabIndex)
+        return
+      }
+      // 否则检查是否是子页面导航
       const route = routeMap[action]
       if (route) {
         RouterManager.navigate(route)
@@ -534,6 +552,9 @@ export struct AuroraToolsGrid {
         Text($r('app.string.more'))
           .fontSize(12)
           .fontColor(COLOR_AURORA_PRIMARY)
+          .onClick(() => {
+            RouterManager.navigateToTab(4) // 跳转到工具 Tab
+          })
       }
       .width('100%')
 
@@ -543,16 +564,13 @@ export struct AuroraToolsGrid {
           this.ToolCard($r('app.string.roam_test'), $r('app.media.ic_roaming'), 'rgba(74,144,217,0.15)', COLOR_AURORA_PRIMARY, 0, 'roamtest')
         }
         GridItem() {
-          this.ToolCard($r('app.string.find_device'), $r('app.media.ic_device'), 'rgba(0,217,126,0.15)', '#00D97E', 1, 'finddevice')
+          this.ToolCard($r('app.string.surrounding_wifi'), $r('app.media.ic_surround'), 'rgba(135,206,235,0.15)', COLOR_AURORA_LIGHT, 1, 'wifi')
         }
         GridItem() {
-          this.ToolCard($r('app.string.surrounding_wifi'), $r('app.media.ic_surround'), 'rgba(135,206,235,0.15)', COLOR_AURORA_LIGHT, 2, '')
-        }
-        GridItem() {
-          this.ToolCard($r('app.string.channel_analysis'), $r('app.media.ic_channel'), 'rgba(139,92,246,0.15)', '#8B5CF6', 3, '')
+          this.ToolCard($r('app.string.channel_analysis'), $r('app.media.ic_channel'), 'rgba(139,92,246,0.15)', '#8B5CF6', 2, 'channel_tab')
         }
       }
-      .columnsTemplate('1fr 1fr 1fr 1fr')
+      .columnsTemplate('1fr 1fr 1fr')
       .columnsGap(10)
       .rowsGap(10)
       .width('100%')

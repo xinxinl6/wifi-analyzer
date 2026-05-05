@@ -381,10 +381,6 @@
       "value": "Roaming Test"
     },
     {
-      "name": "find_device",
-      "value": "Device Finder"
-    },
-    {
       "name": "about",
       "value": "About"
     },
@@ -901,26 +897,6 @@
       "value": "Security"
     },
     {
-      "name": "find_device_desc",
-      "value": "Device Finder"
-    },
-    {
-      "name": "find_device_hint",
-      "value": "Search for devices on LAN"
-    },
-    {
-      "name": "find_device_start",
-      "value": "Start Discovery"
-    },
-    {
-      "name": "find_device_stop",
-      "value": "Stop Discovery"
-    },
-    {
-      "name": "find_device_found",
-      "value": "New device found"
-    },
-    {
       "name": "about_app",
       "value": "About"
     },
@@ -1215,10 +1191,6 @@
     {
       "name": "desc_roam_test",
       "value": "Monitor WiFi roaming"
-    },
-    {
-      "name": "desc_find_device",
-      "value": "Locate network devices"
     },
     {
       "name": "quick_tools",
@@ -2269,10 +2241,6 @@
       "value": "Test Again"
     },
     {
-      "name": "find_device_title",
-      "value": "Device Finder"
-    },
-    {
       "name": "back_with_arrow",
       "value": "<  Back"
     },
@@ -2379,14 +2347,6 @@
     {
       "name": "find_again",
       "value": "Find Again"
-    },
-    {
-      "name": "find_device_intro",
-      "value": "Device Finder Info"
-    },
-    {
-      "name": "find_device_intro_desc",
-      "value": "Combine LAN scanning and MAC vendor lookup to quickly locate and identify network devices"
     },
     {
       "name": "about_title",

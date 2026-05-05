@@ -1,53 +1,42 @@
-// IP 归属查询页面组件
-// 界面：搜索栏 + 我的IP + 查询结果卡片（地理位置+运营商+地图坐标）
+// IP 归属查询页面组件 — 天蓝色透明毛玻璃悬浮风格
 
 import {
-  COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
+  COLOR_PRIMARY, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
   COLOR_PURPLE, COLOR_PINK, COLOR_CYAN, COLOR_INDIGO,
   COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
-  COLOR_BACKGROUND, COLOR_SURFACE, COLOR_BORDER, COLOR_DIVIDER,
-  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL, FONT_SIZE_4XL,
+  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
-  RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
-  BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  GLASS_BLUR_LG, GLASS_BLUR_MD,
+  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  COLOR_GLASS_WHITE, COLOR_GLASS_SKY_SOLID, COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
+  COLOR_GLASS_BORDER, COLOR_GLASS_SKY_LIGHT,
+  COLOR_GLASS_SKY_ACTIVE, COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER,
+  COLOR_GLASS_SKY_SHADOW_MED, COLOR_GLASS_SKY_LINE,
+  adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
+  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
-import { BackButtonCapsule } from '@wifi-analyzer/design-system'
-import {
-  IpGeoEngine, IpGeoResult,
-} from '../ipgeo/IpGeoEngine'
+import { BackButtonGlass, BackButtonCapsule } from '@wifi-analyzer/design-system'
+import { IpGeoEngine, IpGeoResult } from '../ipgeo/IpGeoEngine'
 import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
 import promptAction from '@ohos.promptAction'
 
-// ==================== 组件 ====================
-
 @Component
 export struct IpGeoPage {
-  // 输入
+  @Consume isDarkMode: boolean = false
   @State inputText: string = ''
-
-  // UI 状态：'idle' | 'querying' | 'result'
   @State viewMode: string = 'idle'
   @State isQuerying: boolean = false
-
-  // 查询结果
   @State result: IpGeoResult = {
     ip: '', country: '', province: '', city: '', isp: '',
     district: '', latitude: 0, longitude: 0, timezone: '',
     queryTime: 0, status: 'error', errorMessage: '',
   }
-
-  // 我的IP
   @State myIp: string = ''
   @State isDetectingMyIp: boolean = true
-
-  // 引擎
   private engine: IpGeoEngine = new IpGeoEngine()
-
-  // 查询历史
   @State queryHistory: string[] = []
 
-  // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
       const ctx = this.getUIContext().getHostContext()
@@ -62,7 +51,6 @@ export struct IpGeoPage {
     this.detectMyIp()
   }
 
-  // 检测本机公网IP
   private async detectMyIp(): Promise<void> {
     this.isDetectingMyIp = true
     const ip: string = await this.engine.queryMyIp()
@@ -74,7 +62,6 @@ export struct IpGeoPage {
     this.isDetectingMyIp = false
   }
 
-  // 获取完整地理位置文字
   getLocationText(): string {
     if (this.result.country.length === 0 && this.result.city.length === 0) return '--'
     const parts: string[] = []
@@ -85,18 +72,14 @@ export struct IpGeoPage {
     return parts.join(' · ')
   }
 
-  // ==================== 业务逻辑 ====================
-
-  // ==================== 输入验证 ====================
   private validateInput(ip: string): string {
     const trimmed = ip.trim()
     if (trimmed.length === 0) {
       return this.getString($r('app.string.err_empty_input'))
     }
-    if (trimmed.length > 45) { // IPv6 最大长度
+    if (trimmed.length > 45) {
       return this.getString($r('app.string.err_input_too_long'))
     }
-    // 支持IPv4或域名
     if (!ValidationPatterns.isValidIpv4(trimmed) && !ValidationPatterns.isValidDomain(trimmed)) {
       return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
@@ -105,16 +88,13 @@ export struct IpGeoPage {
 
   async doQuery(): Promise<void> {
     const ip: string = this.inputText.trim()
-    // 输入验证
     const errorMsg = this.validateInput(ip)
     if (errorMsg !== '') {
       promptAction.showToast({ message: errorMsg, duration: 2000 })
       return
     }
-
     this.isQuerying = true
     this.viewMode = 'querying'
-
     const queryResult: IpGeoResult = await this.engine.query(ip)
     this.result = queryResult
     this.isQuerying = false
@@ -135,17 +115,49 @@ export struct IpGeoPage {
 
   // ==================== 页面入口 ====================
   build() {
-    Column() {
-      if (this.viewMode === 'idle') {
-        this.IdleView()
-      } else {
-        this.ResultView()
+    Stack() {
+      // ===== Aurora 天蓝渐变背景 =====
+      Column() {}
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: adaptiveBackgroundList(this.isDarkMode)
+        })
+
+      // 极光装饰光晕
+      Circle()
+        .width(280)
+        .height(280)
+        .fill(adaptiveGlowLarge(this.isDarkMode))
+        .position({ x: -60, y: -60 })
+
+      Circle()
+        .width(180)
+        .height(180)
+        .fill(adaptiveGlowMedium(this.isDarkMode))
+        .position({ x: '68%', y: '45%' })
+
+      // 主内容
+      Column() {
+        // 顶部返回按钮栏
+        Row() {
+          BackButtonGlass({ onBack: () => RouterManager.goBack() })
+          Blank()
+        }
+        .width('100%')
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SAFE_AREA_TOP })
+        .alignItems(VerticalAlign.Center)
+
+        if (this.viewMode === 'idle') {
+          this.IdleView()
+        } else {
+          this.ResultView()
+        }
       }
+      .width('100%').height('100%')
     }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(COLOR_BACKGROUND)
-    .padding({ top: SAFE_AREA_TOP, bottom: SAFE_AREA_BOTTOM })
+    .width('100%').height('100%')
   }
 
   // ==================== 初始视图 ====================
@@ -156,11 +168,11 @@ export struct IpGeoPage {
         this.SearchBarSection()
         this.FeatureCard()
       }
-      .padding(SPACE_LG)
+      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: 100 })
       .width('100%')
     }
     .edgeEffect(EdgeEffect.Spring)
-    .scrollBar(BarState.Auto)
+    .scrollBar(BarState.Off)
     .layoutWeight(1)
   }
 
@@ -168,17 +180,18 @@ export struct IpGeoPage {
   @Builder MyIpCard() {
     Row({ space: SPACE_MD }) {
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(44).height(44).fill('#FDF2F8')
+        Circle().width(44).height(44)
+          .fill(this.isDarkMode ? 'rgba(236,72,153,0.15)' : COLOR_GLASS_SKY_ACTIVE)
         Image($r('app.media.ic_ip')).width(22).height(22).fillColor(COLOR_PINK)
       }
 
       Column({ space: 2 }) {
         Text($r('app.string.my_public_ip'))
-          .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+          .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
         Row({ space: SPACE_SM }) {
           if (this.isDetectingMyIp) {
             Text($r('app.string.fetching'))
-              .fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_TERTIARY)
+              .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextTertiary(this.isDarkMode))
             Text($r('app.string.detecting'))
               .fontSize(FONT_SIZE_XS).fontColor(COLOR_PINK)
           } else if (this.myIp.length === 0) {
@@ -186,241 +199,238 @@ export struct IpGeoPage {
               .fontSize(FONT_SIZE_LG).fontColor(COLOR_DANGER)
           } else {
             Text(this.myIp)
-              .fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
+              .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
           }
         }
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
 
-      Button($r('app.string.query_action'))
-        .fontSize(FONT_SIZE_SM).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_PINK)
-        .borderRadius(RADIUS_3XL).height(28)
-        .padding({ left: SPACE_MD, right: SPACE_MD })
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.queryMyIpGeo())
+      Row() {
+        Text($r('app.string.query_action')).fontSize(FONT_SIZE_SM).fontColor('#FFFFFF').fontWeight(FONT_WEIGHT_BOLD)
+      }
+      .padding({ left: 18, right: 18, top: 9, bottom: 9 })
+      .backgroundColor(COLOR_PINK)
+      .borderRadius(999)
+      .shadow({ radius: GLASS_SHADOW_SM, color: COLOR_GLASS_SKY_SHADOW_MED, offsetX: 0, offsetY: 4 })
+      .onClick(() => this.queryMyIpGeo())
     }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%').padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 搜索栏
   @Builder SearchBarSection() {
     Row({ space: SPACE_SM }) {
-      Image($r('app.media.ic_ip')).width(FONT_SIZE_LG).height(FONT_SIZE_LG).fillColor(COLOR_PINK)
+      Image($r('app.media.ic_ip')).width(20).height(20).fillColor(COLOR_PINK)
 
       TextInput({ placeholder: $r('app.string.input_ip_address'), text: this.inputText })
         .layoutWeight(1)
-        .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).placeholderColor(COLOR_TEXT_TERTIARY)
+        .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).placeholderColor(adaptiveTextTertiary(this.isDarkMode))
         .backgroundColor(Color.Transparent)
-        .type(InputType.Number)
+        .type(InputType.Normal)
         .onChange((value: string) => { this.inputText = value })
 
-      Button($r('app.string.query_action'))
-        .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_PINK)
-        .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_SM)
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.doQuery())
+      Row() {
+        Text($r('app.string.query_action')).fontSize(FONT_SIZE_SM).fontColor('#FFFFFF').fontWeight(FONT_WEIGHT_BOLD)
+      }
+      .padding({ left: 18, right: 18, top: 9, bottom: 9 })
+      .backgroundColor(COLOR_PINK)
+      .borderRadius(999)
+      .shadow({ radius: GLASS_SHADOW_SM, color: COLOR_GLASS_SKY_SHADOW_MED, offsetX: 0, offsetY: 4 })
+      .onClick(() => this.doQuery())
     }
-    .width('100%').padding(SPACE_MD).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%').padding({ left: 16, right: 12, top: 13, bottom: 13 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 功能说明
   @Builder FeatureCard() {
-    Column({ space: SPACE_MD }) {
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(36).height(36).fill('#FDF2F8')
-          Image($r('app.media.ic_ip')).width(18).height(18).fillColor(COLOR_PINK)
-        }
-        Column({ space: 2 }) {
-          Text($r('app.string.ip_geo_intro'))
-            .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_MEDIUM)
-          Text($r('app.string.ip_geo_intro_desc'))
-            .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-        }
-        .alignItems(HorizontalAlign.Start)
-        .layoutWeight(1)
+    Column({ space: 0 }) {
+      Text($r('app.string.ip_geo_intro'))
+        .fontSize(FONT_SIZE_SM).fontWeight(FONT_WEIGHT_BOLD)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
+        .width('100%')
+        .padding({ bottom: 12 })
+
+      Column({ space: 0 }) {
+        this.FeatureItem('📍', '归属地查询', '查询IP的地理位置')
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+        this.FeatureItem('📡', '运营商信息', '查看ISP和网络运营商')
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+        this.FeatureItem('📊', '坐标定位', '获取经纬度坐标')
       }
+      .padding({ left: 14, right: 14, top: 14, bottom: 14 })
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+      .borderRadius(18)
+      .borderWidth(1.5)
+      .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+      .backdropBlur(GLASS_BLUR_LG)
+      .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+      .clip(true)
     }
-    .width('100%').padding(SPACE_MD).backgroundColor(COLOR_SURFACE)
-    .borderRadius(RADIUS_2XL).border({ width: 1, color: COLOR_BORDER })
+    .width('100%')
+  }
+
+  @Builder FeatureItem(emoji: string, title: string, desc: string) {
+    Row({ space: 14 }) {
+      Stack({ alignContent: Alignment.Center }) {
+        Circle().width(38).height(38)
+          .fill(this.isDarkMode ? 'rgba(236,72,153,0.15)' : COLOR_GLASS_SKY_ACTIVE)
+        Text(emoji).fontSize(16)
+      }
+
+      Column({ space: 3 }) {
+        Text(title)
+          .fontSize(FONT_SIZE_MD)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
+          .fontWeight(FONT_WEIGHT_BOLD)
+        Text(desc)
+          .fontSize(FONT_SIZE_XS)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
+      }
+      .alignItems(HorizontalAlign.Start)
+      .layoutWeight(1)
+    }
+    .width('100%')
+    .padding({ left: 14, right: 14, top: 14, bottom: 14 })
   }
 
   // ==================== 结果视图 ====================
   @Builder ResultView() {
     Scroll() {
       Column({ space: SPACE_LG }) {
-        // IP信息卡
-        this.IpInfoCard()
-
-        // 查询中
+        this.ResultInfoCard()
         if (this.isQuerying) {
           this.QueryingState()
         } else if (this.result.status === 'success') {
-          // 地理位置
-          this.LocationCard()
-          // 网络信息
-          this.NetworkInfoCard()
+          this.GeoDetailCard()
         } else {
           this.ErrorState()
         }
-
-        // 操作按钮
         this.ActionButtons()
       }
-      .padding(SPACE_LG)
+      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: 100 })
       .width('100%')
     }
     .edgeEffect(EdgeEffect.Spring)
-    .scrollBar(BarState.Auto)
+    .scrollBar(BarState.Off)
     .layoutWeight(1)
   }
 
-  // IP 信息卡
-  @Builder IpInfoCard() {
+  // 结果信息卡
+  @Builder ResultInfoCard() {
     Row({ space: SPACE_MD }) {
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(40).height(40).fill('#FDF2F8')
+        Circle().width(44).height(44)
+          .fill(this.isDarkMode ? 'rgba(236,72,153,0.15)' : COLOR_GLASS_SKY_LIGHT)
         Image($r('app.media.ic_ip')).width(22).height(22).fillColor(COLOR_PINK)
       }
 
-      Column({ space: 2 }) {
+      Column({ space: 4 }) {
         Text(this.result.ip)
-          .fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
+          .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
+          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
         Row({ space: SPACE_SM }) {
-          Text() {
-          Span($r('app.string.query_latency'))
-          Span(' ' + String(this.result.queryTime) + 'ms')
-        }
-            .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+          Text(this.getLocationText()).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
+          Text(' | ').fontSize(FONT_SIZE_XS).fontColor(adaptiveDivider(this.isDarkMode))
+          Text(this.result.queryTime + 'ms').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
         }
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
-    }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
-  }
 
-  // 地理位置卡
-  @Builder LocationCard() {
-    Column({ space: SPACE_MD }) {
-      // 标题行
       Row() {
-        Text($r('app.string.geographic_location'))
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
-        Blank()
-        Text('📍').fontSize(FONT_SIZE_XL)
+        Text('🔍').fontSize(14)
       }
-      .width('100%')
-
-      // 位置信息
-      Column({ space: SPACE_SM }) {
-        Row({ space: SPACE_MD }) {
-          Stack({ alignContent: Alignment.Center }) {
-            Circle().width(36).height(36).fill('#FDF2F8')
-            Text('🌐').fontSize(FONT_SIZE_MD)
-          }
-
-          Column({ space: 2 }) {
-            Text(this.getLocationText())
-              .fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
-            if (this.result.timezone.length > 0) {
-              Text() {
-                Span($r('app.string.timezone_colon'))
-                Span(this.result.timezone)
-              }
-                .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-            }
-          }
-          .alignItems(HorizontalAlign.Start)
-          .layoutWeight(1)
-        }
-        .width('100%')
-        .padding(SPACE_MD)
-        .backgroundColor('#FDF2F8')
-        .borderRadius(RADIUS_MD)
-
-        // 坐标信息
-        if (this.result.latitude !== 0 || this.result.longitude !== 0) {
-          Row() {
-            this.CoordCell($r('app.string.latitude'), String(this.result.latitude))
-            this.CoordCell($r('app.string.longitude'), String(this.result.longitude))
-          }
-          .width('100%')
-        }
-      }
+      .width(34).height(34)
+      .justifyContent(FlexAlign.Center)
+      .alignItems(VerticalAlign.Center)
+      .backgroundColor(this.isDarkMode ? 'rgba(236,72,153,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+      .borderRadius(10)
+      .onClick(() => {
+        this.viewMode = 'idle'
+        this.inputText = this.result.ip
+      })
     }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%').padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
-  @Builder CoordCell(label: Resource | string, value: string) {
-    Column({ space: SPACE_XS }) {
-      Text(label).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-      Text(value).fontSize(FONT_SIZE_MD).fontColor(COLOR_PINK).fontWeight(FONT_WEIGHT_BOLD)
-    }
-    .layoutWeight(1)
-    .padding(SPACE_SM)
-    .backgroundColor(COLOR_BACKGROUND)
-    .borderRadius(RADIUS_SM)
-    .alignItems(HorizontalAlign.Center)
-  }
-
-  // 网络信息卡
-  @Builder NetworkInfoCard() {
+  // 地理位置详情
+  @Builder GeoDetailCard() {
     Column({ space: 0 }) {
       Row() {
-        Text($r('app.string.network_info')).fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
+        Row({ space: 6 }) {
+          Text('📍').fontSize(14)
+          Text('地理位置').fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
+        }
         Blank()
+        if (this.result.country.length > 0) {
+          Text(this.result.country).fontSize(FONT_SIZE_XS).fontColor(COLOR_PINK)
+            .padding({ left: 8, right: 8, top: 3, bottom: 3 })
+            .backgroundColor(this.isDarkMode ? 'rgba(236,72,153,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+            .borderRadius(999)
+        }
       }
       .width('100%').padding({ bottom: SPACE_SM })
 
-      if (this.result.isp.length > 0) {
-        this.DetailRow($r('app.string.vendor'), this.result.isp, COLOR_PINK)
-        Divider().color(COLOR_DIVIDER)
+      Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+
+      Column({ space: SPACE_SM }) {
+        if (this.result.province.length > 0)
+          this.DetailRow('省份', this.result.province)
+        if (this.result.city.length > 0)
+          this.DetailRow('城市', this.result.city)
+        if (this.result.isp.length > 0)
+          this.DetailRow('运营商', this.result.isp)
+        if (this.result.latitude !== 0 || this.result.longitude !== 0)
+          this.DetailRow('坐标', this.result.latitude.toFixed(2) + ', ' + this.result.longitude.toFixed(2))
+        if (this.result.timezone.length > 0)
+          this.DetailRow('时区', this.result.timezone)
       }
-      if (this.result.country.length > 0) {
-        this.DetailRow($r('app.string.country_region'), this.result.country, COLOR_TEXT_PRIMARY)
-        Divider().color(COLOR_DIVIDER)
-      }
-      if (this.result.province.length > 0) {
-        this.DetailRow($r('app.string.province'), this.result.province, COLOR_TEXT_PRIMARY)
-        Divider().color(COLOR_DIVIDER)
-      }
-      if (this.result.city.length > 0) {
-        this.DetailRow($r('app.string.city'), this.result.city, COLOR_TEXT_PRIMARY)
-        Divider().color(COLOR_DIVIDER)
-      }
-      if (this.result.district.length > 0) {
-        this.DetailRow($r('app.string.district'), this.result.district, COLOR_TEXT_PRIMARY)
-        Divider().color(COLOR_DIVIDER)
-      }
-      if (this.result.timezone.length > 0) {
-        this.DetailRow($r('app.string.timezone'), this.result.timezone, COLOR_TEXT_SECONDARY)
-      }
+      .padding({ left: 14, right: 14, top: 12, bottom: 12 })
     }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%')
+    .padding({ left: 14, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .clip(true)
   }
 
-  @Builder DetailRow(label: Resource | string, value: string, valueColor: string) {
+  @Builder DetailRow(label: string, value: string) {
     Row() {
-      Text(label).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
-      Blank()
-      Text(value).fontSize(FONT_SIZE_SM).fontColor(valueColor).fontWeight(FONT_WEIGHT_MEDIUM)
+      Text(label).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(60)
+      Text(value)
+        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextPrimary(this.isDarkMode))
+        .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
     }
-    .width('100%').padding({ top: SPACE_SM, bottom: SPACE_SM })
+    .width('100%').padding({ top: 6, bottom: 6 })
   }
 
-  // 查询中
+  // 查询中状态
   @Builder QueryingState() {
     Column({ space: SPACE_MD }) {
-      Text($r('app.string.querying_ip_info')).fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_TERTIARY)
+      Text($r('app.string.querying_ip')).fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
     }
     .width('100%').height(180).justifyContent(FlexAlign.Center)
   }
@@ -429,14 +439,19 @@ export struct IpGeoPage {
   @Builder ErrorState() {
     Column({ space: SPACE_MD }) {
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(64).height(64).fill('#FEF2F2')
+        Circle().width(64).height(64).fill(this.isDarkMode ? 'rgba(239,68,68,0.15)' : '#FEF2F2')
         Text('!').fontSize(FONT_SIZE_3XL).fontColor(COLOR_DANGER).fontWeight(FONT_WEIGHT_BOLD)
       }
       Text(this.result.errorMessage || $r('app.string.query_failed'))
         .fontSize(FONT_SIZE_MD).fontColor(COLOR_DANGER)
-        .textAlign(TextAlign.Center)
     }
     .width('100%').height(200).justifyContent(FlexAlign.Center)
+    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
   }
 
   // 操作按钮
@@ -444,12 +459,16 @@ export struct IpGeoPage {
     Row({ space: SPACE_MD }) {
       BackButtonCapsule({ onBack: () => RouterManager.goBack() })
 
-      Button($r('app.string.query_my_ip'))
-        .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_PINK)
-        .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_MD).layoutWeight(1)
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.queryMyIpGeo())
+      Row() {
+        Text($r('app.string.re_query')).fontSize(FONT_SIZE_MD).fontColor('#FFFFFF').fontWeight(FONT_WEIGHT_BOLD)
+      }
+      .justifyContent(FlexAlign.Center)
+      .layoutWeight(1)
+      .padding({ top: 13, bottom: 13 })
+      .backgroundColor(COLOR_PINK)
+      .borderRadius(999)
+      .shadow({ radius: GLASS_SHADOW_SM, color: COLOR_GLASS_SKY_SHADOW_MED, offsetX: 0, offsetY: 5 })
+      .onClick(() => this.doQuery())
     }
     .width('100%')
   }

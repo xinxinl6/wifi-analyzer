@@ -1,23 +1,25 @@
-// 端口扫描页面组件
-// 界面：搜索栏 + 预设方案选择 + 扫描进度 + 端口状态列表
+// 端口扫描页面组件 — 天蓝色透明毛玻璃悬浮风格
 
 import promptAction from '@ohos.promptAction'
 import {
-  COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
-  COLOR_PURPLE, COLOR_PINK, COLOR_CYAN,
+  COLOR_PRIMARY, COLOR_SUCCESS, COLOR_DANGER, COLOR_WARNING, COLOR_INFO,
+  COLOR_PURPLE,
   COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
-  COLOR_BACKGROUND, COLOR_SURFACE, COLOR_BORDER, COLOR_DIVIDER,
-  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL, FONT_SIZE_4XL,
+  FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
-  SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG, SPACE_XL,
-  RADIUS_SM, RADIUS_MD, RADIUS_LG, RADIUS_2XL, RADIUS_3XL,
-  BUTTON_HEIGHT_SM, BUTTON_HEIGHT_MD, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG,
+  GLASS_BLUR_LG, GLASS_BLUR_MD,
+  GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
+  COLOR_GLASS_WHITE, COLOR_GLASS_SKY_SOLID, COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
+  COLOR_GLASS_BORDER, COLOR_GLASS_SKY_LIGHT,
+  COLOR_GLASS_SKY_ACTIVE, COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER,
+  COLOR_GLASS_SKY_SHADOW_MED, COLOR_GLASS_SKY_LINE,
+  adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
+  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
-import { BackButtonCapsule } from '@wifi-analyzer/design-system'
-import { PortScanEngine, PortScanResult, PortScanCallbacks, PortPreset } from '../ports/PortScanEngine'
+import { BackButtonGlass, BackButtonCapsule } from '@wifi-analyzer/design-system'
+import { PortScanEngine, PortScanResult, PortPreset, PortScanCallbacks } from '../ports/PortScanEngine'
 import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
-
-// ==================== 接口定义 ====================
 
 interface PresetItem {
   name: string
@@ -25,37 +27,29 @@ interface PresetItem {
   portCount: number
 }
 
-// ==================== 组件 ====================
-
 @Component
 export struct PortScanPage {
-  // 输入
+  @Consume isDarkMode: boolean = false
   @State inputText: string = ''
   @State detectedGateway: string = ''
 
-  // UI 状态：'idle' | 'scanning' | 'result'
   @State viewMode: string = 'idle'
   @State isScanning: boolean = false
 
-  // 预设方案
   @State presetItems: PresetItem[] = []
   @State selectedPresetIndex: number = 0
 
-  // 扫描数据
   @State resultList: PortScanResult[] = []
   @State openPorts: PortScanResult[] = []
   @State scannedCount: number = 0
   @State totalPorts: number = 0
   @State currentPort: number = 0
 
-  // 引擎
   private engine: PortScanEngine = new PortScanEngine()
 
-  // 脉冲动画
   @State pulseOpacity: number = 1.0
   private pulseTimerId: number = -1
 
-  // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
       const ctx = this.getUIContext().getHostContext()
@@ -67,7 +61,6 @@ export struct PortScanPage {
 
   aboutToAppear(): void {
     this.loadPresets()
-    this.detectGateway()
   }
 
   aboutToDisappear(): void {
@@ -75,7 +68,6 @@ export struct PortScanPage {
     this.stopPulse()
   }
 
-  // 加载预设
   private loadPresets(): void {
     const presets: PortPreset[] = PortScanEngine.PRESETS
     const items: PresetItem[] = []
@@ -90,12 +82,6 @@ export struct PortScanPage {
     this.presetItems = items
   }
 
-  // 检测网关（预留）
-  private detectGateway(): void {
-    // 端口扫描不需要网关检测
-  }
-
-  // 脉冲动画
   private startPulse(): void {
     this.pulseTimerId = setInterval((): void => {
       this.pulseOpacity = this.pulseOpacity === 1.0 ? 0.3 : 1.0
@@ -110,13 +96,11 @@ export struct PortScanPage {
     this.pulseOpacity = 1.0
   }
 
-  // 获取进度百分比
   getProgressPercent(): number {
     if (this.totalPorts === 0) return 0
     return Math.round((this.scannedCount / this.totalPorts) * 100)
   }
 
-  // 获取状态颜色
   getStatusColor(status: string): string {
     switch (status) {
       case 'open': return COLOR_SUCCESS
@@ -126,7 +110,15 @@ export struct PortScanPage {
     }
   }
 
-  // 获取状态文字（Resource 类型，用于 i18n）
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'open': return this.getString($r('app.string.port_open'))
+      case 'closed': return this.getString($r('app.string.port_closed'))
+      case 'filtered': return this.getString($r('app.string.timeout_status'))
+      default: return this.getString($r('app.string.unknown'))
+    }
+  }
+
   getStatusTextResource(status: string): Resource {
     switch (status) {
       case 'open': return $r('app.string.port_open')
@@ -136,58 +128,32 @@ export struct PortScanPage {
     }
   }
 
-  // 获取状态文字（兼容字符串）
-  getStatusText(status: string): string {
-    switch (status) {
-      case 'open': return this.getString($r('app.string.port_status_open'))
-      case 'closed': return this.getString($r('app.string.port_status_closed'))
-      case 'filtered': return this.getString($r('app.string.port_status_filtered'))
-      default: return this.getString($r('app.string.unknown'))
-    }
-  }
-
   // ==================== 业务逻辑 ====================
 
-  // 验证输入
   private validateInput(addr: string): string {
     const trimmed: string = addr.trim()
-
-    // 检查是否为空
     if (trimmed.length === 0) {
       return this.getString($r('app.string.err_empty_input'))
     }
-
-    // 检查长度限制（域名/IP最大255字符）
     if (trimmed.length > 255) {
       return this.getString($r('app.string.err_input_too_long'))
     }
-
-    // 检查是否为内网IP（安全限制）
     if (ValidationPatterns.isValidIpv4(trimmed) && ValidationPatterns.isPrivateIp(trimmed)) {
       return this.getString($r('app.string.err_private_ip'))
     }
-
-    // 验证IP或域名格式
     if (!ValidationPatterns.isValidIpOrDomain(trimmed)) {
       return this.getString($r('app.string.err_invalid_ip_or_domain'))
     }
-
     return ''
   }
 
   async startScan(): Promise<void> {
     const addr: string = this.inputText.trim()
-
-    // 输入验证
     const errorMsg: string = this.validateInput(addr)
     if (errorMsg !== '') {
-      promptAction.showToast({
-        message: errorMsg,
-        duration: 2000
-      })
+      promptAction.showToast({ message: errorMsg, duration: 2000 })
       return
     }
-
     this.resultList = []
     this.openPorts = []
     this.scannedCount = 0
@@ -207,7 +173,6 @@ export struct PortScanPage {
       },
       onPortFound: (port: PortScanResult): void => {
         this.openPorts.push(port)
-        // 触发刷新
         const refreshed: PortScanResult[] = []
         for (let i = 0; i < this.openPorts.length; i++) {
           refreshed.push(this.openPorts[i])
@@ -245,21 +210,51 @@ export struct PortScanPage {
     }
   }
 
-  // aboutToDisappear 已处理引擎清理
-
   // ==================== 页面入口 ====================
   build() {
-    Column() {
-      if (this.viewMode === 'idle') {
-        this.IdleView()
-      } else {
-        this.ScanView()
+    Stack() {
+      // ===== Aurora 天蓝渐变背景 =====
+      Column() {}
+        .width('100%')
+        .height('100%')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: adaptiveBackgroundList(this.isDarkMode)
+        })
+
+      // 极光装饰光晕
+      Circle()
+        .width(280)
+        .height(280)
+        .fill(adaptiveGlowLarge(this.isDarkMode))
+        .position({ x: -60, y: -60 })
+
+      Circle()
+        .width(180)
+        .height(180)
+        .fill(adaptiveGlowMedium(this.isDarkMode))
+        .position({ x: '68%', y: '45%' })
+
+      // 主内容
+      Column() {
+        // 顶部返回按钮栏
+        Row() {
+          BackButtonGlass({ onBack: () => RouterManager.goBack() })
+          Blank()
+        }
+        .width('100%')
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SAFE_AREA_TOP })
+        .alignItems(VerticalAlign.Center)
+
+        if (this.viewMode === 'idle') {
+          this.IdleView()
+        } else {
+          this.ScanView()
+        }
       }
+      .width('100%').height('100%')
     }
-    .width('100%')
-    .height('100%')
-    .backgroundColor(COLOR_BACKGROUND)
-    .padding({ top: SAFE_AREA_TOP, bottom: SAFE_AREA_BOTTOM })
+    .width('100%').height('100%')
   }
 
   // ==================== 初始视图 ====================
@@ -270,300 +265,312 @@ export struct PortScanPage {
         this.PresetSelector()
         this.FeatureCard()
       }
-      .padding(SPACE_LG)
+      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: 100 })
       .width('100%')
     }
     .edgeEffect(EdgeEffect.Spring)
-    .scrollBar(BarState.Auto)
+    .scrollBar(BarState.Off)
     .layoutWeight(1)
   }
 
   // 搜索栏
   @Builder SearchBarSection() {
     Row({ space: SPACE_SM }) {
-      Image($r('app.media.ic_port')).width(FONT_SIZE_LG).height(FONT_SIZE_LG).fillColor(COLOR_PURPLE)
+      Image($r('app.media.ic_port')).width(20).height(20).fillColor(COLOR_PURPLE)
 
       TextInput({ placeholder: $r('app.string.input_ip_hint'), text: this.inputText })
         .layoutWeight(1)
-        .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).placeholderColor(COLOR_TEXT_TERTIARY)
+        .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).placeholderColor(adaptiveTextTertiary(this.isDarkMode))
         .backgroundColor(Color.Transparent)
         .onChange((value: string) => { this.inputText = value })
 
-      Button($r('app.string.scan_action'))
-        .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_PURPLE)
-        .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_SM)
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.startScan())
+      Row() {
+        Text($r('app.string.scan_action'))
+          .fontSize(FONT_SIZE_SM)
+          .fontColor('#FFFFFF')
+          .fontWeight(FONT_WEIGHT_BOLD)
+      }
+      .padding({ left: 18, right: 18, top: 9, bottom: 9 })
+      .backgroundColor(COLOR_PURPLE)
+      .borderRadius(999)
+      .shadow({ radius: GLASS_SHADOW_SM, color: COLOR_GLASS_SKY_SHADOW_MED, offsetX: 0, offsetY: 4 })
+      .onClick(() => this.startScan())
     }
-    .width('100%').padding(SPACE_MD).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%').padding({ left: 16, right: 12, top: 13, bottom: 13 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
   }
 
   // 预设方案选择
   @Builder PresetSelector() {
     Column({ space: SPACE_SM }) {
-      Text($r('app.string.scan_preset')).fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY).alignSelf(ItemAlign.Start)
+      Text($r('app.string.scan_preset')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).alignSelf(ItemAlign.Start)
 
-      Column({ space: SPACE_SM }) {
+      Column({ space: 0 }) {
         ForEach(this.presetItems, (preset: PresetItem, index: number) => {
           this.PresetRow(preset, index)
         }, (preset: PresetItem, index: number): string => String(index))
       }
       .width('100%')
+      .padding({ left: 14, right: 14, top: 14, bottom: 14 })
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+      .borderRadius(18)
+      .borderWidth(1.5)
+      .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+      .backdropBlur(GLASS_BLUR_LG)
+      .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+      .clip(true)
     }
     .width('100%').alignItems(HorizontalAlign.Start)
   }
 
   @Builder PresetRow(preset: PresetItem, index: number) {
     Row({ space: SPACE_MD }) {
-      // 选中指示器
       Circle()
         .width(20).height(20)
         .fill(this.selectedPresetIndex === index ? COLOR_PURPLE : Color.Transparent)
-        .border({ width: 2, color: this.selectedPresetIndex === index ? COLOR_PURPLE : COLOR_BORDER })
+        .border({ width: 2, color: this.selectedPresetIndex === index ? COLOR_PURPLE : adaptiveDivider(this.isDarkMode) })
 
       Column({ space: 2 }) {
         Text(preset.name)
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_MEDIUM)
+          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_MEDIUM)
         Text() {
-          Span(preset.description + ' (' + preset.portCount + ' ')
+          Span(preset.description + ' (')
+          Span(String(preset.portCount))
+          Span(' ')
           Span($r('app.string.port_count_ports'))
           Span(')')
         }
-          .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
+        .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
       }
       .alignItems(HorizontalAlign.Start)
       .layoutWeight(1)
     }
-    .width('100%').padding(SPACE_MD).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_MD)
-    .border({ width: 1, color: this.selectedPresetIndex === index ? COLOR_PURPLE : COLOR_BORDER })
+    .width('100%').padding({ top: 14, bottom: 14 })
+    .border({
+      width: index < this.presetItems.length - 1 ? 0.5 : 0,
+      color: adaptiveDivider(this.isDarkMode)
+    })
     .stateStyles({ pressed: { opacity: 0.8 } })
     .onClick(() => { this.selectedPresetIndex = index })
   }
 
   // 功能说明
   @Builder FeatureCard() {
-    Column({ space: SPACE_MD }) {
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(36).height(36).fill('#F0EBFF')
-          Image($r('app.media.ic_port')).width(18).height(18).fillColor(COLOR_PURPLE)
-        }
-        Column({ space: 2 }) {
-          Text($r('app.string.port_scan_intro'))
-            .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_MEDIUM)
-          Text($r('app.string.port_scan_intro_desc'))
-            .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-        }
-        .alignItems(HorizontalAlign.Start)
-        .layoutWeight(1)
+    Column({ space: 0 }) {
+      Text($r('app.string.port_scan_intro'))
+        .fontSize(FONT_SIZE_SM).fontWeight(FONT_WEIGHT_BOLD)
+        .fontColor(adaptiveTextSecondary(this.isDarkMode))
+        .width('100%')
+        .padding({ bottom: 12 })
+
+      Column({ space: 0 }) {
+        this.FeatureItem('🔍', '端口检测', '检测常用端口是否开放')
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+        this.FeatureItem('📊', '安全扫描', '发现潜在安全风险')
+        Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+        this.FeatureItem('📈', '结果导出', '查看开放端口详情')
       }
+      .padding({ left: 14, right: 14, top: 14, bottom: 14 })
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+      .borderRadius(18)
+      .borderWidth(1.5)
+      .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+      .backdropBlur(GLASS_BLUR_LG)
+      .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+      .clip(true)
     }
-    .width('100%').padding(SPACE_MD).backgroundColor(COLOR_SURFACE)
-    .borderRadius(RADIUS_2XL).border({ width: 1, color: COLOR_BORDER })
+    .width('100%')
+  }
+
+  @Builder FeatureItem(emoji: string, title: string, desc: string) {
+    Row({ space: 14 }) {
+      Stack({ alignContent: Alignment.Center }) {
+        Circle().width(38).height(38)
+          .fill(this.isDarkMode ? 'rgba(147,51,234,0.15)' : COLOR_GLASS_SKY_ACTIVE)
+        Text(emoji).fontSize(16)
+      }
+
+      Column({ space: 3 }) {
+        Text(title)
+          .fontSize(FONT_SIZE_MD)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
+          .fontWeight(FONT_WEIGHT_BOLD)
+        Text(desc)
+          .fontSize(FONT_SIZE_XS)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
+      }
+      .alignItems(HorizontalAlign.Start)
+      .layoutWeight(1)
+    }
+    .width('100%')
+    .padding({ left: 14, right: 14, top: 14, bottom: 14 })
   }
 
   // ==================== 扫描视图 ====================
   @Builder ScanView() {
     Scroll() {
       Column({ space: SPACE_LG }) {
-        // 扫描状态卡
-        this.ScanStatusCard()
-
-        // 开放端口统计
+        this.TargetInfoCard()
+        if (this.isScanning) {
+          this.ProgressCard()
+        }
         if (this.openPorts.length > 0) {
-          this.OpenPortsSummary()
+          this.OpenPortsCard()
         }
-
-        // 端口结果列表
-        if (this.viewMode === 'result' && this.resultList.length > 0) {
-          this.PortResultsList()
-        }
-
-        // 操作按钮
         this.ActionButtons()
       }
-      .padding(SPACE_LG)
+      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: 100 })
       .width('100%')
     }
     .edgeEffect(EdgeEffect.Spring)
-    .scrollBar(BarState.Auto)
+    .scrollBar(BarState.Off)
     .layoutWeight(1)
   }
 
-  // 扫描状态卡
-  @Builder ScanStatusCard() {
-    Column({ space: SPACE_MD }) {
-      // 目标 + 状态图标
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle()
-            .width(40).height(40)
-            .fill(this.isScanning ? (COLOR_PURPLE + Math.round(this.pulseOpacity * 60).toString(16).padStart(2, '0')) : '#F0EBFF')
-          Image($r('app.media.ic_port')).width(22).height(22).fillColor(COLOR_PURPLE)
-        }
+  // 目标信息卡
+  @Builder TargetInfoCard() {
+    Row({ space: SPACE_MD }) {
+      Stack({ alignContent: Alignment.Center }) {
+        Circle().width(44).height(44)
+          .fill(this.isDarkMode ? 'rgba(147,51,234,0.15)' : COLOR_GLASS_SKY_LIGHT)
+          .opacity(this.isScanning ? this.pulseOpacity : 1.0)
+        Circle().width(36).height(36)
+          .fill(this.isScanning ? COLOR_PURPLE : COLOR_PURPLE)
+        Image($r('app.media.ic_port')).width(18).height(18).fillColor('#FFFFFF')
+      }
 
-        Column({ space: 2 }) {
-          Text(this.inputText)
-            .fontSize(FONT_SIZE_LG).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
-          if (this.isScanning) {
-            Text() {
-              Span($r('app.string.scanning_port'))
-              Span(' ' + String(this.currentPort) + '...')
-            }.fontSize(FONT_SIZE_XS).fontColor(COLOR_PURPLE)
-          } else {
-            Text(this.viewMode === 'result' ? $r('app.string.scan_complete') : $r('app.string.scan_stopped'))
+      Column({ space: 4 }) {
+        Text(this.inputText)
+          .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
+          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+
+        if (this.isScanning) {
+          Row({ space: 4 }) {
+            Circle().width(5).height(5).fill(COLOR_PURPLE).opacity(this.pulseOpacity)
+            Text($r('app.string.scanning_ports'))
+              .fontSize(FONT_SIZE_XS).fontColor(COLOR_PURPLE)
+          }
+        } else if (this.viewMode === 'result') {
+          Row({ space: 4 }) {
+            Circle().width(5).height(5).fill(COLOR_SUCCESS)
+            Text($r('app.string.scan_complete'))
               .fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS)
           }
         }
-        .alignItems(HorizontalAlign.Start)
-        .layoutWeight(1)
       }
+      .alignItems(HorizontalAlign.Start)
+      .layoutWeight(1)
+    }
+    .width('100%').padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+  }
+
+  // 进度卡片
+  @Builder ProgressCard() {
+    Column({ space: SPACE_MD }) {
+      Row() {
+        Text($r('app.string.scan_progress'))
+          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
+        Blank()
+        Text(String(this.scannedCount) + '/' + String(this.totalPorts))
+          .fontSize(FONT_SIZE_XS).fontColor(COLOR_PURPLE)
+      }
+      .width('100%')
 
       // 进度条
-      if (this.isScanning) {
-        Column({ space: SPACE_XS }) {
-          Row() {
-            Text() {
-              Span($r('app.string.progress_label'))
-              Span(String(this.scannedCount) + ' / ' + String(this.totalPorts))
-            }
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY)
-            Blank()
-            Text(this.getProgressPercent() + '%')
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_PURPLE).fontWeight(FONT_WEIGHT_BOLD)
-          }
-          .width('100%')
+      Row() {
+        Column()
+          .height(6)
+          .borderRadius(3)
+          .backgroundColor(COLOR_PURPLE)
+          .width(String(this.getProgressPercent()) + '%')
+        Blank()
+      }
+      .width('100%')
+      .height(6)
+      .borderRadius(3)
+      .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_GLASS_SKY_LIGHT)
 
-          // 进度条
-          Stack() {
-            Column()
-              .width('100%').height(6).backgroundColor(COLOR_DIVIDER).borderRadius(3)
-            Column()
-              .width(this.getProgressPercent() + '%').height(6)
-              .backgroundColor(COLOR_PURPLE).borderRadius(3)
-          }
-          .width('100%')
+      Text($r('app.string.current_port') + ': ' + (this.currentPort > 0 ? String(this.currentPort) : '...'))
+        .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
+    }
+    .width('100%').padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+  }
+
+  // 开放端口列表
+  @Builder OpenPortsCard() {
+    Column({ space: 0 }) {
+      Row() {
+        Row({ space: 6 }) {
+          Text('📊').fontSize(14)
+          Text($r('app.string.open_ports'))
+            .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
         }
-      }
-
-      // 统计行
-      Row() {
-        this.StatCell($r('app.string.scanned'), String(this.scannedCount), COLOR_PRIMARY)
-        this.StatCell($r('app.string.port_open'), String(this.openPorts.length), COLOR_SUCCESS)
-        this.StatCell($r('app.string.port_closed'), String(this.scannedCount - this.openPorts.length), COLOR_DANGER)
-      }
-    }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
-  }
-
-  @Builder StatCell(label: Resource | string, value: string, valueColor: string) {
-    Column({ space: SPACE_XS }) {
-      Text(value).fontSize(FONT_SIZE_2XL).fontColor(valueColor).fontWeight(FONT_WEIGHT_BOLD)
-      Text(label).fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-    }
-    .layoutWeight(1).alignItems(HorizontalAlign.Center)
-  }
-
-  // 开放端口摘要
-  @Builder OpenPortsSummary() {
-    Column({ space: SPACE_SM }) {
-      Row() {
-        Text($r('app.string.discovered_open_ports'))
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
         Blank()
         Text() {
           Span(String(this.openPorts.length))
           Span(' ')
-          Span($r('app.string.device_count_suffix'))
-        }.fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS)
-      }
-      .width('100%')
-
-      ForEach(this.openPorts, (port: PortScanResult, index: number) => {
-        Row({ space: SPACE_MD }) {
-          Stack({ alignContent: Alignment.Center }) {
-            Circle().width(32).height(32).fill('#ECFDF5')
-            Text(String(port.port)).fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS).fontWeight(FONT_WEIGHT_BOLD)
-          }
-
-          Column({ space: 2 }) {
-            Text(port.service).fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_MEDIUM)
-            Text() {
-              Span($r('app.string.port_service'))
-              Span(' ' + String(port.port) + ' · ' + port.latency + 'ms')
-            }
-              .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-          }
-          .alignItems(HorizontalAlign.Start)
-          .layoutWeight(1)
-
-          Text($r('app.string.port_open'))
-            .fontSize(FONT_SIZE_XS).fontColor(Color.White)
-            .padding({ left: 8, right: 8, top: 2, bottom: 2 })
-            .backgroundColor(COLOR_SUCCESS).borderRadius(RADIUS_SM)
+          Span($r('app.string.port_count_ports'))
         }
-        .width('100%')
-        .padding(SPACE_SM)
-        .backgroundColor(COLOR_SURFACE)
-        .borderRadius(RADIUS_MD)
-        .border({ width: 1, color: COLOR_BORDER })
-      }, (port: PortScanResult, index: number): string => String(port.port))
+        .fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS)
+        .padding({ left: 8, right: 8, top: 3, bottom: 3 })
+        .backgroundColor(this.isDarkMode ? 'rgba(16,185,129,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+        .borderRadius(999)
+      }
+      .width('100%').padding({ left: 16, right: 14, top: 14, bottom: 12 })
+
+      Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+
+      Column({ space: 0 }) {
+        ForEach(this.openPorts, (port: PortScanResult, index: number) => {
+          this.PortItem(port, index)
+        }, (port: PortScanResult, index: number): string => String(index + '_' + port.port))
+      }
+      .padding({ left: 14, right: 14, top: 8, bottom: 12 })
     }
     .width('100%')
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(18)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
+    .clip(true)
   }
 
-  // 端口结果完整列表
-  @Builder PortResultsList() {
-    Column({ space: 0 }) {
-      Row() {
-        Text($r('app.string.all_ports'))
-          .fontSize(FONT_SIZE_MD).fontColor(COLOR_TEXT_PRIMARY).fontWeight(FONT_WEIGHT_BOLD)
-        Blank()
-        Text() {
-          Span(String(this.resultList.length))
-          Span(' ')
-          Span($r('app.string.ports_total'))
-        }
-          .fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY)
-      }
-      .width('100%').padding({ bottom: SPACE_SM })
+  @Builder PortItem(port: PortScanResult, index: number) {
+    Row({ space: SPACE_SM }) {
+      Text(String(port.port))
+        .fontSize(FONT_SIZE_SM).fontColor(COLOR_PURPLE).fontWeight(FONT_WEIGHT_BOLD)
+        .width(50).textAlign(TextAlign.Center)
 
-      // 表头
-      Row() {
-        Text('端口').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(50)
-        Text('服务').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).layoutWeight(1)
-        Text('延迟').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(60).textAlign(TextAlign.End)
-        Text('状态').fontSize(FONT_SIZE_XS).fontColor(COLOR_TEXT_TERTIARY).width(50).textAlign(TextAlign.End)
-      }
-      .width('100%').padding({ top: SPACE_XS, bottom: SPACE_XS })
-      Divider().color(COLOR_DIVIDER)
+      Text(port.service)
+        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextPrimary(this.isDarkMode))
+        .layoutWeight(1).maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
 
-      ForEach(this.resultList, (item: PortScanResult, index: number) => {
-        Column({ space: 0 }) {
-          Row() {
-            Text(String(item.port))
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_PRIMARY).width(50).fontWeight(FONT_WEIGHT_MEDIUM)
-            Text(item.service)
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_SECONDARY).layoutWeight(1)
-            Text(item.latency + 'ms')
-              .fontSize(FONT_SIZE_SM).fontColor(COLOR_TEXT_TERTIARY).width(60).textAlign(TextAlign.End)
-            Text(this.getStatusTextResource(item.status))
-              .fontSize(FONT_SIZE_XS).fontColor(this.getStatusColor(item.status)).fontWeight(FONT_WEIGHT_MEDIUM)
-              .width(50).textAlign(TextAlign.End)
-          }
-          .width('100%').padding({ top: SPACE_SM, bottom: SPACE_SM })
-
-          if (index < this.resultList.length - 1) {
-            Divider().color(COLOR_DIVIDER)
-          }
-        }
-      }, (item: PortScanResult, index: number): string => String(index + '_' + item.port))
+      Text(this.getStatusText(port.status))
+        .fontSize(FONT_SIZE_XS).fontColor(this.getStatusColor(port.status))
     }
-    .width('100%').padding(SPACE_LG).backgroundColor(COLOR_SURFACE).borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: COLOR_BORDER })
+    .width('100%').padding({ top: 8, bottom: 8 })
+
+    if (index < this.openPorts.length - 1) {
+      Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
+    }
   }
 
   // 操作按钮
@@ -572,19 +579,27 @@ export struct PortScanPage {
       BackButtonCapsule({ onBack: () => RouterManager.goBack() })
 
       if (this.isScanning) {
-        Button($r('app.string.stop_scan'))
-          .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-          .backgroundColor(COLOR_DANGER)
-          .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_MD).layoutWeight(1)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => this.stopScan())
+        Row() {
+          Text($r('app.string.stop_action')).fontSize(FONT_SIZE_MD).fontColor('#FFFFFF').fontWeight(FONT_WEIGHT_BOLD)
+        }
+        .justifyContent(FlexAlign.Center)
+        .layoutWeight(1)
+        .padding({ top: 13, bottom: 13 })
+        .backgroundColor('rgba(239,68,68,0.85)')
+        .borderRadius(999)
+        .shadow({ radius: GLASS_SHADOW_SM, color: this.isDarkMode ? 'rgba(239,68,68,0.5)' : 'rgba(239,68,68,0.35)', offsetX: 0, offsetY: 5 })
+        .onClick(() => this.stopScan())
       } else {
-        Button($r('app.string.re_scan'))
-          .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-          .backgroundColor(COLOR_PURPLE)
-          .borderRadius(RADIUS_3XL).height(BUTTON_HEIGHT_MD).layoutWeight(1)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => this.startScan())
+        Row() {
+          Text($r('app.string.re_scan')).fontSize(FONT_SIZE_MD).fontColor('#FFFFFF').fontWeight(FONT_WEIGHT_BOLD)
+        }
+        .justifyContent(FlexAlign.Center)
+        .layoutWeight(1)
+        .padding({ top: 13, bottom: 13 })
+        .backgroundColor(COLOR_PURPLE)
+        .borderRadius(999)
+        .shadow({ radius: GLASS_SHADOW_SM, color: COLOR_GLASS_SKY_SHADOW_MED, offsetX: 0, offsetY: 5 })
+        .onClick(() => this.startScan())
       }
     }
     .width('100%')

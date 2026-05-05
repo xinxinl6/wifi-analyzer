@@ -10,6 +10,7 @@ import {
   adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
   adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
+import { BackButtonGlass } from '@wifi-analyzer/design-system'
 import { RouterManager } from '@wifi-analyzer/core'
 import promptAction from '@ohos.promptAction'
 
@@ -67,20 +68,7 @@ export struct AboutPage {
       Column() {
         // 顶部返回按钮栏
         Row() {
-          Row() {
-            Text('←')
-              .fontSize(20)
-              .fontColor(COLOR_PRIMARY)
-            Text($r('app.string.back'))
-              .fontSize(FONT_SIZE_MD)
-              .fontColor(COLOR_PRIMARY)
-              .fontWeight(FONT_WEIGHT_MEDIUM)
-          }
-          .padding({ left: 4, right: 12, top: 6, bottom: 6 })
-          .borderRadius(20)
-          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.60)')
-          .onClick(() => RouterManager.goBack())
-
+          BackButtonGlass({ onBack: () => RouterManager.goBack() })
           Blank()
         }
         .width('100%')

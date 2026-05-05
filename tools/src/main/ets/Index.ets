@@ -5,6 +5,9 @@
 // 路由追踪
 export { TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteCallbacks, TracerouteStats } from './traceroute/TracerouteEngine'
 
+// Ping 测试
+export { PingEngine, PingResult, PingStats, PingConfig, PingCallbacks } from './ping/PingEngine'
+
 // DNS 查询
 export { DnsLookupEngine, DnsRecordType, DnsRecord, DnsLookupResult, DnsLookupConfig, DnsServerPreset } from './dnslookup/DnsLookupEngine'
 
@@ -32,12 +35,12 @@ export { LanEngine, LanDevice, LanScanCallbacks, LanNetworkInfo } from './lansca
 // 漫游测试
 export { RoamTestEngine, RoamEvent, RoamTestConfig, RoamTestCallbacks, RoamTestInfo, RoamTestSummary, BssidRecord, WifiInfo } from './roamtest/RoamTestEngine'
 
-// 查找终端
-export { FindDeviceEngine, DeviceSearchResult, EnrichedDevice, DeviceFilter, FindDeviceCallbacks } from './finddevice/FindDeviceEngine'
-
 // ===== 页面导出 =====
 // 路由追踪页面
 export { TraceroutePage } from './route/TraceroutePage'
+
+// Ping 测试页面
+export { PingPage } from './ping/PingPage'
 
 // DNS 查询页面
 export { DnsLookupPage } from './dns/DnsLookupPage'
@@ -65,6 +68,3 @@ export { LanScanPage } from './lan/LanScanPage'
 
 // 漫游测试页面
 export { RoamTestPage } from './roam/RoamTestPage'
-
-// 查找终端页面
-export { FindDevicePage } from './find/FindDevicePage'
