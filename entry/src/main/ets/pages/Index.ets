@@ -93,6 +93,12 @@ struct Index {
   @StorageLink('showRoamTestPage') showRoamTestPage: boolean = false
   @StorageLink('showAboutPage') showAboutPage: boolean = false
 
+  // 页面转场动画状态（淡入淡出 + 缩放）
+  @State overlayOpacity: number = 0
+  @State overlayScale: number = 0.95
+  // 标记是否正在执行关闭动画（防止 enter/exit 动画冲突）
+  @State private isClosingOverlay: boolean = false
+
   // Tabs 控制器
   private tabsController: TabsController = new TabsController()
 
@@ -115,6 +121,8 @@ struct Index {
 
   // Tab 切换订阅句柄
   private tabUnsubscribe: (() => void) | null = null
+  // 路由变更订阅句柄
+  private routerUnsubscribe: (() => void) | null = null
 
   aboutToAppear(): void {
     hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === aboutToAppear START ===')
@@ -126,6 +134,11 @@ struct Index {
     this.tabUnsubscribe = RouterManager.subscribeTab((tabIndex: number) => {
       hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Tab navigation requested:' + JSON.stringify(tabIndex))
       this.onTabClick(tabIndex)
+    })
+
+    // 订阅路由变更，触发子页面转场动画
+    this.routerUnsubscribe = RouterManager.subscribe((route: string | null) => {
+      this.onRouterChange(route)
     })
 
     // 直接通过 UIContext 获取 UIAbilityContext（不依赖 AppStorage 中转）
@@ -170,6 +183,54 @@ struct Index {
       this.tabUnsubscribe()
       this.tabUnsubscribe = null
     }
+    // 清理路由变更订阅
+    if (this.routerUnsubscribe) {
+      this.routerUnsubscribe()
+      this.routerUnsubscribe = null
+    }
+  }
+
+  // 路由变更回调 - 触发子页面转场动画（淡入淡出 + 缩放）
+  private onRouterChange(route: string | null): void {
+    if (route === null) {
+      // 返回主页：播放退出动画
+      this.playOverlayExitAnimation()
+    } else {
+      // 进入子页面：播放入场动画
+      this.playOverlayEnterAnimation()
+    }
+  }
+
+  // 子页面入场动画（淡入 + 缩放弹簧效果）
+  private playOverlayEnterAnimation(): void {
+    if (this.isClosingOverlay) {
+      this.isClosingOverlay = false
+    }
+    this.overlayOpacity = 0
+    this.overlayScale = 0.92
+
+    // 延迟触发动画，让内容先渲染
+    setTimeout(() => {
+      this.getUIContext().animateTo({
+        duration: 350,
+        curve: Curve.FastOutSlowIn
+      }, () => {
+        this.overlayOpacity = 1
+        this.overlayScale = 1
+      })
+    }, 20)
+  }
+
+  // 子页面退出动画（淡出 + 缩小）
+  private playOverlayExitAnimation(): void {
+    this.isClosingOverlay = true
+    this.getUIContext().animateTo({
+      duration: 280,
+      curve: Curve.FastOutSlowIn
+    }, () => {
+      this.overlayOpacity = 0
+      this.overlayScale = 0.92
+    })
   }
 
   // 检查是否有子页面显示
@@ -501,42 +562,60 @@ struct Index {
   @Builder
   buildOverlayPages() {
     Stack() {
-      if (this.showPingPage) {
-        PingTestPage()
+      // 半透明黑色背景遮罩
+      Column()
+        .width('100%')
+        .height('100%')
+        .backgroundColor('rgba(0,0,0,0.5)')
+        .opacity(this.overlayOpacity * 0.5)
+        .onClick(() => {
+          // 点击遮罩返回
+          RouterManager.goBack()
+        })
+
+      // 子页面内容容器（带缩放 + 淡入动画）
+      Column() {
+        if (this.showPingPage) {
+          PingTestPage()
+        }
+        if (this.showTraceroutePage) {
+          TraceroutePage()
+        }
+        if (this.showDnsPage) {
+          DnsLookupPage()
+        }
+        if (this.showPortScanPage) {
+          PortScanPage()
+        }
+        if (this.showSubnetPage) {
+          SubnetCalcPage()
+        }
+        if (this.showIpGeoPage) {
+          IpGeoPage()
+        }
+        if (this.showPoePage) {
+          PoeCalcPage()
+        }
+        if (this.showMacLookupPage) {
+          MacLookupPage()
+        }
+        if (this.showWolPage) {
+          WolPage()
+        }
+        if (this.showLanScanPage) {
+          LanScanPage()
+        }
+        if (this.showRoamTestPage) {
+          RoamTestPage()
+        }
+        if (this.showAboutPage) {
+          AboutPage()
+        }
       }
-      if (this.showTraceroutePage) {
-        TraceroutePage()
-      }
-      if (this.showDnsPage) {
-        DnsLookupPage()
-      }
-      if (this.showPortScanPage) {
-        PortScanPage()
-      }
-      if (this.showSubnetPage) {
-        SubnetCalcPage()
-      }
-      if (this.showIpGeoPage) {
-        IpGeoPage()
-      }
-      if (this.showPoePage) {
-        PoeCalcPage()
-      }
-      if (this.showMacLookupPage) {
-        MacLookupPage()
-      }
-      if (this.showWolPage) {
-        WolPage()
-      }
-      if (this.showLanScanPage) {
-        LanScanPage()
-      }
-      if (this.showRoamTestPage) {
-        RoamTestPage()
-      }
-      if (this.showAboutPage) {
-        AboutPage()
-      }
+      .width('100%')
+      .height('100%')
+      .scale({ x: this.overlayScale, y: this.overlayScale })
+      .opacity(this.overlayOpacity)
     }
     .width('100%')
     .height('100%')
