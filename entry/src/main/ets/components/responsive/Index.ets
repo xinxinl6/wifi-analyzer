@@ -1,5 +1,7 @@
 // ============================================
 // Aurora WiFi V2 — 响应式组件库索引
+// 注意：AuroraGrid.ets、AuroraSpacing.ets、AuroraDashboardResponsive.ets、AuroraLayout.ets
+// 当前无外部引用（仅供 future responsive layout 预留），可保留 or 删除。
 // ============================================
 
 // 断点和设备类型

@@ -1,5 +1,8 @@
 // WiFi列表页组件 — Aurora 极光主题版
 // 风格与首页 Aurora V2 保持一致
+// 注意：当前使用 ForEach + Scroll 而非 LazyForEach + List，
+// 因为 WiFi 列表通常不超过 50 项，且 Scroll+Column 提供了更好的毛玻璃卡片圆角兼容。
+// 若列表项超过 100 可考虑切换到 List + LazyForEach。
 
 import {
   COLOR_AURORA_PRIMARY,

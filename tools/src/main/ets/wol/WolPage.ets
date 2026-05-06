@@ -16,7 +16,7 @@ import {
   adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
   adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
-import { BackButtonGlass } from '@wifi-analyzer/design-system'
+import { BackButtonGlass, PulseIndicator } from '@wifi-analyzer/design-system'
 import {
   WolEngine, WolDevice, WolResult, WolCallbacks,
 } from '../wol/WolEngine'
@@ -48,51 +48,34 @@ export struct WolPage {
   private engine: WolEngine = new WolEngine()
 
   // 脉冲动画
-  @State pulseOpacity: number = 1.0
-  private pulseTimerId: number = -1
+  private pulser: PulseIndicator = new PulseIndicator()
 
   aboutToAppear(): void {
     this.deviceList = this.engine.getDevices()
   }
 
   aboutToDisappear(): void {
-    this.stopPulse()
+    this.pulser.stop()
   }
-
-  // 脉冲动画
-  private startPulse(): void {
-    this.pulseTimerId = setInterval((): void => {
-      this.pulseOpacity = this.pulseOpacity === 1.0 ? 0.3 : 1.0
-    }, 600)
-  }
-
-  private stopPulse(): void {
-    if (this.pulseTimerId >= 0) {
-      clearInterval(this.pulseTimerId)
-      this.pulseTimerId = -1
-    }
-    this.pulseOpacity = 1.0
-  }
-
   // ==================== 业务逻辑 ====================
 
   async sendWake(device: WolDevice): Promise<void> {
     this.sendingDeviceName = device.name
     this.viewMode = 'sending'
     this.showError = false
-    this.startPulse()
+    this.pulser.start(800)
 
     const callbacks: WolCallbacks = {
       onSuccess: (result: WolResult): void => {
         this.lastResult = result
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'idle'
         this.deviceList = this.engine.getDevices()
       },
       onError: (message: string): void => {
         this.errorMessage = message
         this.showError = true
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'idle'
       }
     }
@@ -451,7 +434,7 @@ export struct WolPage {
   @Builder SendingState() {
     Row({ space: SPACE_MD }) {
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(40).height(40).fill(COLOR_CYAN).opacity(this.pulseOpacity)
+        Circle().width(40).height(40).fill(COLOR_CYAN).opacity(this.pulser.opacity)
         Image($r('app.media.ic_wol')).width(20).height(20).fillColor(Color.White)
       }
       Text() {

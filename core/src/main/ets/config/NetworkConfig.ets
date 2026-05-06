@@ -1,6 +1,10 @@
 // 网络配置常量 - 集中管理所有硬编码的网络配置值
 // 便于维护和国际化配置
 
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0x0000
+
 /**
  * 公网IP查询API配置
  * 支持多个备选服务，避免单点故障
@@ -251,16 +255,16 @@ export class LoggerConfig {
 
     switch (level) {
       case LogLevel.DEBUG:
-        console.debug(`${prefix} ${fullMessage}`)
+        hilog.debug(DOMAIN, 'testTag', '%{public}s', `${prefix} ${fullMessage}`)
         break
       case LogLevel.INFO:
-        console.info(`${prefix} ${fullMessage}`)
+        hilog.info(DOMAIN, 'testTag', '%{public}s', `${prefix} ${fullMessage}`)
         break
       case LogLevel.WARN:
-        console.warn(`${prefix} ${fullMessage}`)
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', `${prefix} ${fullMessage}`)
         break
       case LogLevel.ERROR:
-        console.error(`${prefix} ${fullMessage}`)
+        hilog.error(DOMAIN, 'testTag', '%{public}s', `${prefix} ${fullMessage}`)
         break
     }
   }

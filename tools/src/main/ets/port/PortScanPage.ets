@@ -17,7 +17,7 @@ import {
   adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
   adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
-import { BackButtonGlass, BackButtonCapsule } from '@wifi-analyzer/design-system'
+import { BackButtonGlass, BackButtonCapsule, PulseIndicator } from '@wifi-analyzer/design-system'
 import { PortScanEngine, PortScanResult, PortPreset, PortScanCallbacks } from '../ports/PortScanEngine'
 import { RouterManager, ValidationPatterns } from '@wifi-analyzer/core'
 
@@ -47,8 +47,7 @@ export struct PortScanPage {
 
   private engine: PortScanEngine = new PortScanEngine()
 
-  @State pulseOpacity: number = 1.0
-  private pulseTimerId: number = -1
+  private pulser: PulseIndicator = new PulseIndicator()
 
   private getString(str: Resource): string {
     try {
@@ -65,7 +64,7 @@ export struct PortScanPage {
 
   aboutToDisappear(): void {
     this.engine.stopScan()
-    this.stopPulse()
+    this.pulser.stop()
   }
 
   private loadPresets(): void {
@@ -80,20 +79,6 @@ export struct PortScanPage {
       items.push(item)
     }
     this.presetItems = items
-  }
-
-  private startPulse(): void {
-    this.pulseTimerId = setInterval((): void => {
-      this.pulseOpacity = this.pulseOpacity === 1.0 ? 0.3 : 1.0
-    }, 600)
-  }
-
-  private stopPulse(): void {
-    if (this.pulseTimerId >= 0) {
-      clearInterval(this.pulseTimerId)
-      this.pulseTimerId = -1
-    }
-    this.pulseOpacity = 1.0
   }
 
   getProgressPercent(): number {
@@ -161,7 +146,7 @@ export struct PortScanPage {
     this.currentPort = 0
     this.isScanning = true
     this.viewMode = 'scanning'
-    this.startPulse()
+    this.pulser.start(600)
 
     const preset: PortPreset = PortScanEngine.PRESETS[this.selectedPresetIndex]
     this.totalPorts = preset.ports.length
@@ -182,12 +167,12 @@ export struct PortScanPage {
       onComplete: (results: PortScanResult[]): void => {
         this.resultList = results
         this.isScanning = false
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'result'
       },
       onError: (message: string): void => {
         this.isScanning = false
-        this.stopPulse()
+        this.pulser.stop()
         if (this.resultList.length > 0) {
           this.viewMode = 'result'
         } else {
@@ -202,7 +187,7 @@ export struct PortScanPage {
   stopScan(): void {
     this.engine.stopScan()
     this.isScanning = false
-    this.stopPulse()
+    this.pulser.stop()
     if (this.resultList.length > 0) {
       this.viewMode = 'result'
     } else {
@@ -438,7 +423,7 @@ export struct PortScanPage {
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(44).height(44)
           .fill(this.isDarkMode ? 'rgba(147,51,234,0.15)' : COLOR_GLASS_SKY_LIGHT)
-          .opacity(this.isScanning ? this.pulseOpacity : 1.0)
+          .opacity(this.isScanning ? this.pulser.opacity : 1.0)
         Circle().width(36).height(36)
           .fill(this.isScanning ? COLOR_PURPLE : COLOR_PURPLE)
         Image($r('app.media.ic_port')).width(18).height(18).fillColor('#FFFFFF')
@@ -451,7 +436,7 @@ export struct PortScanPage {
 
         if (this.isScanning) {
           Row({ space: 4 }) {
-            Circle().width(5).height(5).fill(COLOR_PURPLE).opacity(this.pulseOpacity)
+            Circle().width(5).height(5).fill(COLOR_PURPLE).opacity(this.pulser.opacity)
             Text($r('app.string.scanning_ports'))
               .fontSize(FONT_SIZE_XS).fontColor(COLOR_PURPLE)
           }

@@ -37,6 +37,23 @@ enum FilterType {
   COMPUTER = 'computer'
 }
 
+// ==================== ViewModel 定义 ====================
+
+// 扫描进度状态
+interface ScanProgressState {
+  progress: number      // 已扫描数
+  total: number         // 总数
+  currentIp: string     // 当前扫描IP
+  startTime: number     // 开始时间戳
+  duration: number      // 已耗时(ms)
+}
+
+// 扫描统计
+interface ScanStats {
+  onlineCount: number
+  errorMessage: string
+}
+
 @Component
 export struct LanScanPage {
   @Consume isDarkMode: boolean = false
@@ -47,7 +64,7 @@ export struct LanScanPage {
   // 扫描模式
   @State scanMode: ScanMode = ScanMode.QUICK
 
-  // 当前筛选
+  // 筛选状态
   @State currentFilter: FilterType = FilterType.ALL
 
   // 搜索关键词
@@ -59,25 +76,29 @@ export struct LanScanPage {
     networkPrefix: '192.168.1', hostCount: 254
   }
 
-  // 扫描进度
-  @State scanProgress: number = 0
-  @State scanTotal: number = 254
-  @State scanCurrentIp: string = ''
-  @State scanStartTime: number = 0
+  // === ViewModel: 扫描进度 ===
+  @State scanProgress: ScanProgressState = {
+    progress: 0, total: 254, currentIp: '',
+    startTime: 0, duration: 0
+  }
+
+  // === ViewModel: 扫描统计 ===
+  @State scanStats: ScanStats = {
+    onlineCount: 0, errorMessage: ''
+  }
 
   // 发现的设备
   @State deviceList: LanDevice[] = []
 
-  // 扫描统计
-  @State scanDuration: number = 0
-  @State onlineCount: number = 0
-  @State errorMessage: string = ''
+  // 缓存筛选后的设备列表（避免 build() 中重复调用 getFilteredDevices）
+  @State filteredDevices: LanDevice[] = []
 
   // 引擎
   private engine: LanEngine = new LanEngine()
 
   aboutToAppear(): void {
     this.detectNetwork()
+    this.updateFilteredCache()
   }
 
   aboutToDisappear(): void {
@@ -94,32 +115,30 @@ export struct LanScanPage {
   startScan(): void {
     this.viewMode = 'scanning'
     this.deviceList = []
-    this.scanProgress = 0
-    // 根据扫描模式设置扫描范围
-    this.scanTotal = this.scanMode === ScanMode.QUICK ? 20 : 254
-    this.scanStartTime = Date.now()
-    this.errorMessage = ''
-    this.onlineCount = 0
+    this.filteredDevices = []
+    const totalIp: number = this.scanMode === ScanMode.QUICK ? 20 : 254
+    this.scanProgress = { progress: 0, total: totalIp, currentIp: '', startTime: Date.now(), duration: 0 }
+    this.scanStats = { onlineCount: 0, errorMessage: '' }
 
     const callbacks: LanScanCallbacks = {
       onProgress: (scanned: number, total: number, currentIp: string): void => {
-        this.scanProgress = scanned
-        this.scanTotal = total
-        this.scanCurrentIp = currentIp
+        this.scanProgress = { progress: scanned, total: total, currentIp: currentIp, startTime: this.scanProgress.startTime, duration: 0 }
       },
       onDeviceFound: (device: LanDevice): void => {
         this.deviceList.push(device)
-        this.onlineCount = this.deviceList.length
+        this.scanStats.onlineCount = this.deviceList.length
+        this.updateFilteredCache()
       },
       onComplete: (devices: LanDevice[]): void => {
-        this.scanDuration = Date.now() - this.scanStartTime
+        this.scanProgress.duration = Date.now() - this.scanProgress.startTime
         this.deviceList = devices
-        this.onlineCount = devices.length
+        this.scanStats.onlineCount = devices.length
         this.viewMode = 'done'
+        this.updateFilteredCache()
       },
       onError: (message: string): void => {
-        this.errorMessage = message
-        this.scanDuration = Date.now() - this.scanStartTime
+        this.scanStats.errorMessage = message
+        this.scanProgress.duration = Date.now() - this.scanProgress.startTime
         this.viewMode = 'error'
       }
     }
@@ -129,13 +148,18 @@ export struct LanScanPage {
 
   stopScan(): void {
     this.engine.stopScan()
-    this.scanDuration = Date.now() - this.scanStartTime
+    this.scanProgress.duration = Date.now() - this.scanProgress.startTime
     this.viewMode = 'done'
   }
 
   resetFilter(): void {
     this.currentFilter = FilterType.ALL
     this.searchKeyword = ''
+  }
+
+  // 更新筛选缓存（在 keyword / currentFilter / deviceList 变化时调用）
+  private updateFilteredCache(): void {
+    this.filteredDevices = this.getFilteredDevices()
   }
 
   // 获取筛选后的设备列表
@@ -176,10 +200,10 @@ export struct LanScanPage {
   }
 
   getProgressPercent(): number {
-    if (this.scanTotal <= 0) {
+    if (this.scanProgress.total <= 0) {
       return 0
     }
-    return Math.round(this.scanProgress / this.scanTotal * 100)
+    return Math.round(this.scanProgress.progress / this.scanProgress.total * 100)
   }
 
   // ==================== 页面入口 ====================
@@ -337,6 +361,7 @@ export struct LanScanPage {
         } else {
           this.currentFilter = type
         }
+        this.updateFilteredCache()
       })
   }
 
@@ -435,7 +460,7 @@ export struct LanScanPage {
       Row({ space: SPACE_SM }) {
         Text() {
           Span('已扫描 ')
-          Span(String(this.scanProgress) + '/' + String(this.scanTotal))
+          Span(String(this.scanProgress.progress) + '/' + String(this.scanProgress.total))
         }
         .fontSize(FONT_SIZE_XS)
         .fontColor(adaptiveTextTertiary(this.isDarkMode))
@@ -444,7 +469,7 @@ export struct LanScanPage {
 
         Text() {
           Span('当前 ')
-          Span(this.scanCurrentIp)
+          Span(this.scanProgress.currentIp)
         }
         .fontSize(FONT_SIZE_XS)
         .fontColor(adaptiveTextTertiary(this.isDarkMode))
@@ -453,7 +478,7 @@ export struct LanScanPage {
 
         Text() {
           Span('发现 ')
-          Span(String(this.onlineCount) + ' 台')
+          Span(String(this.scanStats.onlineCount) + ' 台')
         }
         .fontSize(FONT_SIZE_XS)
         .fontColor(COLOR_SUCCESS)
@@ -480,7 +505,7 @@ export struct LanScanPage {
           .fontColor(adaptiveTextPrimary(this.isDarkMode))
           .fontWeight(FONT_WEIGHT_BOLD)
         Blank()
-        Text(String(this.getFilteredDevices().length) + ' 台')
+        Text(String(this.filteredDevices.length) + ' 台')
           .fontSize(FONT_SIZE_XS)
           .fontColor(adaptiveTextTertiary(this.isDarkMode))
           .padding({ left: 8, right: 8, top: 3, bottom: 3 })
@@ -489,7 +514,7 @@ export struct LanScanPage {
       }
       .width('100%')
 
-      ForEach(this.getFilteredDevices(), (device: LanDevice) => {
+      ForEach(this.filteredDevices, (device: LanDevice) => {
         this.DeviceRow(device)
       }, (device: LanDevice): string => device.ip + ':' + String(device.port))
     }

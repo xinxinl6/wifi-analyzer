@@ -33,6 +33,8 @@ import { COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER,
   COLOR_GLASS_DARK_BORDER } from '@wifi-analyzer/design-system'
 import { SpeedTestResult } from '@wifi-analyzer/core'
 import { SpeedTestEngine, SERVER_NODES, SpeedTestCallbacks, ServerNode } from '@wifi-analyzer/speed-test'
+import { preferences } from '@kit.ArkData'
+import { common } from '@kit.AbilityKit'
 
 @Component
 export struct SpeedTestSection {
@@ -52,11 +54,16 @@ export struct SpeedTestSection {
   @State phaseLabel: string = ''
   @State gaugeProgress: number = 0
   @State historyList: Array<SpeedTestResult> = []
+  @State showAllHistory: boolean = false
+  @State showDetailPopup: boolean = false
+  @State selectedResult: SpeedTestResult | null = null
+  @State detailPopupScale: number = 0
+  @State detailPopupOpacity: number = 0
 
   private engine: SpeedTestEngine = new SpeedTestEngine()
 
   aboutToAppear(): void {
-    this.loadHistory()
+    this.loadHistoryAsync()
   }
 
   aboutToDisappear(): void {
@@ -110,6 +117,10 @@ export struct SpeedTestSection {
 
       if (this.showServerPanel) {
         this.buildServerPopup()
+      }
+
+      if (this.showDetailPopup && this.selectedResult !== null) {
+        this.buildDetailPopup()
       }
     }
     .width('100%')
@@ -334,7 +345,7 @@ export struct SpeedTestSection {
     .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
   }
 
-  // 历史记录 - 天蓝色毛玻璃
+  // 历史记录 - 天蓝色毛玻璃（支持展开/收起）
   @Builder buildHistoryCard() {
     Column({ space: 14 }) {
       Row() {
@@ -342,12 +353,48 @@ export struct SpeedTestSection {
           Text('📊').fontSize(FONT_SIZE_3XL)
           Text($r('app.string.speed_history')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
         }
+        Blank()
+        // 展开/收起按钮
+        if (this.historyList.length > 5) {
+          Row({ space: 4 }) {
+            Text(this.showAllHistory ? '收起' : '展开全部')
+              .fontSize(FONT_SIZE_SM)
+              .fontColor(COLOR_SKY_BLUE)
+            Text(this.showAllHistory ? '∧' : '∨')
+              .fontSize(FONT_SIZE_SM)
+              .fontColor(COLOR_SKY_BLUE)
+          }
+          .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+          .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+          .borderRadius(8)
+          .onClick(() => {
+            this.showAllHistory = !this.showAllHistory
+          })
+        }
       }.width('100%')
 
       if (this.historyList.length > 0) {
-        ForEach(this.historyList.slice(0, 5), (item: SpeedTestResult) => {
-          this.buildHistoryRow(item)
-        }, (item: SpeedTestResult): string => item.timestamp)
+        // 可滚动的历史记录列表
+        Column() {
+          Scroll() {
+            Column({ space: 12 }) {
+              ForEach(this.showAllHistory ? this.historyList : this.historyList.slice(0, 5),
+                (item: SpeedTestResult) => {
+                  this.buildHistoryRow(item)
+                }, (item: SpeedTestResult): string => item.timestamp)
+            }
+          }
+          .scrollBar(BarState.Off)
+          .height(this.showAllHistory ? 300 : undefined)
+        }
+
+        // 底部提示（仅展开时显示）
+        if (this.showAllHistory && this.historyList.length > 5) {
+          Text(`共 ${this.historyList.length} 条记录`)
+            .fontSize(FONT_SIZE_XS)
+            .fontColor(adaptiveTextTertiary(this.isDarkMode))
+            .margin({ top: 8 })
+        }
       } else {
         Column({ space: 12 }) {
           Text('📈').fontSize(42)
@@ -405,6 +452,10 @@ export struct SpeedTestSection {
       .borderRadius(12)
     }
     .width('100%')
+    .onClick(() => {
+      this.selectedResult = item
+      this.showDetailPopupWithAnimation()
+    })
   }
 
   // 节点选择弹窗 - WiFi详细卡片样式 + 线性弹出动画
@@ -497,6 +548,154 @@ export struct SpeedTestSection {
       // 线性弹出动画：中心缩放
       .scale({ x: this.serverPopupScale, y: this.serverPopupScale, centerX: '50%', centerY: '50%' })
     }
+  }
+
+  // 测速详情弹窗 - 天蓝色毛玻璃风格
+  @Builder buildDetailPopup() {
+    Stack({ alignContent: Alignment.Center }) {
+      // 遮罩
+      Column()
+        .width('100%').height('100%')
+        .backgroundColor(this.isDarkMode ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)')
+        .opacity(this.detailPopupOpacity)
+        .onClick(() => { this.hideDetailPopupWithAnimation() })
+
+      // 弹窗内容
+      Column({ space: 16 }) {
+        // 拖动手柄
+        Column().width(36).height(4).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(74,144,217,0.40)').borderRadius(2)
+          .margin({ top: 12, bottom: 8 })
+
+        // 标题栏
+        Row() {
+          Row({ space: 8 }) {
+            Text('📊').fontSize(FONT_SIZE_3XL)
+            Text('测速详情').fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
+          }
+          Blank()
+          Column() {
+            Text('✕').fontSize(FONT_SIZE_2XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : COLOR_SKY_BLUE)
+          }
+          .width(36).height(36)
+          .justifyContent(FlexAlign.Center)
+          .alignItems(HorizontalAlign.Center)
+          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.1)' : COLOR_GLASS_SKY_TAG_BG)
+          .borderRadius(10)
+          .onClick(() => { this.hideDetailPopupWithAnimation() })
+        }
+        .width('100%')
+        .padding({ left: 18, right: 18, bottom: 8 })
+
+        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(74,144,217,0.15)')
+
+        // 主要内容 - 可滚动
+        Scroll() {
+          Column({ space: 18 }) {
+            // 下载速度
+            this.buildDetailItem('↓ 下载速度',
+              this.selectedResult ? this.selectedResult.downloadSpeed.toFixed(1) : '0.0',
+              'Mbps',
+              COLOR_SKY_BLUE)
+
+            // 上传速度
+            this.buildDetailItem('↑ 上传速度',
+              this.selectedResult ? this.selectedResult.uploadSpeed.toFixed(1) : '0.0',
+              'Mbps',
+              COLOR_SUCCESS)
+
+            // Ping 延迟
+            this.buildDetailItem('⊙ 延迟 (Ping)',
+              this.selectedResult ? this.selectedResult.pingMs.toFixed(0) : '0',
+              'ms',
+              COLOR_WARNING)
+
+            // Jitter 抖动
+            this.buildDetailItem('⚡ 抖动 (Jitter)',
+              this.selectedResult ? this.selectedResult.jitterMs.toFixed(0) : '0',
+              'ms',
+              COLOR_SKY_BLUE_LIGHT)
+
+            // 测试时间
+            if (this.selectedResult) {
+              this.buildDetailItem('🕐 测试时间',
+                this.selectedResult.timeLabel || '未知',
+                '',
+                adaptiveTextSecondary(this.isDarkMode))
+            }
+
+            // 服务器
+            if (this.selectedResult && this.selectedResult.serverName) {
+              this.buildDetailItem('📡 测试服务器',
+                this.selectedResult.serverName,
+                '',
+                adaptiveTextSecondary(this.isDarkMode))
+            }
+          }
+          .padding({ left: 18, right: 18, top: 10, bottom: 24 })
+        }
+        .layoutWeight(1)
+        .width('100%')
+        .scrollBar(BarState.Off)
+      }
+      .width('88%')
+      .constraintSize({ maxHeight: '65%' })
+      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.78)' : 'rgba(255,255,255,0.78)')
+      .borderRadius(20)
+      .shadow({ radius: 8, color: 'rgba(0,0,0,0.10)', offsetX: 0, offsetY: 2 })
+      .backdropBlur(10)
+      .borderWidth(1)
+      .borderColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.20)')
+      .scale({ x: this.detailPopupScale, y: this.detailPopupScale, centerX: '50%', centerY: '50%' })
+    }
+  }
+
+  @Builder buildDetailItem(label: string, value: string, unit: string, valueColor: string) {
+    Column({ space: 6 }) {
+      Text(label).fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
+      Row({ space: 6 }) {
+        Text(value).fontSize(FONT_SIZE_4XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(valueColor)
+        if (unit.length > 0) {
+          Text(unit).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
+        }
+      }
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+    .padding({ top: 10, bottom: 10 })
+  }
+
+  // 显示详情弹窗（线性动画）
+  private showDetailPopupWithAnimation(): void {
+    this.showDetailPopup = true
+    this.getUIContext().animateTo({
+      duration: 280,
+      curve: Curve.Linear,
+      iterations: 1,
+      playMode: PlayMode.Normal,
+      onFinish: () => {}
+    }, () => {
+      this.detailPopupOpacity = 1
+      this.detailPopupScale = 1
+    })
+  }
+
+  // 关闭详情弹窗（线性动画）
+  private hideDetailPopupWithAnimation(): void {
+    this.getUIContext().animateTo({
+      duration: 220,
+      curve: Curve.Linear,
+      iterations: 1,
+      playMode: PlayMode.Normal,
+      onFinish: () => {
+        this.showDetailPopup = false
+        this.selectedResult = null
+        this.detailPopupScale = 0
+        this.detailPopupOpacity = 0
+      }
+    }, () => {
+      this.detailPopupOpacity = 0
+      this.detailPopupScale = 0
+    })
   }
 
   // 显示弹窗（线性动画）
@@ -635,24 +834,51 @@ export struct SpeedTestSection {
     this.saveHistory(newList)
   }
 
+  // 异步保存历史记录
   private saveHistory(list: Array<SpeedTestResult>): void {
     try {
       const jsonStr: string = JSON.stringify(list)
-      AppStorage.set('speedtest_history', jsonStr)
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
+      preferences.getPreferences(context, 'speedtest_data').then((pref: preferences.Preferences) => {
+        pref.put('history_list', jsonStr).then(() => {
+          pref.flush()
+        }).catch((e: Object) => {
+          console.warn('[SpeedTest] Failed to flush history:', e)
+        })
+      }).catch((e: Object) => {
+        console.warn('[SpeedTest] Failed to get preferences:', e)
+      })
     } catch (e) {
       console.warn('[SpeedTest] Failed to save history:', e)
     }
   }
 
-  private loadHistory(): void {
+  // 异步加载历史记录（不返回Promise，内部更新状态）
+  private loadHistoryAsync(): void {
     try {
-      const savedValue: Object | null | undefined = AppStorage.get('speedtest_history')
-      const jsonStr: string = (savedValue !== null && savedValue !== undefined) ? String(savedValue) : '[]'
-      const parsed: Array<SpeedTestResult> = JSON.parse(jsonStr)
-      if (parsed && parsed.length > 0) {
-        this.historyList = parsed
-      }
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
+      preferences.getPreferences(context, 'speedtest_data').then((pref: preferences.Preferences) => {
+        pref.get('history_list', '[]').then((value: Object) => {
+          const jsonStr: string = String(value)
+          try {
+            const parsed: Array<SpeedTestResult> = JSON.parse(jsonStr)
+            if (parsed && parsed.length > 0) {
+              this.historyList = parsed
+            }
+          } catch (parseError) {
+            console.warn('[SpeedTest] Failed to parse history:', parseError)
+            this.historyList = []
+          }
+        }).catch((e: Object) => {
+          console.warn('[SpeedTest] Failed to get history:', e)
+          this.historyList = []
+        })
+      }).catch((e: Object) => {
+        console.warn('[SpeedTest] Failed to get preferences:', e)
+        this.historyList = []
+      })
     } catch (e) {
+      console.warn('[SpeedTest] Failed to load history:', e)
       this.historyList = []
     }
   }

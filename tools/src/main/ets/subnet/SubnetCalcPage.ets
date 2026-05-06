@@ -458,7 +458,7 @@ export struct SubnetCalcPage {
           .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode)).fontWeight(FONT_WEIGHT_MEDIUM)
         Blank()
         Text('/ 32 bits')
-          .fontSize(10).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(99,102,241,0.4)')
+          .fontSize(14).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(99,102,241,0.4)')
       }
       .width('100%')
       .padding({ left: 16, right: 14, top: 14 })
@@ -486,7 +486,7 @@ export struct SubnetCalcPage {
       Row({ space: 2 }) {
         ForEach(this.getBits(octet.binary), (bit: BitItem, bitIndex: number) => {
           Text(bit.char)
-            .fontSize(10)
+            .fontSize(14)
             .fontColor(bit.isOne ? Color.White : (this.isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'))
             .fontWeight(FONT_WEIGHT_BOLD)
             .width(18).height(22).textAlign(TextAlign.Center)
@@ -503,7 +503,7 @@ export struct SubnetCalcPage {
 
       // 十进制值
       Text(octet.decimal)
-        .fontSize(11)
+        .fontSize(15)
         .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(99,102,241,0.7)')
         .fontWeight(FONT_WEIGHT_MEDIUM)
     }

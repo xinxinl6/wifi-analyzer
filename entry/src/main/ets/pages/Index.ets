@@ -1,6 +1,5 @@
 import { common, ConfigurationConstant } from '@kit.AbilityKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
-import { EventBus } from '../utils/EventBus'
 import {
   // Aurora V2 色彩
   COLOR_AURORA_PRIMARY,
@@ -34,7 +33,7 @@ import {
   RoamTestPage
 } from '@wifi-analyzer/tools'
 import { AboutPage } from '../components/AboutPage'
-import { ChannelPage } from '../components/ChannelPage'
+// ChannelPage 已移除冗余条件渲染，ChannelSection 直接在 Tab 3 中显示
 
 // 数据管理
 import { WifiDataManager, SharedWifiState, PermissionManager, RouterManager } from '@wifi-analyzer/core'
@@ -92,7 +91,6 @@ struct Index {
   @StorageLink('showWolPage') showWolPage: boolean = false
   @StorageLink('showLanScanPage') showLanScanPage: boolean = false
   @StorageLink('showRoamTestPage') showRoamTestPage: boolean = false
-  @StorageLink('showChannelPage') showChannelPage: boolean = false
   @StorageLink('showAboutPage') showAboutPage: boolean = false
 
   // Tabs 控制器
@@ -119,14 +117,14 @@ struct Index {
   private tabUnsubscribe: (() => void) | null = null
 
   aboutToAppear(): void {
-    console.log('[Index] === aboutToAppear START ===')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === aboutToAppear START ===')
 
     // 初始化 AppStorage 路由模式
     RouterManager.initAppStorageMode()
 
     // 订阅 Tab 切换事件
     this.tabUnsubscribe = RouterManager.subscribeTab((tabIndex: number) => {
-      console.log('[Index] Tab navigation requested:', tabIndex)
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Tab navigation requested:' + JSON.stringify(tabIndex))
       this.onTabClick(tabIndex)
     })
 
@@ -143,11 +141,11 @@ struct Index {
         // 直接请求权限并开始扫描
         this.requestPermissionsAndScan(context)
       } else {
-        console.error('[Index] FATAL: getUIContext().getHostContext() returned null')
+        hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] FATAL: getUIContext().getHostContext() returned null')
         this.wifiState.error = $r('app.string.err_init_failed')
       }
     } catch (e) {
-      console.error('[Index] FATAL: Failed to get context:', e)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] FATAL: Failed to get context:' + JSON.stringify(e))
       this.wifiState.error = $r('app.string.err_init_failed')
     }
 
@@ -158,7 +156,7 @@ struct Index {
       }
     }, 5000) as number
 
-    console.log('[Index] === aboutToAppear END ===')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === aboutToAppear END ===')
   }
 
   aboutToDisappear(): void {
@@ -179,7 +177,7 @@ struct Index {
     return this.showPingPage || this.showTraceroutePage || this.showDnsPage ||
            this.showPortScanPage || this.showSubnetPage || this.showIpGeoPage ||
            this.showPoePage || this.showMacLookupPage || this.showWolPage ||
-           this.showLanScanPage || this.showRoamTestPage || this.showChannelPage ||
+           this.showLanScanPage || this.showRoamTestPage ||
            this.showAboutPage
   }
 
@@ -282,22 +280,22 @@ struct Index {
   private abilityContext: common.UIAbilityContext | null = null
 
   async requestPermissionsAndScan(context: common.UIAbilityContext): Promise<void> {
-    console.log('[Index] === requestPermissionsAndScan START ===')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === requestPermissionsAndScan START ===')
     this.abilityContext = context  // 保存 context 供后续使用
     try {
       const granted: boolean = await PermissionManager.requestPermissions(context)
       this.permissionGranted = granted
 
       if (granted) {
-        console.log('[Index] Permissions OK, starting WiFi scan...')
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Permissions OK, starting WiFi scan...')
         this.startWifiScan()
       } else {
-        console.warn('[Index] Permissions denied, showing dialog...')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[Index] Permissions denied, showing dialog...')
         // 显示权限拒绝弹窗
         this.showPermissionDeniedDialog = true
       }
     } catch (e) {
-      console.error('[Index] Permission error:', e)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] Permission error:' + JSON.stringify(e))
       this.permissionGranted = false
       this.showPermissionDeniedDialog = true  // 出错时也显示弹窗
     }
@@ -305,7 +303,7 @@ struct Index {
 
   // 跳转到应用权限设置页面
   private openAppSettings(): void {
-    console.log('[Index] Opening app settings...')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Opening app settings...')
     if (this.abilityContext) {
       PermissionManager.openAppSettings(this.abilityContext)
     }
@@ -314,7 +312,7 @@ struct Index {
 
   // 退出应用
   private exitApp(): void {
-    console.log('[Index] Exiting app...')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Exiting app...')
     if (this.abilityContext) {
       PermissionManager.terminateApp(this.abilityContext)
     }
@@ -535,9 +533,6 @@ struct Index {
       }
       if (this.showRoamTestPage) {
         RoamTestPage()
-      }
-      if (this.showChannelPage) {
-        ChannelPage()
       }
       if (this.showAboutPage) {
         AboutPage()

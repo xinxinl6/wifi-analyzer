@@ -2,8 +2,11 @@
 // 作为 Index 和各页面组件之间的数据桥梁
 // 使用 @Provide/@Consume 机制实现跨组件数据共享
 
+import { hilog } from '@kit.PerformanceAnalysisKit'
 import { WifiItem } from '../models/WifiItem'
 import { WifiScanner, WifiScanResult } from './WifiScanner'
+
+const DOMAIN = 0x0000
 
 export interface SharedWifiState {
   // WiFi 列表
@@ -67,13 +70,13 @@ export class WifiDataManager {
     currentState: SharedWifiState,
     onUpdate: (state: SharedWifiState) => void
   ): Promise<void> {
-    console.log('[WifiDataManager] === scanAndUpdate START ===')
-    console.log('[WifiDataManager] Current state: connectedSsid=' + currentState.connectedSsid +
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] === scanAndUpdate START ===')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Current state: connectedSsid=' + currentState.connectedSsid +
       ', isLoaded=' + currentState.isLoaded)
 
     await this.scanner.startScan((result: WifiScanResult) => {
-      console.log('[WifiDataManager] === Scanner callback invoked ===')
-      console.log('[WifiDataManager] Scan callback: isScanning=' + result.isScanning +
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] === Scanner callback invoked ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Scan callback: isScanning=' + result.isScanning +
         ', connectedSsid=' + result.connectedSsid +
         ', wifiList.length=' + result.wifiList.length)
       const newState: SharedWifiState = {
@@ -91,8 +94,8 @@ export class WifiDataManager {
       }
 
       // 从已连接WiFi列表项获取频段和信道信息（单次遍历替代两次 find）
-      console.log('[WifiDataManager] Looking for connected item in ' + result.wifiList.length + ' items')
-      console.log('[WifiDataManager] Connected SSID: ' + result.connectedSsid + ', BSSID: ' + result.connectedBssid)
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Looking for connected item in ' + result.wifiList.length + ' items')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Connected SSID: ' + result.connectedSsid + ', BSSID: ' + result.connectedBssid)
 
       let foundConnected: boolean = false
       for (let i = 0; i < result.wifiList.length; i++) {
@@ -101,7 +104,7 @@ export class WifiDataManager {
           newState.connectedFreq = item.freq
           newState.connectedChannel = item.channel
           foundConnected = true
-          console.log('[WifiDataManager] Found connected item: ' + item.ssid +
+          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Found connected item: ' + item.ssid +
             ' freq=' + item.freq + ' channel=' + item.channel)
           break
         }
@@ -111,18 +114,18 @@ export class WifiDataManager {
           if (result.wifiList[j].ssid === result.connectedSsid) {
             newState.connectedFreq = result.wifiList[j].freq
             newState.connectedChannel = result.wifiList[j].channel
-            console.log('[WifiDataManager] Matched by SSID: ' + result.wifiList[j].ssid +
+            hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Matched by SSID: ' + result.wifiList[j].ssid +
               ' freq=' + result.wifiList[j].freq + ' channel=' + result.wifiList[j].channel)
             break
           }
         }
       }
 
-      console.log('[WifiDataManager] Calling onUpdate: connectedSsid=' + newState.connectedSsid +
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Calling onUpdate: connectedSsid=' + newState.connectedSsid +
         ', wifiList.length=' + newState.wifiList.length +
         ', isLoaded=' + newState.isLoaded)
       onUpdate(newState)
-      console.log('[WifiDataManager] === scanAndUpdate END ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] === scanAndUpdate END ===')
     })
   }
 }

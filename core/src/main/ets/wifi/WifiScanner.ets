@@ -1,8 +1,11 @@
 // WiFi 真机扫描工具服务
 // 使用 WiFi 服务抽象层获取真实 WiFi 信号数据
 
+import { hilog } from '@kit.PerformanceAnalysisKit'
 import { WifiItem } from '../models/WifiItem'
 import { WifiServiceFactory, IWifiService, WifiScanInfo } from './WifiService'
+
+const DOMAIN = 0x0000
 
 // 扫描结果数据结构
 export class WifiScanResult {
@@ -81,9 +84,9 @@ export class WifiScanner {
 
   // 开始扫描（异步，结果通过回调返回）
   async startScan(callback: (result: WifiScanResult) => void): Promise<void> {
-    console.log('[WifiScanner] === startScan START ===')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] === startScan START ===')
     this.scanCallback = callback
-    console.log('[WifiScanner] Callback stored, about to perform scan...')
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Callback stored, about to perform scan...')
 
     let result: WifiScanResult = {
       wifiList: [],
@@ -95,29 +98,29 @@ export class WifiScanner {
     }
 
     try {
-      console.log('[WifiScanner] Getting connected info...')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Getting connected info...')
       // 先获取已连接信息（这个 API 通常比扫描快）
       result = await this.getConnectedInfo(result)
       result = await this.performScan(result)
 
       // 如果扫描结果为空（API 失败/权限不足），自动使用 fallback 数据
       if (!result.wifiList || result.wifiList.length === 0) {
-        console.warn('[WifiScanner] Scan returned 0 results, using fallback data')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Scan returned 0 results, using fallback data')
         result = this.getFallbackData(result)
       }
 
       result.isScanning = false
-      console.log('[WifiScanner] === Invoking callback with ' + result.wifiList.length + ' items ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] === Invoking callback with ' + result.wifiList.length + ' items ===')
       this.scanCallback?.(result)
-      console.log('[WifiScanner] === startScan END ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] === startScan END ===')
     } catch (error) {
-      console.error('[WifiScanner] Scan error:', JSON.stringify(error))
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Scan error:' + JSON.stringify(error))
       result.isScanning = false
       result.error = '扫描失败: ' + JSON.stringify(error)
       result = this.getFallbackData(result)
-      console.log('[WifiScanner] === Invoking error callback ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] === Invoking error callback ===')
       this.scanCallback?.(result)
-      console.log('[WifiScanner] === startScan END (error path) ===')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] === startScan END (error path) ===')
     }
   }
 
@@ -139,7 +142,7 @@ export class WifiScanner {
   private async getConnectedInfo(result: WifiScanResult): Promise<WifiScanResult> {
     try {
       const linkedInfo = await this.wifiService.getLinkedInfo()
-      console.log('[WifiScanner] getLinkedInfo raw result:', JSON.stringify(linkedInfo))
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo raw result:' + JSON.stringify(linkedInfo))
 
       if (linkedInfo) {
         const ssidValue: string = linkedInfo.ssid || ''
@@ -149,16 +152,16 @@ export class WifiScanner {
           // 确保 rssi 是数字类型
           const rssiValue = linkedInfo.rssi
           result.connectedSignal = (typeof rssiValue === 'number') ? rssiValue : -80
-          console.log('[WifiScanner] ✓ Connected to: ' + result.connectedSsid +
+          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Connected to: ' + result.connectedSsid +
             ', RSSI: ' + result.connectedSignal + ', BSSID: ' + result.connectedBssid)
         } else {
-          console.warn('[WifiScanner] linkedInfo returned but ssid is empty')
+          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] linkedInfo returned but ssid is empty')
         }
       } else {
-        console.warn('[WifiScanner] getLinkedInfo returned null')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo returned null')
       }
     } catch (e) {
-      console.error('[WifiScanner] Get linked info error:', JSON.stringify(e))
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Get linked info error:' + JSON.stringify(e))
     }
 
     return result
@@ -175,15 +178,15 @@ export class WifiScanner {
       // 获取扫描结果（异步API，需要await）
       const scanResults: WifiScanInfo[] = await this.wifiService.getScanResults()
 
-      console.log('[WifiScanner] Found ' + scanResults.length + ' APs')
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Found ' + scanResults.length + ' APs')
 
       // 如果扫描结果为空，输出详细信息帮助调试
       if (scanResults.length === 0) {
-        console.warn('[WifiScanner] WARNING: No APs found. This may indicate:')
-        console.warn('[WifiScanner] 1. Wi-Fi scanning is disabled by the system')
-        console.warn('[WifiScanner] 2. Location permission not granted')
-        console.warn('[WifiScanner] 3. Privacy protection is filtering results')
-        console.warn('[WifiScanner] 4. No Wi-Fi networks are available')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] WARNING: No APs found. This may indicate:')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] 1. Wi-Fi scanning is disabled by the system')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] 2. Location permission not granted')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] 3. Privacy protection is filtering results')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] 4. No Wi-Fi networks are available')
       }
 
       // 转换为我们的数据模型
@@ -214,7 +217,7 @@ export class WifiScanner {
       }
 
       // 标记已连接的网络 — 同一SSID可能在2.4G和5G都出现，优先选5GHz（信号更好）
-      console.log('[WifiScanner] Trying to mark connected network: SSID=' + result.connectedSsid +
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Trying to mark connected network: SSID=' + result.connectedSsid +
         ', BSSID=' + result.connectedBssid + ', list.length=' + list.length)
       
       // 第一步：收集所有匹配项
@@ -224,7 +227,7 @@ export class WifiScanner {
         const bssidMatch: boolean = result.connectedBssid === '' || list[j].bssid === result.connectedBssid
         if (ssidMatch && bssidMatch) {
           matchedIndices.push(j)
-          console.log('[WifiScanner] Candidate item ' + j + ': ssid=' + list[j].ssid +
+          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Candidate item ' + j + ': ssid=' + list[j].ssid +
             ', freq=' + list[j].freq + ', ch=' + list[j].channel)
         }
       }
@@ -245,7 +248,7 @@ export class WifiScanner {
           }
         }
         list[bestIdx].isConnected = true
-        console.log('[WifiScanner] ✓ Marked connected network: ' + list[bestIdx].ssid +
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Marked connected network: ' + list[bestIdx].ssid +
           ' (freq: ' + list[bestIdx].freq + ', channel: ' + list[bestIdx].channel + ')')
       }
 
@@ -257,14 +260,14 @@ export class WifiScanner {
       // 限制最大显示数量（防止高密度 WiFi 环境下列表过长）
       if (result.wifiList.length > this.MAX_WIFI_LIST_SIZE) {
         result.wifiList = result.wifiList.slice(0, this.MAX_WIFI_LIST_SIZE)
-        console.warn('[WifiScanner] Truncated wifiList to ' + this.MAX_WIFI_LIST_SIZE + ' items')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Truncated wifiList to ' + this.MAX_WIFI_LIST_SIZE + ' items')
       }
 
       // 保护机制：如果扫描结果中没有标记任何已连接网络，但 getLinkedInfo 返回了 SSID
       // 说明扫描结果可能被隐私保护过滤，添加一个虚拟的已连接网络条目
       const hasConnectedItem: boolean = result.wifiList.some((item: WifiItem) => item.isConnected)
       if (!hasConnectedItem && result.connectedSsid !== '' && result.connectedSsid !== '--') {
-        console.warn('[WifiScanner] No connected item found in scan results, adding fallback connected entry')
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] No connected item found in scan results, adding fallback connected entry')
         result.wifiList.unshift({
           ssid: result.connectedSsid,
           bssid: result.connectedBssid || '',
@@ -279,7 +282,7 @@ export class WifiScanner {
 
       return result
     } catch (e) {
-      console.error('[WifiScanner] Perform scan error:', e)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Perform scan error:' + JSON.stringify(e))
       // 不重新抛出（ArkTS限制：只能抛Error），返回空结果
       // 外层 startScan 会检查 wifiList.length 来决定是否用 fallback
       return result

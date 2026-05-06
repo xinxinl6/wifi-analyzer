@@ -20,7 +20,7 @@ import {
   TracerouteEngine, TracerouteHop, TracerouteConfig, TracerouteStats, DnsResolveResult
 } from '../traceroute/TracerouteEngine'
 import { RouterManager, ValidationPatterns, DnsConfig, DiagnosticsConfig } from '@wifi-analyzer/core'
-import { BackButtonGlass, BackButtonCapsule } from '@wifi-analyzer/design-system'
+import { BackButtonGlass, BackButtonCapsule, PulseIndicator } from '@wifi-analyzer/design-system'
 
 // ==================== 接口定义 ====================
 
@@ -50,10 +50,9 @@ export struct TraceroutePage {
   @State targetHost: string = ''
   @State resolvedIp: string = ''
   @State isRunning: boolean = false
-  @State pulseOpacity: number = 1.0
+  private pulser: PulseIndicator = new PulseIndicator()
 
   private engine: TracerouteEngine = new TracerouteEngine()
-  private pulseTimerId: number = -1
 
   // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
@@ -71,7 +70,7 @@ export struct TraceroutePage {
 
   aboutToDisappear(): void {
     this.engine.stopTrace()
-    this.stopPulse()
+    this.pulser.stop()
   }
 
   // ==================== 网关检测 ====================
@@ -79,21 +78,6 @@ export struct TraceroutePage {
     this.engine.detectGateway().then((gw: string) => {
       this.detectedGateway = gw
     })
-  }
-
-  // ==================== 脉冲动画 ====================
-  private startPulse(): void {
-    this.pulseTimerId = setInterval((): void => {
-      this.pulseOpacity = this.pulseOpacity === 1.0 ? 0.3 : 1.0
-    }, 600)
-  }
-
-  private stopPulse(): void {
-    if (this.pulseTimerId >= 0) {
-      clearInterval(this.pulseTimerId)
-      this.pulseTimerId = -1
-    }
-    this.pulseOpacity = 1.0
   }
 
   // ==================== 业务逻辑 ====================
@@ -158,7 +142,7 @@ export struct TraceroutePage {
     }
     this.isRunning = true
     this.viewMode = 'tracing'
-    this.startPulse()
+    this.pulser.start(600)
 
     this.engine.resolveHost(addr).then((result: DnsResolveResult) => {
       this.resolvedIp = result.address
@@ -174,13 +158,13 @@ export struct TraceroutePage {
         this.hopList = hops
         this.traceStats = TracerouteEngine.calcStats(hops)
         this.isRunning = false
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'completed'
       },
       onError: (message: string): void => {
         console.error('[TraceroutePage] Error:', message)
         this.isRunning = false
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'completed'
       }
     })
@@ -189,7 +173,7 @@ export struct TraceroutePage {
   stopTrace(): void {
     this.engine.stopTrace()
     this.isRunning = false
-    this.stopPulse()
+    this.pulser.stop()
     if (this.hopList.length > 0) {
       this.viewMode = 'completed'
     } else {
@@ -487,7 +471,7 @@ export struct TraceroutePage {
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(44).height(44)
           .fill(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_LIGHT)
-          .opacity(this.isRunning ? this.pulseOpacity : 1.0)
+          .opacity(this.isRunning ? this.pulser.opacity : 1.0)
         Circle().width(36).height(36)
           .fill(this.isRunning ? COLOR_SKY_BLUE : (this.viewMode === 'completed' ? COLOR_SUCCESS : COLOR_SKY_BLUE))
         Image($r('app.media.ic_route')).width(18).height(18).fillColor('#FFFFFF')
@@ -511,7 +495,7 @@ export struct TraceroutePage {
             Row({ space: 4 }) {
               Circle().width(5).height(5)
                 .fill(COLOR_SKY_BLUE)
-                .opacity(this.pulseOpacity)
+                .opacity(this.pulser.opacity)
               Text($r('app.string.tracing'))
                 .fontSize(FONT_SIZE_XS)
                 .fontColor(COLOR_SKY_BLUE)
@@ -787,10 +771,10 @@ export struct TraceroutePage {
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(72).height(72)
           .fill(COLOR_GLASS_SKY_ACTIVE)
-          .opacity(this.pulseOpacity)
+          .opacity(this.pulser.opacity)
         Circle().width(52).height(52)
           .fill(COLOR_SKY_BLUE_DIVIDER)
-          .opacity(this.pulseOpacity)
+          .opacity(this.pulser.opacity)
         Image($r('app.media.ic_route')).width(26).height(26).fillColor(COLOR_SKY_BLUE)
       }
       Text($r('app.string.tracing_path'))

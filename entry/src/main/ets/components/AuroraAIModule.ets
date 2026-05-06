@@ -29,17 +29,9 @@ import {
   DURATION_NORMAL,
   AnimationTapScale
 } from '@wifi-analyzer/design-system'
-import { EventBus } from '../utils/EventBus'
 import { getAIAnalysisUrl, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
 import web_webview from '@ohos.web.webview'
 import { promptAction } from '@kit.ArkUI'
-
-// ============================================
-// AI 事件定义
-// ============================================
-
-// FAB 点击事件 ID（导出供父组件订阅）
-export const FAB_CLICK_EVENT_ID = 1001
 
 // ============================================
 // AI 消息数据结构
@@ -208,8 +200,6 @@ export struct AuroraAIFabButton {
       duration: 2000
     })
 
-    // 通知父组件
-    EventBus.emit(FAB_CLICK_EVENT_ID)
   }
 
   // 关闭 AI 分析面板

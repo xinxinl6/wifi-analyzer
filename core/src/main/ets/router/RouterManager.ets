@@ -4,6 +4,10 @@
 // 2. AppStorage 模式（条件渲染，兼容 API 22）
 // 位于 core 模块，供所有 HAR 模块共享
 
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0x0000
+
 // 路由名称
 export type RouteName =
   | 'ping'
@@ -103,7 +107,7 @@ export class RouterManager {
       // NavPathStack 模式
       const pageName = ROUTE_TO_PAGE[route]
       if (!pageName) {
-        console.error('[RouterManager] Unknown route:', route)
+        hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Unknown route:' + JSON.stringify(route))
         return
       }
       RouterManager.navPathStack.pushPathByName(pageName, param)
@@ -111,7 +115,7 @@ export class RouterManager {
       // AppStorage 模式
       const key = ROUTE_TO_STORAGE_KEY[route]
       if (!key) {
-        console.error('[RouterManager] Unknown route:', route)
+        hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Unknown route:' + JSON.stringify(route))
         return
       }
       AppStorage.set(key, true)
@@ -128,7 +132,7 @@ export class RouterManager {
   // 导航到指定 Tab
   static navigateToTab(tabIndex: number): void {
     if (tabIndex < 0 || tabIndex > 4) {
-      console.error('[RouterManager] Invalid tab index:', tabIndex)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Invalid tab index:' + JSON.stringify(tabIndex))
       return
     }
     AppStorage.set('targetTabIndex', tabIndex)

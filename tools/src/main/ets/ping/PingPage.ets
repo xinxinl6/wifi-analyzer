@@ -15,7 +15,8 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
   GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL, GLASS_SHADOW_3XL, SAFE_AREA_BOTTOM, SAFE_AREA_TOP,
   adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
-  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider } from '@wifi-analyzer/design-system'
+  adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider,
+  PulseIndicator } from '@wifi-analyzer/design-system'
 import {
   PingEngine, PingResult, PingStats, PingConfig
 } from '../ping/PingEngine'
@@ -53,11 +54,10 @@ export struct PingPage {
   @State targetHost: string = ''
   @State resolvedIp: string = ''
   @State isRunning: boolean = false
-  @State pulseOpacity: number = 1.0
   @State progress: string = '0/0'
 
   private engine: PingEngine = new PingEngine()
-  private pulseTimerId: number = -1
+  private pulser: PulseIndicator = new PulseIndicator()
 
   aboutToAppear(): void {
     this.detectGateway()
@@ -65,7 +65,7 @@ export struct PingPage {
 
   aboutToDisappear(): void {
     this.engine.stopPing()
-    this.stopPulse()
+    this.pulser.stop()
   }
 
   // ==================== 网关检测 ====================
@@ -77,21 +77,6 @@ export struct PingPage {
           this.recommendItems[0].address = gw || DiagnosticsConfig.DEFAULT_GATEWAY
         }
       })
-  }
-
-  // ==================== 脉冲动画 ====================
-  private startPulse(): void {
-    this.pulseTimerId = setInterval((): void => {
-      this.pulseOpacity = this.pulseOpacity === 1.0 ? 0.3 : 1.0
-    }, 600)
-  }
-
-  private stopPulse(): void {
-    if (this.pulseTimerId >= 0) {
-      clearInterval(this.pulseTimerId)
-      this.pulseTimerId = -1
-    }
-    this.pulseOpacity = 1.0
   }
 
   // ==================== 业务逻辑 ====================
@@ -144,7 +129,7 @@ export struct PingPage {
     }
     this.isRunning = true
     this.viewMode = 'pinging'
-    this.startPulse()
+    this.pulser.start()
     this.progress = '0/4'
 
     const config: PingConfig = PingEngine.getDefaultConfig(addr)
@@ -163,13 +148,13 @@ export struct PingPage {
         this.pingResults = results
         this.pingStats = stats
         this.isRunning = false
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'completed'
       },
       onError: (message: string): void => {
         console.error('[PingPage] Error:', message)
         this.isRunning = false
-        this.stopPulse()
+        this.pulser.stop()
         this.viewMode = 'completed'
         promptAction.showToast({
           message: 'Ping 失败: ' + message,
@@ -182,7 +167,7 @@ export struct PingPage {
   stopPing(): void {
     this.engine.stopPing()
     this.isRunning = false
-    this.stopPulse()
+    this.pulser.stop()
     if (this.pingResults.length > 0) {
       this.viewMode = 'completed'
     } else {
@@ -442,7 +427,7 @@ export struct PingPage {
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(44).height(44)
           .fill(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_LIGHT)
-          .opacity(this.isRunning ? this.pulseOpacity : 1.0)
+          .opacity(this.isRunning ? this.pulser.opacity : 1.0)
         Circle().width(36).height(36)
           .fill(this.isRunning ? COLOR_SKY_BLUE : (this.viewMode === 'completed' ? COLOR_SUCCESS : COLOR_SKY_BLUE))
         Image($r('app.media.ic_device')).width(18).height(18).fillColor('#FFFFFF')
@@ -466,7 +451,7 @@ export struct PingPage {
             Row({ space: 4 }) {
               Circle().width(5).height(5)
                 .fill(COLOR_SKY_BLUE)
-                .opacity(this.pulseOpacity)
+                .opacity(this.pulser.opacity)
               Text('Pinging ' + this.progress)
                 .fontSize(FONT_SIZE_XS)
                 .fontColor(COLOR_SKY_BLUE)

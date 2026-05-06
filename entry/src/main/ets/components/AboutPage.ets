@@ -14,12 +14,171 @@ import { BackButtonGlass } from '@wifi-analyzer/design-system'
 import { RouterManager } from '@wifi-analyzer/core'
 import promptAction from '@ohos.promptAction'
 
+// 内容页面的 HTML 模板
+const PRIVACY_POLICY_HTML: string =
+  '<h2>隐私政策</h2>' +
+  '<p>更新时间：2026年5月</p>' +
+  '<p>WiFi分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。</p>' +
+  '<h3>1. 信息收集</h3>' +
+  '<p>本应用仅在您主动授权的情况下收集以下信息：</p>' +
+  '<ul>' +
+  '<li><b>位置信息</b>：用于扫描附近的WiFi网络（HarmonyOS系统要求）</li>' +
+  '<li><b>WiFi信息</b>：用于显示网络状态、信号强度、信道分析</li>' +
+  '</ul>' +
+  '<h3>2. 信息使用</h3>' +
+  '<p>收集的信息仅用于本应用内的功能展示，不会上传至任何服务器。</p>' +
+  '<h3>3. 数据存储</h3>' +
+  '<p>所有数据仅存储在您的设备本地，不会传输到外部。</p>' +
+  '<h3>4. 第三方服务</h3>' +
+  '<p>本应用不集成任何第三方分析或广告SDK。</p>' +
+  '<h3>5. 联系我们</h3>' +
+  '<p>如有隐私相关问题，请联系：1218478630@qq.com</p>'
+
+const USER_AGREEMENT_HTML: string =
+  '<h2>用户协议</h2>' +
+  '<p>更新时间：2026年5月</p>' +
+  '<p>欢迎使用WiFi分析仪。使用本应用即表示您同意以下条款。</p>' +
+  '<h3>1. 服务说明</h3>' +
+  '<p>本应用提供WiFi扫描、网络诊断、信号分析等功能。功能仅限个人学习研究使用。</p>' +
+  '<h3>2. 使用规范</h3>' +
+  '<ul>' +
+  '<li>不得将本应用用于任何非法目的</li>' +
+  '<li>不得破解、反编译或修改本应用</li>' +
+  '<li>不得利用本应用进行网络攻击或侵犯他人权益</li>' +
+  '</ul>' +
+  '<h3>3. 免责声明</h3>' +
+  '<p>本应用按"现状"提供，不保证功能完全无间断或错误。在法律允许的范围内，开发者不承担任何间接损失责任。</p>' +
+  '<h3>4. 知识产权</h3>' +
+  '<p>本应用及其所有内容的知识产权归开发者所有。</p>' +
+  '<h3>5. 协议变更</h3>' +
+  '<p>我们可能适时修改本协议，修改后的协议一经发布即生效。</p>'
+
+const FEEDBACK_HTML: string =
+  '<h2>意见反馈</h2>' +
+  '<p>感谢您使用WiFi分析仪！</p>' +
+  '<h3>联系方式</h3>' +
+  '<ul>' +
+  '<li>邮箱：1218478630@qq.com</li>' +
+  '<li>GitHub：xinxinl6/wifi-analyzer</li>' +
+  '</ul>' +
+  '<h3>功能建议</h3>' +
+  '<p>如您有新功能想法或改进建议，欢迎通过以上方式联系我们。我们非常重视每个用户的反馈意见。</p>' +
+  '<h3>问题反馈</h3>' +
+  '<p>如果遇到Bug或异常情况，请提供以下信息：</p>' +
+  '<ul>' +
+  '<li>设备型号与系统版本</li>' +
+  '<li>问题发生的具体操作步骤</li>' +
+  '<li>错误截图（如有）</li>' +
+  '</ul>'
+
+// 协议内容纯文本版本
+const PRIVACY_TEXT: string =
+  '隐私政策\n\n' +
+  '更新时间：2026年5月\n\n' +
+  'WiFi分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。\n\n' +
+  '1. 信息收集\n' +
+  '本应用仅在您主动授权的情况下收集以下信息：\n' +
+  '• 位置信息：用于扫描附近的WiFi网络（HarmonyOS系统要求）\n' +
+  '• WiFi信息：用于显示网络状态、信号强度、信道分析\n\n' +
+  '2. 信息使用\n' +
+  '收集的信息仅用于本应用内的功能展示，不会上传至任何服务器。\n\n' +
+  '3. 数据存储\n' +
+  '所有数据仅存储在您的设备本地，不会传输到外部。\n\n' +
+  '4. 第三方服务\n' +
+  '本应用不集成任何第三方分析或广告SDK。\n\n' +
+  '5. 联系我们\n' +
+  '如有隐私相关问题，请联系：1218478630@qq.com'
+
+const AGREEMENT_TEXT: string =
+  '用户协议\n\n' +
+  '更新时间：2026年5月\n\n' +
+  '欢迎使用WiFi分析仪。使用本应用即表示您同意以下条款。\n\n' +
+  '1. 服务说明\n' +
+  '本应用提供WiFi扫描、网络诊断、信号分析等功能。功能仅限个人学习研究使用。\n\n' +
+  '2. 使用规范\n' +
+  '• 不得将本应用用于任何非法目的\n' +
+  '• 不得破解、反编译或修改本应用\n' +
+  '• 不得利用本应用进行网络攻击或侵犯他人权益\n\n' +
+  '3. 免责声明\n' +
+  '本应用按"现状"提供，不保证功能完全无间断或错误。在法律允许的范围内，开发者不承担任何间接损失责任。\n\n' +
+  '4. 知识产权\n' +
+  '本应用及其所有内容的知识产权归开发者所有。\n\n' +
+  '5. 协议变更\n' +
+  '我们可能适时修改本协议，修改后的协议一经发布即生效。'
+
+const FEEDBACK_TEXT: string =
+  '意见反馈\n\n' +
+  '感谢您使用WiFi分析仪！\n\n' +
+  '联系方式\n' +
+  '• 邮箱：1218478630@qq.com\n' +
+  '• GitHub：xinxinl6/wifi-analyzer\n\n' +
+  '功能建议\n' +
+  '如您有新功能想法或改进建议，欢迎通过以上方式联系我们。我们非常重视每个用户的反馈意见。\n\n' +
+  '问题反馈\n' +
+  '如果遇到Bug或异常情况，请提供以下信息：\n' +
+  '• 设备型号与系统版本\n' +
+  '• 问题发生的具体操作步骤\n' +
+  '• 错误截图（如有）'
+
 // ==================== 列表项接口 ====================
 interface AboutListItem {
   label: Resource | string
   value: Resource | string
   action: string
   showArrow: boolean
+}
+
+// ==================== 通用协议弹窗组件 ====================
+@CustomDialog
+struct AgreementDialog {
+  @Consume isDarkMode: boolean = false
+  controller: CustomDialogController = new CustomDialogController({ builder: '' })
+  dialogTitle: string = ''
+  plainTextContent: string = ''
+
+  build() {
+    Column() {
+      // 标题栏
+      Row() {
+        Text(this.dialogTitle)
+          .fontSize(FONT_SIZE_LG)
+          .fontWeight(FONT_WEIGHT_BOLD)
+          .fontColor(adaptiveTextPrimary(this.isDarkMode))
+        Blank()
+        Text('×')
+          .fontSize(28)
+          .fontColor(adaptiveTextTertiary(this.isDarkMode))
+          .onClick(() => { this.controller.close() })
+      }
+      .width('100%')
+      .padding({ left: SPACE_LG, right: SPACE_SM, top: SPACE_LG, bottom: SPACE_MD })
+
+      Divider()
+        .color(adaptiveDivider(this.isDarkMode))
+        .strokeWidth(0.5)
+
+      // 内容区域 - 使用 Text 组件显示纯文本
+      Scroll() {
+        Text(this.plainTextContent)
+          .fontSize(FONT_SIZE_MD)
+          .fontColor(adaptiveTextSecondary(this.isDarkMode))
+          .width('100%')
+          .lineHeight(24)
+      }
+      .width('100%')
+      .layoutWeight(1)
+      .padding(SPACE_LG)
+    }
+    .width('90%')
+    .height('70%')
+    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
+    .borderRadius(RADIUS_LG)
+    .borderWidth(1.5)
+    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
+    .backdropBlur(GLASS_BLUR_LG)
+    .shadow({ radius: GLASS_SHADOW_XL, color: 'rgba(0,0,0,0.25)', offsetX: 0, offsetY: 8 })
+    .clip(true)
+  }
 }
 
 // ==================== 组件 ====================
@@ -30,6 +189,11 @@ export struct AboutPage {
   // 应用版本信息
   private appVersion: string = 'v1.0.1'
   private buildNumber: string = '1000001'
+
+  // 弹窗控制器
+  @State dialogController: CustomDialogController | null = null
+  @State dialogTitle: string = ''
+  @State dialogTextContent: string = ''
 
   // 列表数据
   private listItems: AboutListItem[] = [
@@ -211,11 +375,35 @@ export struct AboutPage {
         duration: 2000
       })
     } else if (action === 'privacy') {
-      // TODO: 隐私政策
+      // 隐私政策弹窗
+      this.dialogTitle = '隐私政策'
+      this.dialogTextContent = PRIVACY_TEXT
+      this.showDialog()
     } else if (action === 'agreement') {
-      // TODO: 用户协议
+      // 用户协议弹窗
+      this.dialogTitle = '用户协议'
+      this.dialogTextContent = AGREEMENT_TEXT
+      this.showDialog()
     } else if (action === 'feedback') {
-      // TODO: 意见反馈
+      // 意见反馈弹窗
+      this.dialogTitle = '意见反馈'
+      this.dialogTextContent = FEEDBACK_TEXT
+      this.showDialog()
     }
+  }
+
+  // 显示协议弹窗
+  private showDialog(): void {
+    if (this.dialogController) {
+      this.dialogController.close()
+    }
+    this.dialogController = new CustomDialogController({
+      builder: AgreementDialog({
+        dialogTitle: this.dialogTitle,
+        plainTextContent: this.dialogTextContent
+      }),
+      customStyle: true
+    })
+    this.dialogController.open()
   }
 }
