@@ -7,11 +7,11 @@
         "material": {
           "certpath": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B02C8DE35B328FA2A8BD5A3EFF840B32DF1DED06BBBD230626CE893204405396265AE6BA19B99C8",
+          "keyPassword": "0000001A37B27863C409033ABB60916C7194042025E3FD4B1FCFBE6F1736E2273A366E1861B18146413A",
           "profile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.p12",
-          "storePassword": "0000001B22E56997676F8DB3C76074B5A2F92E8BD01ACF89B556A39AEC50AC3919EB77B6A4E7B1212937F4"
+          "storePassword": "0000001AA01DCB319AFA5716AC78C3164B7E2156851661785AE55E3FE5FC25BF6A4416154B554FE1A62E"
         }
       }
     ],
