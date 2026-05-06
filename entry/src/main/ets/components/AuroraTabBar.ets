@@ -56,36 +56,12 @@ export struct AuroraTabItem {
 
   // 点击状态动画
   @State private scale: number = 1.0
-  @State private iconOpacity: number = 0.5
-  @State private textOpacity: number = 0.5
-  @State private glowOpacity: number = 0
-  @State private isPressed: boolean = false
-
-  aboutToAppear(): void {
-    // 初始化时根据激活状态设置透明度
-    this.updateOpacity()
-  }
-
-  private updateOpacity(): void {
-    if (this.isActive) {
-      this.iconOpacity = 1.0
-      this.textOpacity = 1.0
-      this.glowOpacity = 0.3
-    } else {
-      this.iconOpacity = 0.5
-      this.textOpacity = 0.5
-      this.glowOpacity = 0
-    }
-  }
 
   // 点击按下
   private onPress(): void {
     this.getUIContext().animateTo(AnimationTapScale, () => {
       this.scale = 0.90
-      this.iconOpacity = 1.0
-      this.textOpacity = 1.0
     })
-    this.isPressed = true
   }
 
   // 点击释放
@@ -95,12 +71,7 @@ export struct AuroraTabItem {
       curve: Curve.EaseOut
     }, () => {
       this.scale = 1.0
-      if (!this.isActive) {
-        this.iconOpacity = 0.5
-        this.textOpacity = 0.5
-      }
     })
-    this.isPressed = false
   }
 
   build() {
@@ -112,7 +83,7 @@ export struct AuroraTabItem {
           Circle()
             .width('100%')
             .height(24)
-            .fill(this.isActive ? 'rgba(74,144,217,0.25)' : 'transparent')
+            .fill('rgba(74,144,217,0.25)')
         }
       }
       .width(56)
@@ -133,18 +104,15 @@ export struct AuroraTabItem {
           .width(24)
           .height(24)
           .fillColor(this.isActive ? COLOR_AURORA_PRIMARY : COLOR_TEXT_GLASS_TERTIARY)
-          .opacity(this.iconOpacity)
       }
       .width(48)
       .height(48)
-      .clip(false)
 
       // 标题
       Text(this.title)
         .fontSize(11)
         .fontWeight(this.isActive ? FontWeight.Medium : FontWeight.Normal)
         .fontColor(this.isActive ? COLOR_AURORA_PRIMARY : COLOR_TEXT_GLASS_TERTIARY)
-        .opacity(this.textOpacity)
         .margin({ top: 4 })
     }
     .width('100%')
@@ -233,30 +201,17 @@ export struct AuroraAIFab {
   @Prop isVisible: boolean = true
   @State private isExpanded: boolean = false
   @State private scale: number = 1.0
-  @State private glowIntensity: number = 0.5
 
   private onClick: () => void = () => {}
-
-  aboutToAppear(): void {
-    // 脉冲光晕动画
-    this.getUIContext().animateTo({
-      duration: 2000,
-      curve: Curve.EaseInOut,
-      iterations: -1,
-      expectedFrameRate: 60
-    }, () => {
-      this.glowIntensity = this.glowIntensity === 0.5 ? 1.0 : 0.5
-    })
-  }
 
   build() {
     if (this.isVisible) {
       Stack({ alignContent: Alignment.Center }) {
-        // 外层光晕
+        // 外层光晕（静态）
         Circle()
           .width(64)
           .height(64)
-          .fill(`rgba(74,144,217,${this.glowIntensity * 0.2})`)
+          .fill('rgba(74,144,217,0.1)')
 
         // 主按钮
         Column()

@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001A37B27863C409033ABB60916C7194042025E3FD4B1FCFBE6F1736E2273A366E1861B18146413A",
-          "profile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.p7b",
+          "storeFile": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-release.p12",
+          "storePassword": "0000001A3E89FF8C5344C3B72A653BF5C77258A7EC70E597F706D841939D75122366A5446C35D8FF735B",
+          "keyAlias": "releaseKey",
+          "keyPassword": "0000001ADB8AD755A6C2864B0D0F2C281014E86E319E73F8BA611CDF2279B454402CE9DFD37C779303AB",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer_CayhhU8S4rGOTZwzHRa7qGblXA2jlVhBF2OMZZeQhQg=.p12",
-          "storePassword": "0000001AA01DCB319AFA5716AC78C3164B7E2156851661785AE55E3FE5FC25BF6A4416154B554FE1A62E"
+          "profile": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-profileRelease.p7b",
+          "certpath": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-release.cer"
         }
       }
     ],
