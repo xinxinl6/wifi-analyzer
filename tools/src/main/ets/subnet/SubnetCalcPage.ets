@@ -452,24 +452,28 @@ export struct SubnetCalcPage {
 
   // 二进制可视化
   @Builder BinaryVis() {
-    Column({ space: SPACE_MD }) {
-      Text($r('app.string.binary_subnet'))
-        .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-        .alignSelf(ItemAlign.Start)
-        .padding({ left: 16, right: 14 })
+    Column({ space: 14 }) {
+      Row() {
+        Text($r('app.string.binary_subnet'))
+          .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode)).fontWeight(FONT_WEIGHT_MEDIUM)
+        Blank()
+        Text('/ 32 bits')
+          .fontSize(10).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(99,102,241,0.4)')
+      }
+      .width('100%')
+      .padding({ left: 16, right: 14, top: 14 })
 
-      Row({ space: SPACE_XS }) {
+      Row({ space: 4 }) {
         ForEach(this.getBinaryOctets(), (octet: BinaryOctet, index: number) => {
           this.BinaryOctetBlock(octet, index)
         }, (octet: BinaryOctet, index: number): string => String(index))
       }
-      .padding({ left: 16, right: 14, bottom: 14 })
+      .padding({ left: 12, right: 12, bottom: 14 })
     }
     .width('100%')
-    .padding({ left: 0, right: 0, top: 0, bottom: 14 })
     .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
-    .borderWidth(1.5)
+    .borderWidth(1)
     .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
@@ -477,21 +481,31 @@ export struct SubnetCalcPage {
   }
 
   @Builder BinaryOctetBlock(octet: BinaryOctet, index: number) {
-    Column({ space: SPACE_XS }) {
+    Column({ space: 6 }) {
       // 8 个 bit 方块
-      Row({ space: 1 }) {
+      Row({ space: 2 }) {
         ForEach(this.getBits(octet.binary), (bit: BitItem, bitIndex: number) => {
           Text(bit.char)
-            .fontSize(FONT_SIZE_XS).fontColor(Color.White).fontWeight(FONT_WEIGHT_BOLD)
-            .width(20).height(20).textAlign(TextAlign.Center)
-            .backgroundColor(bit.isOne ? COLOR_WARNING : adaptiveDivider(this.isDarkMode))
-            .borderRadius(4)
+            .fontSize(10)
+            .fontColor(bit.isOne ? Color.White : (this.isDarkMode ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)'))
+            .fontWeight(FONT_WEIGHT_BOLD)
+            .width(18).height(22).textAlign(TextAlign.Center)
+            .backgroundColor(bit.isOne
+              ? (this.isDarkMode ? COLOR_PRIMARY : COLOR_PRIMARY)
+              : (this.isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(99,102,241,0.06)'))
+            .borderRadius(5)
+            .borderWidth(1)
+            .borderColor(bit.isOne
+              ? 'transparent'
+              : (this.isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(99,102,241,0.15)'))
         }, (bit: BitItem, bitIndex: number): string => String(index) + '_' + String(bitIndex))
       }
 
       // 十进制值
       Text(octet.decimal)
-        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
+        .fontSize(11)
+        .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(99,102,241,0.7)')
+        .fontWeight(FONT_WEIGHT_MEDIUM)
     }
     .layoutWeight(1)
     .alignItems(HorizontalAlign.Center)
