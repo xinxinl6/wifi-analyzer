@@ -8,16 +8,20 @@ const DOMAIN = 0x0000
 /**
  * 公网IP查询API配置
  * 支持多个备选服务，避免单点故障
+ * 注意：使用国内可访问的API服务
  */
 export class PublicIpConfig {
-  // 主API - ipify（响应快、可靠）
-  static readonly PRIMARY_API: string = 'https://api.ipify.org?format=json'
+  // 主API - IPIP.NET（国内服务，速度快、可靠）
+  static readonly PRIMARY_API: string = 'https://myip.ipip.net'
 
-  // 备选API - ipinfo.io
-  static readonly FALLBACK_API: string = 'https://ipinfo.io/json'
+  // 备选API - 傲宇科技
+  static readonly FALLBACK_API: string = 'https://ip.3322.net'
+
+  // 第三备选 - 搜狐
+  static readonly THIRD_API: string = 'https://pv.sohu.com/ipimsg'
 
   // 请求超时时间（毫秒）
-  static readonly TIMEOUT_MS: number = 3000
+  static readonly TIMEOUT_MS: number = 5000
 
   // 重试次数
   static readonly MAX_RETRIES: number = 2

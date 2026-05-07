@@ -101,6 +101,16 @@ export class WifiScanner {
       hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Getting connected info...')
       // 先获取已连接信息（这个 API 通常比扫描快）
       result = await this.getConnectedInfo(result)
+      
+      // 如果首次获取的已连接信息为空，延迟后重试一次
+      if (!result.connectedSsid || result.connectedSsid === '' || result.connectedSsid === '--') {
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] First getLinkedInfo failed, waiting 500ms and retrying...')
+        await new Promise<void>((resolve: () => void) => {
+          setTimeout(resolve, 500)
+        })
+        result = await this.getConnectedInfo(result)
+      }
+      
       result = await this.performScan(result)
 
       // 如果扫描结果为空（API 失败/权限不足），自动使用 fallback 数据
@@ -138,32 +148,51 @@ export class WifiScanner {
     }
   }
 
-  // 获取已连接WiFi信息 — 使用 WiFi 服务抽象层
+  // 获取已连接WiFi信息 — 使用 WiFi 服务抽象层（带重试机制）
   private async getConnectedInfo(result: WifiScanResult): Promise<WifiScanResult> {
-    try {
-      const linkedInfo = await this.wifiService.getLinkedInfo()
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo raw result:' + JSON.stringify(linkedInfo))
+    const maxRetries: number = 3
+    const retryDelayMs: number = 300
 
-      if (linkedInfo) {
-        const ssidValue: string = linkedInfo.ssid || ''
-        if (ssidValue.length > 0) {
-          result.connectedSsid = ssidValue
-          result.connectedBssid = linkedInfo.bssid || ''
-          // 确保 rssi 是数字类型
-          const rssiValue = linkedInfo.rssi
-          result.connectedSignal = (typeof rssiValue === 'number') ? rssiValue : -80
-          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Connected to: ' + result.connectedSsid +
-            ', RSSI: ' + result.connectedSignal + ', BSSID: ' + result.connectedBssid)
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const linkedInfo = await this.wifiService.getLinkedInfo()
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo attempt ' + attempt + ': ' + JSON.stringify(linkedInfo))
+
+        if (linkedInfo) {
+          const ssidValue: string = linkedInfo.ssid || ''
+          if (ssidValue.length > 0) {
+            result.connectedSsid = ssidValue
+            result.connectedBssid = linkedInfo.bssid || ''
+            // 确保 rssi 是数字类型
+            const rssiValue = linkedInfo.rssi
+            result.connectedSignal = (typeof rssiValue === 'number') ? rssiValue : -80
+            hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Connected to: ' + result.connectedSsid +
+              ', RSSI: ' + result.connectedSignal + ', BSSID: ' + result.connectedBssid)
+            return result  // 成功获取，直接返回
+          } else {
+            hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] linkedInfo returned but ssid is empty (attempt ' + attempt + ')')
+          }
         } else {
-          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] linkedInfo returned but ssid is empty')
+          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo returned null (attempt ' + attempt + ')')
         }
-      } else {
-        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] getLinkedInfo returned null')
+
+        // 如果不是最后一次尝试，等待后重试
+        if (attempt < maxRetries) {
+          await new Promise<void>((resolve: () => void) => {
+            setTimeout(resolve, retryDelayMs)
+          })
+        }
+      } catch (e) {
+        hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Get linked info error (attempt ' + attempt + '):' + JSON.stringify(e))
+        if (attempt < maxRetries) {
+          await new Promise<void>((resolve: () => void) => {
+            setTimeout(resolve, retryDelayMs)
+          })
+        }
       }
-    } catch (e) {
-      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Get linked info error:' + JSON.stringify(e))
     }
 
+    hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] All retry attempts exhausted for getLinkedInfo')
     return result
   }
 

@@ -3,31 +3,31 @@
 import { connection, http } from '@kit.NetworkKit'
 import { wifiManager } from '@kit.ConnectivityKit'
 import { BusinessError } from '@kit.BasicServicesKit'
-import {
-  DiagnosticsConfig,
-  DnsConfig,
-  LoggerConfig,
-  LogLevel,
-  PublicIpConfig
-} from '../config/NetworkConfig'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0xFF00
+const TAG = 'NetworkDiagnostics'
+
+// 简单的日志函数
+function logInfo(msg: string): void {
+  hilog.info(DOMAIN, TAG, msg)
+}
+function logWarn(msg: string): void {
+  hilog.warn(DOMAIN, TAG, msg)
+}
 
 // 网络诊断结果接口
 export interface NetworkDiagnosticsResult {
-  // 实时数据
-  latency: number      // 延迟 (ms)
-  jitter: number       // 抖动 (ms)
-  uploadSpeed: number  // 上传速度 (Mbps)
-  downloadSpeed: number // 下载速度 (Mbps)
-
-  // 网络信息
-  localIp: string      // 本地IP
-  publicIp: string     // 公网IP
-  gateway: string      // 网关
-  dns: string          // DNS
-
-  // 状态
-  isTesting: boolean   // 是否正在测试
-  error?: string       // 错误信息
+  latency: number
+  jitter: number
+  uploadSpeed: number
+  downloadSpeed: number
+  localIp: string
+  publicIp: string
+  gateway: string
+  dns: string
+  isTesting: boolean
+  error?: string
 }
 
 // 默认结果
@@ -43,27 +43,8 @@ export const defaultDiagnosticsResult: NetworkDiagnosticsResult = {
   isTesting: false
 }
 
-// 本地IP地址项接口
-interface LocalIpItem {
-  address: string
-  family: number
-}
-
-// HTTP请求选项接口（避免内联对象字面量作为类型）
-interface PublicIpRequestOptions {
-  method: http.RequestMethod
-  connectTimeout: number
-  readTimeout: number
-}
-
-// 公网IP响应接口
-interface PublicIpResponse {
-  ip: string
-}
-
 export class NetworkDiagnostics {
   private static instance: NetworkDiagnostics
-  // 内部状态，异步回调更新
   private currentState: NetworkDiagnosticsResult = {
     latency: 0,
     jitter: 0,
@@ -75,10 +56,9 @@ export class NetworkDiagnostics {
     dns: '--',
     isTesting: false
   }
-  
-  // 跟踪异步任务完成状态
-  private pendingTasks: number = 0
-  private readonly totalTasks: number = 3  // localIp, publicIp, gateway
+
+  // 完成回调
+  private onComplete?: (result: NetworkDiagnosticsResult) => void
 
   static getInstance(): NetworkDiagnostics {
     if (!NetworkDiagnostics.instance) {
@@ -87,266 +67,184 @@ export class NetworkDiagnostics {
     return NetworkDiagnostics.instance
   }
 
-  // 获取当前缓存的结果
   getCurrentResult(): NetworkDiagnosticsResult {
     return this.currentState
   }
 
-  // 开始加载所有诊断数据（异步，通过回调更新内部状态）
-  loadDiagnostics(): NetworkDiagnosticsResult {
-    // 重置状态为加载中
+  // 开始诊断
+  startDiagnostics(onComplete?: (result: NetworkDiagnosticsResult) => void): void {
+    this.onComplete = onComplete
+
+    // 重置为加载中状态
     this.currentState = {
       latency: 0,
       jitter: 0,
       uploadSpeed: 0,
       downloadSpeed: 0,
-      localIp: DiagnosticsConfig.LOADING_PLACEHOLDER,
-      publicIp: DiagnosticsConfig.LOADING_PLACEHOLDER,
-      gateway: DiagnosticsConfig.LOADING_PLACEHOLDER,
-      dns: DnsConfig.DEFAULT_DNS,
+      localIp: '获取中...',
+      publicIp: '获取中...',
+      gateway: '获取中...',
+      dns: '获取中...',
       isTesting: true
     }
-    
-    // 重置任务计数器
-    this.pendingTasks = 0
 
-    // 异步获取本地IP、公网IP、网关（并行发起）
+    logInfo('Starting diagnostics...')
+
+    // 并行执行三个任务
     this.fetchLocalIp()
-    this.fetchPublicIp()
     this.fetchGateway()
-
-    return this.currentState
+    this.fetchPublicIp()
   }
 
-  // 检查所有任务是否完成
-  private checkAllTasksCompleted(): void {
-    if (this.pendingTasks >= this.totalTasks) {
-      // 所有任务完成，设置测试状态为false
-      this.currentState.isTesting = false
-      LoggerConfig.debug('NetworkDiagnostics', 'All network info loaded')
-    }
-  }
-
-  // 将数字IP地址转换为点分十进制格式
-  private convertIpNumberToString(ipNumber: number): string {
-    if (!ipNumber || ipNumber === 0) {
+  // 提取IP地址（从各种响应格式）
+  private extractIp(text: string): string {
+    if (!text) {
       return ''
     }
-    return ((ipNumber >>> 24) & 0xFF) + '.' +
-           ((ipNumber >> 16) & 0xFF) + '.' +
-           ((ipNumber >> 8) & 0xFF) + '.' +
-           (ipNumber & 0xFF)
+    // 直接匹配IP地址
+    const match = text.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/)
+    return match ? match[1] : ''
   }
 
-  // 获取本地IP地址 - 使用 wifiManager.getIpInfo() 获取WiFi连接的IP地址
+  // 获取本地IP - 简化版本，只用 wifiManager.getIpInfo()
   private fetchLocalIp(): void {
     try {
-      this.pendingTasks++
-      let foundLocalIp: string = ''
-
-      // 方案一：使用 wifiManager.getIpInfo() 获取WiFi连接的IP信息（推荐方式）
-      try {
-        const ipInfo = wifiManager.getIpInfo()
-        if (ipInfo && ipInfo.ipAddress && ipInfo.ipAddress !== 0) {
-          const ipStr = this.convertIpNumberToString(ipInfo.ipAddress)
-          if (ipStr && ipStr !== '0.0.0.0') {
-            foundLocalIp = ipStr
-            LoggerConfig.debug('NetworkDiagnostics', 'Found local IP via wifiManager:', ipStr)
-          }
-        }
-      } catch (wifiError) {
-        LoggerConfig.warn('NetworkDiagnostics', 'wifiManager.getIpInfo() failed:', String(wifiError))
-      }
-
-      // 方案二：如果 wifiManager 没有获取到，尝试通过默认网络获取
-      if (foundLocalIp === '') {
-        const netHandle: connection.NetHandle | null = connection.getDefaultNetSync()
-        if (netHandle && netHandle.netId !== 0) {
-          try {
-            connection.getAddressesByName('localhost', (err: BusinessError, addresses: connection.NetAddress[]) => {
-              try {
-                if (!err && addresses && addresses.length > 0) {
-                  for (let i = 0; i < addresses.length; i++) {
-                    const addr = addresses[i]
-                    if (addr && addr.address) {
-                      const ip: string = addr.address
-                      // 过滤回环地址和IPv6本地链路
-                      if (ip !== '127.0.0.1' && !ip.startsWith('::') && !ip.startsWith('fe80') && !ip.startsWith('::1')) {
-                        foundLocalIp = ip
-                        LoggerConfig.debug('NetworkDiagnostics', 'Found local IP via getAddressesByName:', ip)
-                        break
-                      }
-                    }
-                  }
-                }
-              } finally {
-                // 更新结果
-                if (foundLocalIp !== '') {
-                  this.currentState.localIp = foundLocalIp
-                } else {
-                  this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-                }
-                this.checkAllTasksCompleted()
-              }
-            })
-            return  // 异步方式，early return
-          } catch (connError) {
-            LoggerConfig.warn('NetworkDiagnostics', 'getAddressesByName failed:', String(connError))
-          }
+      const ipInfo = wifiManager.getIpInfo()
+      if (ipInfo && ipInfo.ipAddress && ipInfo.ipAddress !== 0) {
+        const ip: string = ((ipInfo.ipAddress >>> 24) & 0xFF) + '.' +
+                   ((ipInfo.ipAddress >> 16) & 0xFF) + '.' +
+                   ((ipInfo.ipAddress >> 8) & 0xFF) + '.' +
+                   (ipInfo.ipAddress & 0xFF)
+        if (ip !== '0.0.0.0') {
+          this.currentState.localIp = ip
+          logInfo('Local IP from wifiManager: ' + ip)
+          return
         }
       }
-
-      // 同步方式更新结果
-      if (foundLocalIp !== '') {
-        this.currentState.localIp = foundLocalIp
-      } else {
-        this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      }
-      this.checkAllTasksCompleted()
-
-    } catch (error) {
-      LoggerConfig.error('NetworkDiagnostics', 'fetchLocalIp error:', String(error))
-      this.currentState.localIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      this.checkAllTasksCompleted()
+    } catch (e) {
+      const err: Error = e as Error
+      logWarn('wifiManager.getIpInfo failed: ' + err.message)
     }
+    this.currentState.localIp = '--'
+    logInfo('fetchLocalIp completed: --')
   }
 
-  // 获取网关地址 - 使用 getConnectionProperties 回调模式（动态提取真实网关和DNS）
+  // 获取网关和DNS - 使用同步API
   private fetchGateway(): void {
     try {
-      this.pendingTasks++
-      const netHandle: connection.NetHandle | null = connection.getDefaultNetSync()
-      if (netHandle) {
-        connection.getConnectionProperties(
-          netHandle,
-          (err: BusinessError, data: connection.ConnectionProperties) => {
-            if (err) {
-              LoggerConfig.warn('NetworkDiagnostics', 'getConnectionProperties error:', err.message)
-              this.currentState.gateway = DiagnosticsConfig.DEFAULT_GATEWAY
-              this.currentState.dns = DnsConfig.ALI_DNS
-            } else {
-              // 从 routes 数组中提取真实网关（使用原生 RouteInfo 类型）
-              let gwIp: string = ''
-              let dnsServers: string[] = []
-
-              // 获取真实网关
-              if (data.routes && data.routes.length > 0) {
-                for (let r = 0; r < data.routes.length; r++) {
-                  const route = data.routes[r]
-                  if (route.isDefaultRoute && route.hasGateway && route.gateway) {
-                    gwIp = route.gateway.address || ''
-                    if (gwIp !== '') {
-                      LoggerConfig.debug('NetworkDiagnostics', 'Gateway from route:', gwIp)
-                      break
-                    }
-                  }
+      const netHandle = connection.getDefaultNetSync()
+      if (netHandle && netHandle.netId !== 0) {
+        // 使用同步方法获取连接属性
+        const connectionProperties: connection.ConnectionProperties = connection.getConnectionPropertiesSync(netHandle)
+        if (connectionProperties) {
+          // 获取网关
+          let gateway = ''
+          if (connectionProperties.routes) {
+            for (let i = 0; i < connectionProperties.routes.length; i++) {
+              const route = connectionProperties.routes[i]
+              if (route && route.isDefaultRoute && route.hasGateway && route.gateway) {
+                const gatewayAddr: connection.NetAddress = route.gateway as connection.NetAddress
+                gateway = gatewayAddr.address || ''
+                if (gateway) {
+                  break
                 }
-              }
-
-              // 获取真实DNS服务器列表
-              if (data.dnses && data.dnses.length > 0) {
-                for (let d = 0; d < data.dnses.length; d++) {
-                  const dns = data.dnses[d]
-                  if (dns && dns.address) {
-                    const dnsIp = dns.address
-                    // 过滤IPv6和本地地址
-                    if (!dnsIp.startsWith('::') && dnsIp !== '0.0.0.0' && dnsIp !== '127.0.0.1') {
-                      dnsServers.push(dnsIp)
-                      LoggerConfig.debug('NetworkDiagnostics', 'Found DNS server:', dnsIp)
-                    }
-                  }
-                }
-              }
-
-              // 更新网关
-              if (gwIp === '') {
-                LoggerConfig.warn('NetworkDiagnostics', 'Could not get real gateway')
-                gwIp = DiagnosticsConfig.DEFAULT_GATEWAY
-              }
-              this.currentState.gateway = gwIp
-
-              // 更新DNS（使用第一个真实DNS，没有则使用配置的DNS）
-              if (dnsServers.length > 0) {
-                this.currentState.dns = dnsServers[0]
-              } else {
-                this.currentState.dns = DnsConfig.ALI_DNS
-                LoggerConfig.debug('NetworkDiagnostics', 'Using configured DNS as fallback')
               }
             }
-            this.checkAllTasksCompleted()
           }
-        )
-      } else {
-        this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-        this.currentState.dns = DnsConfig.ALI_DNS
-        this.checkAllTasksCompleted()
-      }
-    } catch (error) {
-      LoggerConfig.error('NetworkDiagnostics', 'fetchGateway error:', String(error))
-      this.currentState.gateway = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      this.currentState.dns = DnsConfig.ALI_DNS
-      this.checkAllTasksCompleted()
-    }
-  }
-
-  // 异步获取公网IP - 使用 http.request 回调模式
-  private fetchPublicIp(): void {
-    let httpRequest: http.HttpRequest | null = null
-    try {
-      this.pendingTasks++
-      httpRequest = http.createHttp()
-      const pubIpOptions: PublicIpRequestOptions = {
-        method: http.RequestMethod.GET,
-        connectTimeout: PublicIpConfig.TIMEOUT_MS,
-        readTimeout: PublicIpConfig.TIMEOUT_MS
-      }
-      httpRequest.request(
-        PublicIpConfig.PRIMARY_API,
-        pubIpOptions,
-        (err: BusinessError, data: http.HttpResponse) => {
-          try {
-            if (!err && data.responseCode === 200 && data.result) {
-              const resultStr: string = data.result.toString()
-              try {
-                const ipData: PublicIpResponse = JSON.parse(resultStr)
-                if (ipData && ipData.ip) {
-                  LoggerConfig.debug('NetworkDiagnostics', 'Public IP:', ipData.ip)
-                  this.currentState.publicIp = ipData.ip
-                } else {
-                  this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-                }
-              } catch (parseError) {
-                LoggerConfig.warn('NetworkDiagnostics', 'parse publicIp error:', String(parseError))
-                this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
+          // 获取DNS
+          let dns = ''
+          if (connectionProperties.dnses) {
+            for (let i = 0; i < connectionProperties.dnses.length; i++) {
+              const d = connectionProperties.dnses[i]
+              if (d && d.address && !d.address.startsWith('::') && d.address !== '0.0.0.0') {
+                dns = d.address
+                break
               }
-            } else {
-              let errMsg: string = 'Unknown error'
-              if (err) {
-                errMsg = err.message
-              }
-              LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', errMsg)
-              this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
             }
-          } finally {
-            httpRequest?.destroy()
           }
-          this.checkAllTasksCompleted()
+
+          this.currentState.gateway = gateway || '192.168.1.1'
+          this.currentState.dns = dns || '223.5.5.5'
+          logInfo('Gateway: ' + this.currentState.gateway + ', DNS: ' + this.currentState.dns)
         }
-      )
-    } catch (error) {
-      httpRequest?.destroy()
-      LoggerConfig.error('NetworkDiagnostics', 'fetchPublicIp error:', String(error))
-      this.currentState.publicIp = DiagnosticsConfig.UNAVAILABLE_PLACEHOLDER
-      this.pendingTasks++
-      this.checkAllTasksCompleted()
+        this.notifyComplete()
+        return
+      }
+    } catch (e) {
+      const err: Error = e as Error
+      logWarn('fetchGateway error: ' + err.message)
     }
+
+    this.currentState.gateway = '192.168.1.1'
+    this.currentState.dns = '223.5.5.5'
+    this.notifyComplete()
   }
 
-  // 同步测试延迟（简化版）
-  testLatency(): number {
-    return 12
+  // 获取公网IP - 使用Promise版本，更可靠
+  private async fetchPublicIp(): Promise<void> {
+    const apis = [
+      'https://myip.ipip.net',
+      'https://ip.3322.net',
+      'https://pv.sohu.com/ipimsg',
+      'https://api.ipify.org?format=text',
+      'https://checkip.amazonaws.com'
+    ]
+
+    for (let i = 0; i < apis.length; i++) {
+      try {
+        const request = http.createHttp()
+        const result: http.HttpResponse = await request.request(apis[i], {
+          method: http.RequestMethod.GET,
+          connectTimeout: 3000,
+          readTimeout: 3000
+        } as http.HttpRequestOptions)
+        
+        request.destroy()
+        
+        if (result.responseCode === 200 && result.result) {
+          const ip: string = this.extractIp(result.result.toString())
+          if (ip) {
+            this.currentState.publicIp = ip
+            logInfo('Public IP: ' + ip)
+            this.notifyComplete()
+            return
+          }
+        }
+        logWarn('API ' + apis[i] + ' failed, trying next...')
+      } catch (e) {
+        const err: Error = e as Error
+        logWarn('API ' + apis[i] + ' error: ' + err.message)
+      }
+    }
+
+    logWarn('All public IP APIs failed')
+    this.currentState.publicIp = '--'
+    this.notifyComplete()
+  }
+
+  private notifyComplete(): void {
+    this.currentState.isTesting = false
+    logInfo('Diagnostics complete: localIp=' + this.currentState.localIp +
+                 ', publicIp=' + this.currentState.publicIp +
+                 ', gateway=' + this.currentState.gateway +
+                 ', dns=' + this.currentState.dns)
+
+    if (this.onComplete) {
+      const result = this.currentState
+      this.onComplete({
+        latency: result.latency,
+        jitter: result.jitter,
+        uploadSpeed: result.uploadSpeed,
+        downloadSpeed: result.downloadSpeed,
+        localIp: result.localIp,
+        publicIp: result.publicIp,
+        gateway: result.gateway,
+        dns: result.dns,
+        isTesting: result.isTesting,
+        error: result.error
+      })
+    }
   }
 }
 
-// 导出单例实例
 export const networkDiagnostics: NetworkDiagnostics = NetworkDiagnostics.getInstance()

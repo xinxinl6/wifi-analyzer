@@ -6,9 +6,9 @@
         "type": "HarmonyOS",
         "material": {
           "storeFile": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-release.p12",
-          "storePassword": "0000001A3E89FF8C5344C3B72A653BF5C77258A7EC70E597F706D841939D75122366A5446C35D8FF735B",
+          "storePassword": "0000001AF65A04E2BC7FD8B259110FFBDCE2D38BFBF5E93DECADD57D4D7347E17BAD4EFE6AC3112FA0A4",
           "keyAlias": "releaseKey",
-          "keyPassword": "0000001ADB8AD755A6C2864B0D0F2C281014E86E319E73F8BA611CDF2279B454402CE9DFD37C779303AB",
+          "keyPassword": "0000001AB7531A14F0AE00CD273988AC0E28105A9697B1E700AC26A468653A533DA58A7BB7085FA91315",
           "signAlg": "SHA256withECDSA",
           "profile": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-profileRelease.p7b",
           "certpath": "C:/Users/xinxin/wifi-analyzer/Key/wifi-analyzer-release.cer"

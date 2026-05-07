@@ -78,3 +78,4 @@ previews/
 
 # 系统文件
 .workbuddy/
+.cache/

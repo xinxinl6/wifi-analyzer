@@ -46,13 +46,17 @@ import {
   RADIUS_CARD,
   RADIUS_BUTTON
 } from '@wifi-analyzer/design-system'
-import { SharedWifiState, NetworkDiagnosticsResult, defaultDiagnosticsResult, networkDiagnostics, RouterManager, RouteName } from '@wifi-analyzer/core'
+import { SharedWifiState, NetworkDiagnosticsResult, defaultDiagnosticsResult, networkDiagnostics, RouterManager, RouteName, WifiDataManager } from '@wifi-analyzer/core'
 import { AuroraSignalIndicator } from './AuroraGlassComponents'
 
 // AI 功能相关
 import { getAIAnalysisUrl, buildNetworkQuery, WifiNetworkInfo } from '../utils/XiaoYiHelper'
 import { promptAction } from '@kit.ArkUI'
 import web_webview from '@ohos.web.webview'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+// 日志 domain
+const DOMAIN = 0x0000
 
 // ============================================
 // Aurora 连接状态卡片（极光渐变版）
@@ -305,9 +309,56 @@ export struct AuroraNetworkGrid {
     return this.isDarkMode ? 1 : 0
   }
 
+  // 轮询定时器ID
+  private pollingTimerId: number = -1
+
   aboutToAppear(): void {
-    networkDiagnostics.loadDiagnostics()
-    this.diagnostics = networkDiagnostics.getCurrentResult()
+    // 获取初始状态
+    const initialResult = networkDiagnostics.getCurrentResult()
+    this.diagnostics.localIp = initialResult.localIp
+    this.diagnostics.publicIp = initialResult.publicIp
+    this.diagnostics.gateway = initialResult.gateway
+    this.diagnostics.dns = initialResult.dns
+    this.diagnostics.isTesting = initialResult.isTesting
+    
+    // 发起诊断
+    networkDiagnostics.startDiagnostics((result: NetworkDiagnosticsResult) => {
+      // 诊断完成，更新UI
+      this.diagnostics.localIp = result.localIp
+      this.diagnostics.publicIp = result.publicIp
+      this.diagnostics.gateway = result.gateway
+      this.diagnostics.dns = result.dns
+      this.diagnostics.isTesting = result.isTesting
+      
+      // 停止轮询
+      if (this.pollingTimerId !== -1) {
+        clearInterval(this.pollingTimerId)
+        this.pollingTimerId = -1
+      }
+    })
+    
+    // 启动轮询，确保UI能更新
+    this.pollingTimerId = setInterval(() => {
+      const result = networkDiagnostics.getCurrentResult()
+      this.diagnostics.localIp = result.localIp
+      this.diagnostics.publicIp = result.publicIp
+      this.diagnostics.gateway = result.gateway
+      this.diagnostics.dns = result.dns
+      this.diagnostics.isTesting = result.isTesting
+      
+      // 如果诊断完成，停止轮询
+      if (!result.isTesting && this.pollingTimerId !== -1) {
+        clearInterval(this.pollingTimerId)
+        this.pollingTimerId = -1
+      }
+    }, 300)
+  }
+  
+  aboutToDisappear(): void {
+    if (this.pollingTimerId !== -1) {
+      clearInterval(this.pollingTimerId)
+      this.pollingTimerId = -1
+    }
   }
 
   @Builder
@@ -634,6 +685,13 @@ export struct AuroraDashboard {
   @Consume('wifiState') wifiState: SharedWifiState
   @Prop isDarkMode: boolean = false
 
+  // 下拉刷新状态
+  @State isRefreshing: boolean = false
+  @State private refreshOffset: number = 0
+
+  // WiFi 数据管理器
+  private dataManager: WifiDataManager = WifiDataManager.getInstance()
+
   // AI 分析面板状态
   @State private showAIAnalysis: boolean = false
   @State private aiWebViewUrl: string = ''
@@ -641,6 +699,23 @@ export struct AuroraDashboard {
 
   // AI 分析面板控制器
   private aiAnalysisController: web_webview.WebviewController = new web_webview.WebviewController()
+
+  // 下拉刷新回调
+  private async onRefresh(): Promise<void> {
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[AuroraDashboard] Refreshing WiFi data...')
+    
+    // 触发 WiFi 扫描
+    this.dataManager.scanAndUpdate(
+      this.wifiState,
+      (newState: SharedWifiState) => {
+        this.wifiState = newState
+        AppStorage.setOrCreate('wifiState', newState)
+        // 刷新完成
+        this.isRefreshing = false
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[AuroraDashboard] Refresh completed')
+      }
+    )
+  }
 
   // 打开 AI 分析面板
   private openAIAnalysis(): void {
@@ -758,31 +833,41 @@ export struct AuroraDashboard {
   build() {
     Stack() {
       Column() {
-        Scroll() {
-          Column({ space: 16 }) {
-            // 连接状态卡片
-            AuroraConnectionCard({ isDarkMode: this.isDarkMode })
+        // 下拉刷新容器
+        Refresh({
+          refreshing: this.isRefreshing
+        }) {
+          Scroll() {
+            Column({ space: 16 }) {
+              // 连接状态卡片
+              AuroraConnectionCard({ isDarkMode: this.isDarkMode })
 
-            // 网络信息网格
-            AuroraNetworkGrid({
-              isDarkMode: this.isDarkMode,
-              onAIAnalysisClick: () => this.openAIAnalysis()
-            })
+              // 网络信息网格
+              AuroraNetworkGrid({
+                isDarkMode: this.isDarkMode,
+                onAIAnalysisClick: () => this.openAIAnalysis()
+              })
 
-            // 快速工具网格
-            AuroraToolsGrid({ isDarkMode: this.isDarkMode })
+              // 快速工具网格
+              AuroraToolsGrid({ isDarkMode: this.isDarkMode })
 
-            // 底部安全区
-            Row()
-              .height(100)
+              // 底部安全区
+              Row()
+                .height(100)
+            }
+            .padding({ left: 16, right: 16, top: 16, bottom: 16 })
+            .width('100%')
           }
-          .padding({ left: 16, right: 16, top: 16, bottom: 16 })
+          .scrollBar(BarState.Off)
+          .edgeEffect(EdgeEffect.Spring)
           .width('100%')
+          .layoutWeight(1)
         }
-        .scrollBar(BarState.Off)
-        .edgeEffect(EdgeEffect.Spring)
+        .onRefreshing(() => {
+          this.onRefresh()
+        })
         .width('100%')
-        .layoutWeight(1)
+        .height('100%')
       }
       .width('100%')
       .height('100%')
