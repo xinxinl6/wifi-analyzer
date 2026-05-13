@@ -36,7 +36,7 @@ interface StandardDisplayItem {
 
 @Component
 export struct PoeCalcPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // PoE 标准选择
   @State selectedStandard: number = 1 // 默认 PoE+

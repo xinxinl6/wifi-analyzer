@@ -33,7 +33,7 @@ interface QuickTargetItem {
 
 @Component
 export struct TraceroutePage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State detectedGateway: string = ''
   @State inputText: string = ''
   @State viewMode: string = 'idle'

@@ -23,7 +23,7 @@ import promptAction from '@ohos.promptAction'
 
 @Component
 export struct MacLookupPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State inputText: string = ''
   @State viewMode: string = 'idle'
   @State result: MacLookupResult = {

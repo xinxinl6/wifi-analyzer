@@ -66,7 +66,7 @@ export function getAIAnalysisUrl(query: string): string {
   const searchQuery = encodeURIComponent(query + ' WiFi网络优化建议')
   // 使用百度移动版，界面更简洁，没有麦克风图标
   const baiduUrl = 'https://m.baidu.com/s?word=' + searchQuery
-  logInfo('获取AI分析URL: ' + baiduUrl)
+  logInfo('AI分析URL构建完成')
   return baiduUrl
 }
 

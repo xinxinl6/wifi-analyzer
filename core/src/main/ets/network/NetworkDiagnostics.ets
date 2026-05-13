@@ -115,11 +115,11 @@ export class NetworkDiagnostics {
                    ((ipInfo.ipAddress >> 16) & 0xFF) + '.' +
                    ((ipInfo.ipAddress >> 8) & 0xFF) + '.' +
                    (ipInfo.ipAddress & 0xFF)
-        if (ip !== '0.0.0.0') {
-          this.currentState.localIp = ip
-          logInfo('Local IP from wifiManager: ' + ip)
-          return
-        }
+          if (ip !== '0.0.0.0') {
+            this.currentState.localIp = ip
+            logInfo('Local IP fetched successfully')
+            return
+          }
       }
     } catch (e) {
       const err: Error = e as Error
@@ -163,9 +163,10 @@ export class NetworkDiagnostics {
             }
           }
 
-          this.currentState.gateway = gateway || '192.168.1.1'
-          this.currentState.dns = dns || '223.5.5.5'
-          logInfo('Gateway: ' + this.currentState.gateway + ', DNS: ' + this.currentState.dns)
+          this.currentState.gateway = gateway || '--'
+          this.currentState.dns = dns || '--'
+          // 脱敏：不在日志中输出可能的敏感网络信息
+          logInfo('Gateway and DNS fetched successfully')
         }
         this.notifyComplete()
         return
@@ -175,8 +176,8 @@ export class NetworkDiagnostics {
       logWarn('fetchGateway error: ' + err.message)
     }
 
-    this.currentState.gateway = '192.168.1.1'
-    this.currentState.dns = '223.5.5.5'
+    this.currentState.gateway = '--'
+    this.currentState.dns = '--'
     this.notifyComplete()
   }
 
@@ -224,10 +225,7 @@ export class NetworkDiagnostics {
 
   private notifyComplete(): void {
     this.currentState.isTesting = false
-    logInfo('Diagnostics complete: localIp=' + this.currentState.localIp +
-                 ', publicIp=' + this.currentState.publicIp +
-                 ', gateway=' + this.currentState.gateway +
-                 ', dns=' + this.currentState.dns)
+    logInfo('Diagnostics complete')
 
     if (this.onComplete) {
       const result = this.currentState

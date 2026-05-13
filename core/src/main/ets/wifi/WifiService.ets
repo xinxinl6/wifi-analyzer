@@ -52,7 +52,8 @@ export interface IWifiService {
 
 // 基于 HarmonyOS wifiManager API 的实现（使用 API 10+ 新同步方法）
 // getScanInfoList (API 10+) / getLinkedInfoSync (API 18+) 替代已废弃的异步版本
-export class DeprecatedWifiService implements IWifiService {
+// 注意：startScan() 在未来版本中可能需要迁移到新 API
+export class ModernWifiService implements IWifiService {
   async startScan(): Promise<void> {
     try {
       const scanResult = await wifiManager.startScan()
@@ -121,7 +122,7 @@ export class WifiServiceFactory {
 
   static getService(): IWifiService {
     if (!WifiServiceFactory.instance) {
-      WifiServiceFactory.instance = new DeprecatedWifiService()
+      WifiServiceFactory.instance = new ModernWifiService()
     }
     return WifiServiceFactory.instance
   }

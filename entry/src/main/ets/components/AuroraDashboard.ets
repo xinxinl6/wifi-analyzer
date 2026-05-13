@@ -65,7 +65,7 @@ const DOMAIN = 0x0000
 @Component
 export struct AuroraConnectionCard {
   @Consume('wifiState') wifiState: SharedWifiState
-  @Prop isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   @State private connected: boolean = false
   @State private cardScale: number = 1.0
@@ -264,7 +264,7 @@ export struct AuroraConnectionCard {
 @Component
 export struct AuroraNetworkGrid {
   @Consume('wifiState') wifiState: SharedWifiState
-  @Prop isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State diagnostics: NetworkDiagnosticsResult = defaultDiagnosticsResult
 
   // AI 分析点击回调（不使用 @Prop 装饰器，直接作为普通属性传递）
@@ -339,17 +339,26 @@ export struct AuroraNetworkGrid {
     
     // 启动轮询，确保UI能更新
     this.pollingTimerId = setInterval(() => {
-      const result = networkDiagnostics.getCurrentResult()
-      this.diagnostics.localIp = result.localIp
-      this.diagnostics.publicIp = result.publicIp
-      this.diagnostics.gateway = result.gateway
-      this.diagnostics.dns = result.dns
-      this.diagnostics.isTesting = result.isTesting
+      // 安全检查：如果组件已销毁，停止轮询
+      try {
+        const result = networkDiagnostics.getCurrentResult()
+        this.diagnostics.localIp = result.localIp
+        this.diagnostics.publicIp = result.publicIp
+        this.diagnostics.gateway = result.gateway
+        this.diagnostics.dns = result.dns
+        this.diagnostics.isTesting = result.isTesting
       
-      // 如果诊断完成，停止轮询
-      if (!result.isTesting && this.pollingTimerId !== -1) {
-        clearInterval(this.pollingTimerId)
-        this.pollingTimerId = -1
+        // 如果诊断完成，停止轮询
+        if (!result.isTesting && this.pollingTimerId !== -1) {
+          clearInterval(this.pollingTimerId)
+          this.pollingTimerId = -1
+        }
+      } catch (e) {
+        // 组件可能已销毁，停止轮询
+        if (this.pollingTimerId !== -1) {
+          clearInterval(this.pollingTimerId)
+          this.pollingTimerId = -1
+        }
       }
     }, 300)
   }
@@ -466,7 +475,7 @@ export struct AuroraNetworkGrid {
 
 @Component
 export struct AuroraToolsGrid {
-  @Prop isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State private toolScale: number = 1.0
 
   // 根据模式获取文字颜色
@@ -683,7 +692,7 @@ export struct AuroraBackground {
 @Component
 export struct AuroraDashboard {
   @Consume('wifiState') wifiState: SharedWifiState
-  @Prop isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // 下拉刷新状态
   @State isRefreshing: boolean = false
@@ -717,6 +726,22 @@ export struct AuroraDashboard {
     )
   }
 
+  // URL 白名单验证（仅允许百度搜索）
+  private isUrlAllowed(url: string): boolean {
+    try {
+      const allowedDomains = ['https://m.baidu.com/', 'https://www.baidu.com/']
+      for (let i = 0; i < allowedDomains.length; i++) {
+        if (url.startsWith(allowedDomains[i])) {
+          return true
+        }
+      }
+      hilog.warn(DOMAIN, 'testTag', '[AuroraDashboard] Blocked URL: ' + url)
+      return false
+    } catch (e) {
+      return false
+    }
+  }
+
   // 打开 AI 分析面板
   private openAIAnalysis(): void {
     // 构建网络分析查询
@@ -730,6 +755,11 @@ export struct AuroraDashboard {
 
     // 直接获取搜索URL，不尝试启动小艺（避免系统弹窗）
     const url = getAIAnalysisUrl(query)
+    // URL 白名单验证
+    if (!this.isUrlAllowed(url)) {
+      promptAction.showToast({ message: '不支持的URL地址', duration: 2000 })
+      return
+    }
     this.aiWebViewUrl = url
     this.showAIAnalysis = true
     this.aiLoading = true
@@ -806,11 +836,19 @@ export struct AuroraDashboard {
             .width('100%')
           }
 
-          // WebView 内容
+          // WebView 内容（添加安全配置）
           Web({ src: this.aiWebViewUrl, controller: this.aiAnalysisController })
             .width('100%')
             .layoutWeight(1)
-            .onPageBegin(() => {
+            .multiWindowAccess(false)
+            .fileAccess(false)
+            .onPageBegin((event: OnPageBeginEvent) => {
+              // 二次验证：页面开始加载时再次检查 URL
+              if (event && event.url && !this.isUrlAllowed(event.url)) {
+                hilog.warn(DOMAIN, 'testTag', '[AuroraDashboard] Blocked WebView loading: ' + event.url)
+                promptAction.showToast({ message: '已阻止不安全链接', duration: 2000 })
+                return
+              }
               this.aiLoading = true
             })
             .onPageEnd(() => {
@@ -840,16 +878,28 @@ export struct AuroraDashboard {
           Scroll() {
             Column({ space: 16 }) {
               // 连接状态卡片
-              AuroraConnectionCard({ isDarkMode: this.isDarkMode })
+              AuroraConnectionCard()
+
+              // Fallback 数据提示
+              if (this.wifiState.usingFallbackData) {
+                Row({ space: 8 }) {
+                  Image($r('app.media.ic_warning'))
+                    .width(16)
+                    .height(16)
+                  Text('当前为模拟数据，请在真机上测试完整功能')
+                    .fontSize(12)
+                    .fontColor(this.isDarkMode ? '#FFA500' : '#FF8C00')
+                }
+                .padding({ left: 16, right: 16 })
+              }
 
               // 网络信息网格
               AuroraNetworkGrid({
-                isDarkMode: this.isDarkMode,
                 onAIAnalysisClick: () => this.openAIAnalysis()
               })
 
               // 快速工具网格
-              AuroraToolsGrid({ isDarkMode: this.isDarkMode })
+              AuroraToolsGrid()
 
               // 底部安全区
               Row()

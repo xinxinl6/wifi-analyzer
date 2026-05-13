@@ -15,7 +15,7 @@ const DOMAIN = 0x0000
 
 @Component
 export struct ContentPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   /** 页面标题 */
   private title: string = ''

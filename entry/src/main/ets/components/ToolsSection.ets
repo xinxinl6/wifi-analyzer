@@ -12,6 +12,7 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY, COLOR_SU
   adaptiveTextSecondary,
   adaptiveTextTertiary,
   adaptiveCardBg,
+  adaptiveDivider,
   COLOR_TEXT_GLASS_PRIMARY,
   COLOR_TEXT_GLASS_SECONDARY,
   COLOR_TEXT_GLASS_TERTIARY,
@@ -44,7 +45,7 @@ const ADVANCED_TOOLS: ToolItem[] = [
 
 @Component
 export struct ToolsSection {
-  @Consume('isDarkMode') isDarkMode: boolean
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   build() {
     Stack() {
       // ===== Aurora 天蓝渐变背景 =====
@@ -223,7 +224,7 @@ export struct ToolsSection {
             // 分割线（最后一项不显示）
             if (index < items.length - 1) {
               Divider()
-                .color(COLOR_DIVIDER_WEAK)
+                .color(adaptiveDivider(this.isDarkMode))
                 .strokeWidth(0.6)
                 .margin({ left: 62 })
             }

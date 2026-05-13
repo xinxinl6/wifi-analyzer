@@ -24,7 +24,7 @@ import { RouterManager } from '@wifi-analyzer/core'
 
 @Component
 export struct WolPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // UI 状态：'idle' | 'sending'
   @State viewMode: string = 'idle'

@@ -18,6 +18,7 @@ export struct ChannelPage {
     currentFilter: 'all',
     isLoaded: false,
     scanRequestCount: 0,
+    usingFallbackData: false,
     error: ''
   }
   @StorageLink('isDarkMode') isDarkMode: boolean = false

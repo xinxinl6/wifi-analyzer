@@ -15,6 +15,7 @@ export class WifiScanResult {
   connectedSignal: number = -100
   isScanning: boolean = false
   error: string = '' // 错误信息，空字符串表示无错误
+  usingFallbackData: boolean = false // 是否正在使用 fallback 模拟数据
 }
 
 // 频率到信道映射
@@ -94,7 +95,8 @@ export class WifiScanner {
       connectedBssid: '',
       connectedSignal: -100,
       isScanning: true,
-      error: ''
+      error: '',
+      usingFallbackData: false
     }
 
     try {
@@ -350,11 +352,12 @@ export class WifiScanner {
     fallbackList.push(
       { ssid: '<隐藏网络>', bssid: '', signal: -51, freq: 2.4, channel: 6, security: 'EAP', isConnected: false, bandwidth: '20MHz' },
       { ssid: '<隐藏网络>', bssid: '', signal: -48, freq: 2.4, channel: 1, security: 'EAP', isConnected: false, bandwidth: '20MHz' },
-      { ssid: 'xinxin', bssid: '', signal: -46, freq: 2.4, channel: 6, security: 'EAP', isConnected: false, bandwidth: '20MHz' },
-      { ssid: 'ZZB', bssid: '', signal: -43, freq: 2.4, channel: 11, security: 'EAP', isConnected: false, bandwidth: '20MHz' },
-      { ssid: 'aWiFi', bssid: '', signal: -41, freq: 5.0, channel: 36, security: 'OPEN', isConnected: false, bandwidth: '40MHz' }
+      { ssid: 'Sample_Network_1', bssid: '', signal: -46, freq: 2.4, channel: 6, security: 'WPA2', isConnected: false, bandwidth: '20MHz' },
+      { ssid: 'Sample_Network_2', bssid: '', signal: -43, freq: 2.4, channel: 11, security: 'WPA2', isConnected: false, bandwidth: '20MHz' },
+      { ssid: 'Sample_Network_3', bssid: '', signal: -41, freq: 5.0, channel: 36, security: 'OPEN', isConnected: false, bandwidth: '40MHz' }
     )
 
+    result.usingFallbackData = true
     result.wifiList = fallbackList
     return result
   }

@@ -1,4 +1,4 @@
-import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, ConfigurationConstant, UIAbility, Want, Configuration } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { RouterManager } from '@wifi-analyzer/core';
@@ -12,7 +12,42 @@ export default class EntryAbility extends UIAbility {
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+    // 初始化 isDarkMode 到 AppStorage
+    const colorMode = this.context.config?.colorMode
+    const isDark = (colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
+    AppStorage.setOrCreate('isDarkMode', isDark)
+    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate, isDarkMode=' + isDark);
+  }
+
+  // 监听系统深色/浅色模式切换 — 必须在 UIAbility 中实现
+  onConfigurationUpdate(newConfig: Configuration): void {
+    const isDark = (newConfig.colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
+    AppStorage.setOrCreate('isDarkMode', isDark)
+    hilog.info(DOMAIN, 'testTag', '%{public}s', 'onConfigurationUpdate: isDarkMode=' + isDark)
+    // 同步更新状态栏文字颜色
+    this.updateStatusBarColor(isDark)
+  }
+
+  // 更新状态栏文字颜色
+  private updateStatusBarColor(isDark: boolean): void {
+    try {
+      const statusBarColor = isDark ? '0xFFFFFF' : '0x000000'
+      // 获取当前窗口并更新状态栏颜色
+      const windowStage = AppStorage.get<window.WindowStage>('windowStage')
+      if (windowStage) {
+        windowStage.getMainWindow().then((mainWindow) => {
+          mainWindow.setWindowSystemBarProperties({
+            statusBarContentColor: statusBarColor,
+          }).catch((err: Error) => {
+            hilog.warn(DOMAIN, 'testTag', 'updateStatusBarColor warning: %{public}s', err.message);
+          });
+        }).catch((err: Error) => {
+          hilog.error(DOMAIN, 'testTag', 'Failed to get main window: %{public}s', err.message);
+        });
+      }
+    } catch (err) {
+      hilog.error(DOMAIN, 'testTag', 'updateStatusBarColor error: %{public}s', JSON.stringify(err));
+    }
   }
 
   onDestroy(): void {
@@ -25,6 +60,8 @@ export default class EntryAbility extends UIAbility {
 
     // 将 UIAbilityContext 存入 AppStorage，供 Page 组件使用
     AppStorage.set('abilityContext', this.context);
+    // 保存 windowStage 供后续更新状态栏颜色使用
+    AppStorage.set('windowStage', windowStage);
     hilog.info(DOMAIN, 'testTag', 'Context stored in AppStorage');
 
     // 窗口配置：全屏模式 + 自定义安全区处理
@@ -42,9 +79,11 @@ export default class EntryAbility extends UIAbility {
         // 全屏模式：允许内容画到状态栏区域
         mainWindow.setWindowLayoutFullScreen(true);
 
-        // 设置系统栏属性（状态栏）
+        // 根据当前颜色模式设置状态栏文字颜色
+        const isDark = AppStorage.get<boolean>('isDarkMode') || false
+        const statusBarColor = isDark ? '0xFFFFFF' : '0x000000'
         mainWindow.setWindowSystemBarProperties({
-          statusBarContentColor: '0xFFFFFF',
+          statusBarContentColor: statusBarColor,
         }).catch((err: Error) => {
           hilog.warn(DOMAIN, 'testTag', 'setWindowSystemBarProperties warning: %{public}s', err.message);
         });

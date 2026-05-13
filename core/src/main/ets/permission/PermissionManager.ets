@@ -8,10 +8,13 @@ import { hilog } from '@kit.PerformanceAnalysisKit'
 
 const DOMAIN = 0x0000
 
-// 需要的权限列表 — 使用 Permissions 类型
+// 需要的权限列表 — 使用 Permissions 类型（与 module.json5 中声明的 6 个权限保持一致）
 const REQUIRED_PERMISSIONS: Permissions[] = [
+  'ohos.permission.GET_WIFI_INFO' as Permissions,
   'ohos.permission.LOCATION' as Permissions,
   'ohos.permission.APPROXIMATELY_LOCATION' as Permissions,
+  'ohos.permission.INTERNET' as Permissions,
+  'ohos.permission.GET_NETWORK_INFO' as Permissions,
 ]
 
 export class PermissionManager {

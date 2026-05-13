@@ -424,7 +424,7 @@ export struct AuroraSignalIndicator {
             .borderRadius(2)
             .backgroundColor(barIndex <= this.getBarCount()
               ? this.getBarColor()
-              : 'rgba(255,255,255,0.2)')
+              : 'rgba(148,163,184,0.3)')
         })
       }
 

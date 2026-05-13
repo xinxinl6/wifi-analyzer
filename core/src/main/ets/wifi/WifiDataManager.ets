@@ -33,6 +33,9 @@ export interface SharedWifiState {
 
   // 错误信息
   error: string | Resource
+
+  // 是否正在使用 fallback 模拟数据
+  usingFallbackData: boolean
 }
 
 export class WifiDataManager {
@@ -61,7 +64,8 @@ export class WifiDataManager {
       currentFilter: 'all',
       isLoaded: false,
       scanRequestCount: 0,
-      error: ''
+      error: '',
+      usingFallbackData: false  // 是否正在使用 fallback 模拟数据
     }
   }
 
@@ -90,8 +94,9 @@ export class WifiDataManager {
         isLoaded: !result.isScanning && (result.wifiList.length > 0 || result.connectedSsid !== ''),
         currentFilter: currentState.currentFilter,
         scanRequestCount: currentState.scanRequestCount,
-        error: result.error || ''
-      }
+      error: result.error || '',
+      usingFallbackData: result.usingFallbackData || false
+    }
 
       // 从已连接WiFi列表项获取频段和信道信息（单次遍历替代两次 find）
       hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiDataManager] Looking for connected item in ' + result.wifiList.length + ' items')

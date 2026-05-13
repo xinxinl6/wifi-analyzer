@@ -34,7 +34,7 @@ interface ResultRowItem {
 
 @Component
 export struct SubnetCalcPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // 输入
   @State inputText: string = '192.168.1.1/24'

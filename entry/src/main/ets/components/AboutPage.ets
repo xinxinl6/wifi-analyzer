@@ -18,7 +18,7 @@ import promptAction from '@ohos.promptAction'
 const PRIVACY_POLICY_HTML: string =
   '<h2>隐私政策</h2>' +
   '<p>更新时间：2026年5月</p>' +
-  '<p>WiFi分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。</p>' +
+  '<p>WlAN-分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。</p>' +
   '<h3>1. 信息收集</h3>' +
   '<p>本应用仅在您主动授权的情况下收集以下信息：</p>' +
   '<ul>' +
@@ -37,7 +37,7 @@ const PRIVACY_POLICY_HTML: string =
 const USER_AGREEMENT_HTML: string =
   '<h2>用户协议</h2>' +
   '<p>更新时间：2026年5月</p>' +
-  '<p>欢迎使用WiFi分析仪。使用本应用即表示您同意以下条款。</p>' +
+  '<p>欢迎使用WlAN-分析仪。使用本应用即表示您同意以下条款。</p>' +
   '<h3>1. 服务说明</h3>' +
   '<p>本应用提供WiFi扫描、网络诊断、信号分析等功能。功能仅限个人学习研究使用。</p>' +
   '<h3>2. 使用规范</h3>' +
@@ -55,7 +55,7 @@ const USER_AGREEMENT_HTML: string =
 
 const FEEDBACK_HTML: string =
   '<h2>意见反馈</h2>' +
-  '<p>感谢您使用WiFi分析仪！</p>' +
+  '<p>感谢您使用WlAN-分析仪！</p>' +
   '<h3>联系方式</h3>' +
   '<ul>' +
   '<li>邮箱：1218478630@qq.com</li>' +
@@ -75,7 +75,7 @@ const FEEDBACK_HTML: string =
 const PRIVACY_TEXT: string =
   '隐私政策\n\n' +
   '更新时间：2026年5月\n\n' +
-  'WiFi分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。\n\n' +
+  'WlAN-分析仪（以下简称"本应用"）尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。\n\n' +
   '1. 信息收集\n' +
   '本应用仅在您主动授权的情况下收集以下信息：\n' +
   '• 位置信息：用于扫描附近的WiFi网络（HarmonyOS系统要求）\n' +
@@ -92,7 +92,7 @@ const PRIVACY_TEXT: string =
 const AGREEMENT_TEXT: string =
   '用户协议\n\n' +
   '更新时间：2026年5月\n\n' +
-  '欢迎使用WiFi分析仪。使用本应用即表示您同意以下条款。\n\n' +
+  '欢迎使用WlAN-分析仪。使用本应用即表示您同意以下条款。\n\n' +
   '1. 服务说明\n' +
   '本应用提供WiFi扫描、网络诊断、信号分析等功能。功能仅限个人学习研究使用。\n\n' +
   '2. 使用规范\n' +
@@ -108,7 +108,7 @@ const AGREEMENT_TEXT: string =
 
 const FEEDBACK_TEXT: string =
   '意见反馈\n\n' +
-  '感谢您使用WiFi分析仪！\n\n' +
+  '感谢您使用WlAN-分析仪！\n\n' +
   '联系方式\n' +
   '• 邮箱：1218478630@qq.com\n' +
   '• GitHub：xinxinl6/wifi-analyzer\n\n' +

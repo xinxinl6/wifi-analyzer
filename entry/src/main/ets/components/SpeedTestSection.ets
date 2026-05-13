@@ -39,7 +39,7 @@ import { common } from '@kit.AbilityKit'
 @Component
 export struct SpeedTestSection {
   // 状态
-  @Consume('isDarkMode') isDarkMode: boolean
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State selectedServerIndex: number = 0
   @State showServerPanel: boolean = false
   @State serverPopupScale: number = 0

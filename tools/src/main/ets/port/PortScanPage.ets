@@ -29,7 +29,7 @@ interface PresetItem {
 
 @Component
 export struct PortScanPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   @State inputText: string = ''
   @State detectedGateway: string = ''
 

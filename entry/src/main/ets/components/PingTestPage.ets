@@ -77,7 +77,7 @@ interface PingTestPageProps {
 // ==================== 组件 ====================
 @Component
 export struct PingTestPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   // 输入验证错误消息
   @State inputError: string = ''
   // 输入 & 网关检测

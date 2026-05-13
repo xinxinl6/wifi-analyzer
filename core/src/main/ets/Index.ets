@@ -7,7 +7,7 @@ export { SpeedTestResult } from './models/SpeedTestResult'
 export { ToolItem } from './models/ToolItem'
 
 // WiFi 服务
-export { IWifiService, WifiScanInfo, WifiLinkedInfo, DeprecatedWifiService, WifiServiceFactory } from './wifi/WifiService'
+export { IWifiService, WifiScanInfo, WifiLinkedInfo, ModernWifiService, WifiServiceFactory } from './wifi/WifiService'
 export { WifiScanner, WifiScanResult } from './wifi/WifiScanner'
 export { WifiDataManager, SharedWifiState } from './wifi/WifiDataManager'
 

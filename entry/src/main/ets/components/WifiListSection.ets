@@ -67,7 +67,7 @@ interface FilterChipConfig {
 @Component
 export struct WifiListSection {
   @Consume('wifiState') wifiState: SharedWifiState
-  @Consume('isDarkMode') isDarkMode: boolean
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   @State localFilter: string = 'all'
   @State private cachedFilteredList: WifiItem[] = []

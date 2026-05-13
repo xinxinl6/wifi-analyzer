@@ -32,7 +32,7 @@ interface RssiLevel {
 
 @Component
 export struct RoamTestPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   // UI 状态：'idle' | 'testing' | 'summary'
   @State viewMode: string = 'idle'
 

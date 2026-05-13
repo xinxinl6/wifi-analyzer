@@ -56,7 +56,7 @@ interface ScanStats {
 
 @Component
 export struct LanScanPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
 
   // UI 状态：'idle' | 'scanning' | 'done' | 'error'
   @State viewMode: string = 'idle'

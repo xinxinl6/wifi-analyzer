@@ -57,11 +57,19 @@ export struct ChannelSection {
     currentFilter: 'all',
     isLoaded: false,
     scanRequestCount: 0,
+    usingFallbackData: false,
     error: ''
   }
 
   // 暗色模式状态
   @StorageLink('isDarkMode') isDarkMode: boolean = false
+
+  // TabBar 显示/隐藏控制（通过 AppStorage 与父组件通信）
+  @StorageLink('tabBarVisible') tabBarVisible: boolean = true
+
+  // 滚动状态追踪
+  private lastScrollOffset: number = 0
+  private scrollThreshold: number = 20  // 滚动阈值，超过此值才触发显示/隐藏
 
   // 当前选中的频段
   @State currentBand: string = '2.4'
@@ -85,6 +93,11 @@ export struct ChannelSection {
   aboutToAppear(): void {
     this.currentBand = '2.4'
     this.recomputeChannelCache()
+  }
+
+  aboutToDisappear(): void {
+    // 离开页面时恢复 TabBar 显示
+    this.tabBarVisible = true
   }
 
   // 获取当前频段简称（Resource）
@@ -308,6 +321,22 @@ export struct ChannelSection {
           .layoutWeight(1)
           .width('100%')
           .height('100%')
+          // 滚动监听：控制 TabBar 显示/隐藏
+          .onScroll((scrollOffset: number, scrollState: ScrollState) => {
+            // 向上滑（内容向上滚动，手指往下滑）→ 显示 TabBar
+            // 向下滑（内容向下滚动，手指往上滑）→ 隐藏 TabBar
+            const delta = scrollOffset - this.lastScrollOffset
+            if (Math.abs(delta) > this.scrollThreshold) {
+              if (delta > 0) {
+                // 向上滑 → 显示 TabBar
+                this.tabBarVisible = true
+              } else {
+                // 向下滑 → 隐藏 TabBar
+                this.tabBarVisible = false
+              }
+              this.lastScrollOffset = scrollOffset
+            }
+          })
 
           // 底部边界渐变遮罩
           Column()
@@ -811,11 +840,11 @@ export struct ChannelSection {
       .width('100%')
       .alignItems(VerticalAlign.Center)
 
-      // 分隔线
+      // 分隔线（最后一项不显示）
       if (item.channel !== this.cachedChannels[this.cachedChannels.length - 1]) {
         Divider()
-          .color(COLOR_DIVIDER_WEAK)
-          .strokeWidth(1)
+          .color(adaptiveDivider(this.isDarkMode))
+          .strokeWidth(0.6)
           .margin({ top: 8 })
       }
     }

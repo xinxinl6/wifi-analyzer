@@ -8,7 +8,7 @@ import { COLOR_TEXT_PRIMARY, COLOR_SURFACE,
 export struct StatusBar {
   build() {
     Row() {
-      Text('WiFi分析仪')
+      Text('WlAN-分析仪')
         .fontSize(FONT_SIZE_4XL)
         .fontWeight(FONT_WEIGHT_BOLD)
         .fontColor(COLOR_TEXT_PRIMARY)

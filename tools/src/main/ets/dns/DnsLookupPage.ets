@@ -34,7 +34,7 @@ interface ServerItem {
 
 @Component
 export struct DnsLookupPage {
-  @Consume isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   // 输入
   @State inputText: string = ''
   @State selectedServerIndex: number = 0

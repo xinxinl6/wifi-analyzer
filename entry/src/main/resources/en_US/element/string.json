@@ -2,7 +2,7 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "WiFi Analyzer"
+      "value": "WlAN-分析仪"
     },
     {
       "name": "EntryAbility_desc",
@@ -10,7 +10,7 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "WiFi Analyzer"
+      "value": "WlAN-分析仪"
     },
     {
       "name": "tab_home",
@@ -1142,7 +1142,7 @@
     },
     {
       "name": "about_wifi_analyzer",
-      "value": "About WiFi Analyzer"
+      "value": "About WlAN-分析仪"
     },
     {
       "name": "version_info",
@@ -2390,7 +2390,7 @@
     },
     {
       "name": "app_name_wifi_analyzer",
-      "value": "WiFi Analyzer"
+      "value": "WlAN-分析仪"
     },
     {
       "name": "version_prefix",
@@ -2406,7 +2406,7 @@
     },
     {
       "name": "copyright",
-      "value": "WiFi Analyzer © 2026  xinxin"
+      "value": "WlAN-分析仪 © 2026  xinxin"
     },
     {
       "name": "ip_geo_title",

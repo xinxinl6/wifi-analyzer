@@ -19,10 +19,6 @@
         "reason": "$string:wifi_permission_reason"
       },
       {
-        "name": "ohos.permission.SET_WIFI_INFO",
-        "reason": "$string:wifi_permission_reason"
-      },
-      {
         "name": "ohos.permission.LOCATION",
         "reason": "$string:location_permission_reason",
         "usedScene": {
@@ -56,7 +52,7 @@
         "label": "$string:EntryAbility_label",
         "startWindowIcon": "$media:layered_image",
         "startWindowBackground": "$color:start_window_background",
-        "exported": true,
+        "exported": false,
         "skills": [
           {
             "entities": [

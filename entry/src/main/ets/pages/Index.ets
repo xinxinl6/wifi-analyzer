@@ -70,12 +70,13 @@ struct Index {
     currentFilter: 'all',
     isLoaded: false,
     scanRequestCount: 0,
+    usingFallbackData: false,
     error: ''
   }
 
   @State permissionGranted: boolean = false
   @State currentIndex: number = 0
-  @Provide('isDarkMode') isDarkMode: boolean = false
+  @StorageLink('isDarkMode') isDarkMode: boolean = false
   // 权限拒绝弹窗控制
   @State showPermissionDeniedDialog: boolean = false
 
@@ -440,7 +441,7 @@ struct Index {
           .margin({ bottom: 12 })
 
         // 提示文字
-        Text('WiFi分析仪需要位置权限才能扫描周围的WiFi网络。\n\n请到「设置 → 应用 → WiFi分析仪 → 权限」中开启「位置信息」权限。')
+        Text('WlAN-分析仪需要位置权限才能扫描周围的WiFi网络。\n\n请到「设置 → 应用 → WlAN-分析仪 → 权限」中开启「位置信息」权限。')
           .fontSize(14)
           .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(30,41,59,0.7)')
           .textAlign(TextAlign.Center)
@@ -508,7 +509,7 @@ struct Index {
       }) {
         TabContent() {
           Column() {
-            AuroraDashboard({ isDarkMode: this.isDarkMode })
+            AuroraDashboard()
           }
           .padding({ top: 32 }) // 避让状态栏高度
         }
