@@ -28,6 +28,7 @@ build_verify*.txt
 backup_*
 icon_preview.html
 *_d.png
+*.bat
 apk_analysis/
 deliverables/
 dns-sample/
