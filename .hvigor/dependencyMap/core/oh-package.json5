@@ -1,1 +1,0 @@
-{"name":"@wifi-analyzer/core","version":"1.0.0","description":"WiFi Analyzer 核心模块 — WiFi服务、扫描器、权限管理、网络诊断、数据模型","main":"src/main/ets/Index.ets","author":"","license":"Apache-2.0"}

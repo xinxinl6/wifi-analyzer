@@ -3,10 +3,12 @@ Key/
 
 # 构建产物
 build/
+.hvigor/
 .entry/
 .cxx/
 .node/
 oh_modules/
+node_modules/
 
 # IDE 文件
 .idea/
