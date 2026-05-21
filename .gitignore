@@ -37,3 +37,7 @@ dns-sample/
 .clangd
 .clang-tidy
 .clang-format
+
+# 工作记录（AI会话上下文，不应提交）
+.workbuddy/
+.gstack/
