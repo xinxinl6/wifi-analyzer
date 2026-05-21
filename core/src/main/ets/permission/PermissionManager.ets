@@ -158,36 +158,78 @@ export class PermissionManager {
   }
 
   // 跳转到应用权限设置页面
+  // 华为审核要求：必须能正确跳转到权限设置，让用户可授权位置信息
+  //
+  // ⚠️ 关键经验：startAbility 对无效 URI 不会抛异常！
+  //    它会"成功"打开一个空白页面。所以不能用 try-catch 判断是否真正成功。
+  //    策略：把最稳定、最不容易白屏的方案放前面。
   static async openAppSettings(context: common.UIAbilityContext): Promise<boolean> {
     try {
       hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Opening app settings...')
-
-      // 获取当前应用的 bundleName
       const bundleName: string = context.abilityInfo.bundleName
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Current app bundleName:' + JSON.stringify(bundleName))
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] bundleName:' + JSON.stringify(bundleName))
 
-      // 方法1：跳转到应用权限设置页面（HarmonyOS 标准方式）
-      // bundleName 和 abilityName 是固定值
-      // uri: 'application_info_entry' 打开应用详情页
-      // parameters.pushParams 指定要打开哪个应用的设置
+      // ════════════════════════════════════════
+      // ① 应用详情页（最稳定）
+      //    用户可在详情页中找到"权限"入口
+      //    uri: application_info_entry 在各版本华为设备上表现最一致
+      // ════════════════════════════════════════
       let want: Want = {
         bundleName: 'com.huawei.hmos.settings',
         abilityName: 'com.huawei.hmos.settings.MainAbility',
         uri: 'application_info_entry',
         parameters: {
-          pushParams: bundleName  // 指定跳转到当前应用的设置页面
+          pushParams: bundleName
         }
       }
 
       try {
         await context.startAbility(want)
-        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Opened app permission settings successfully')
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ✅ Method1 (application_info_entry) accepted')
         return true
       } catch (e) {
-        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] HarmonyOS settings failed:' + JSON.stringify(e))
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Method1 (application_info_entry) rejected:' + JSON.stringify(e))
       }
 
-      // 方法2：尝试 OpenHarmony 通用设置应用
+      // ════════════════════════════════════════
+      // ② 华为设置主页（无 URI，100% 能打开）
+      //    用户手动导航到 应用 → 权限
+      // ════════════════════════════════════════
+      try {
+        want = {
+          bundleName: 'com.huawei.hmos.settings',
+          abilityName: 'com.huawei.hmos.settings.MainAbility'
+        }
+        await context.startAbility(want)
+        hilog.info(DOMAIN, 'testTag', '%{public)s', '[PermissionManager] ✅ Method2 (settings main) accepted')
+        return true
+      } catch (e) {
+        hilog.warn(DOMAIN, 'testTag', '%{public)s', '[PermissionManager] Method2 (settings main) rejected:' + JSON.stringify(e))
+      }
+
+      // ════════════════════════════════════════
+      // ③ 权限管理页（⚠️ 某些系统版本可能白屏！）
+      //    仅当前面两种都失败时才尝试
+      // ════════════════════════════════════════
+      try {
+        want = {
+          bundleName: 'com.huawei.hmos.settings',
+          abilityName: 'com.huawei.hmos.settings.MainAbility',
+          uri: 'permission_manager_apps',
+          parameters: {
+            pushParams: bundleName
+          }
+        }
+        await context.startAbility(want)
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ✅ Method3 (permission_manager_apps) accepted')
+        return true
+      } catch (e) {
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Method3 (permission_manager_apps) rejected:' + JSON.stringify(e))
+      }
+
+      // ════════════════════════════════════════
+      // ④ OpenHarmony 兼容（模拟器 / 纯 OHOS 设备）
+      // ════════════════════════════════════════
       try {
         want = {
           bundleName: 'com.ohos.settings',
@@ -198,39 +240,29 @@ export class PermissionManager {
           }
         }
         await context.startAbility(want)
-        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Opened via OpenHarmony settings')
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ✅ Method4 (OH app info) accepted')
         return true
       } catch (e) {
-        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] OpenHarmony settings failed:' + JSON.stringify(e))
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Method4 (OH app info) rejected:' + JSON.stringify(e))
       }
 
-      // 方法3：打开系统设置主页（让用户手动找到应用）
-      try {
-        want = {
-          bundleName: 'com.huawei.hmos.settings',
-          abilityName: 'com.huawei.hmos.settings.MainAbility'
-        }
-        await context.startAbility(want)
-        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Opened settings main page')
-        return true
-      } catch (e) {
-        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Settings main page failed:' + JSON.stringify(e))
-      }
-
-      // 方法4：尝试隐式 Want
+      // ════════════════════════════════════════
+      // ⑤ 隐式 Want（最终兜底）
+      // ════════════════════════════════════════
       try {
         want = {
           action: 'action.settings'
         }
         await context.startAbility(want)
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ✅ Method5 (implicit) accepted')
         return true
       } catch (e) {
-        hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] All methods failed:' + JSON.stringify(e))
+        hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ❌ ALL methods failed, last error:' + JSON.stringify(e))
         return false
       }
 
     } catch (e) {
-      hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Fatal error:' + JSON.stringify(e))
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Fatal error in openAppSettings:' + JSON.stringify(e))
       return false
     }
   }

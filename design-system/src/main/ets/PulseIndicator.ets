@@ -14,6 +14,7 @@
  *   4. 在停止/销毁时调用 `this.pulser.stop()`
  *   5. 在 aboutToDisappear 中调用 `this.pulser.stop()`
  */
+@Observed
 export class PulseIndicator {
   /**
    * 当前透明度值（绑定到组件的 opacity 属性）

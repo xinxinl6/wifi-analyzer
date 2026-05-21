@@ -6,6 +6,9 @@ import http from '@ohos.net.http'
 import socket from '@ohos.net.socket'
 import connection from '@ohos.net.connection'
 import { ValidationPatterns } from '@wifi-analyzer/core'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0x0000
 
 // ==================== 接口定义 ====================
 
@@ -125,7 +128,7 @@ export class PingEngine {
         }
       }
     } catch (error) {
-      console.error('[PingEngine] DNS resolve failed:', JSON.stringify(error))
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[PingEngine] DNS resolve failed: ' + JSON.stringify(error))
     }
 
     // 如果解析失败，尝试直接连接域名
@@ -176,12 +179,15 @@ export class PingEngine {
     return new Promise((resolve) => {
       let tcpSocket = socket.constructTCPSocketInstance()
       let timeoutId = -1
+      let resolved = false  // 防止双重 resolve 标志位
 
       // 设置超时
       timeoutId = setTimeout(() => {
+        if (resolved) return
+        resolved = true
         try {
           tcpSocket.close(() => {})
-        } catch {}
+        } catch (e) {}
         const timeoutResult: TcpPingResult = { success: false, error: 'timeout' }
         resolve(timeoutResult)
       }, timeout)
@@ -194,14 +200,16 @@ export class PingEngine {
         },
         timeout: timeout
       }, (error) => {
+        if (resolved) return
         clearTimeout(timeoutId)
         if (!error) {
+          resolved = true
           tcpSocket.close(() => {})
           const successResult: TcpPingResult = { success: true }
           resolve(successResult)
         } else {
           // 443 失败，尝试 80 端口（HTTP）
-          this.tryPort80(address, timeout, tcpSocket, resolve)
+          this.tryPort80(address, timeout, tcpSocket, resolve, () => { resolved = true })
         }
       })
     })
@@ -212,7 +220,8 @@ export class PingEngine {
     address: string,
     timeout: number,
     previousSocket: socket.TCPSocket,
-    resolve: (result: TcpPingResult) => void
+    resolve: (result: TcpPingResult) => void,
+    markResolved: () => void
   ): void {
     let tcpSocket = socket.constructTCPSocketInstance()
     let timeoutId = -1
@@ -220,7 +229,7 @@ export class PingEngine {
     timeoutId = setTimeout(() => {
       try {
         tcpSocket.close(() => {})
-      } catch {}
+      } catch (e) {}
       const timeoutResult: TcpPingResult = { success: false, error: 'port_closed' }
       resolve(timeoutResult)
     }, timeout)
@@ -250,13 +259,16 @@ export class PingEngine {
     return new Promise((resolve) => {
       const httpRequest = http.createHttp()
       let timeoutId = -1
+      let resolved = false  // 防止双重 resolve 标志位
       const startTime = Date.now()
 
       // 设置超时
       timeoutId = setTimeout(() => {
+        if (resolved) return
+        resolved = true
         try {
           httpRequest.destroy()
-        } catch {}
+        } catch (e) {}
         const timeoutResult: HttpPingResult = { time: -1, status: 'timeout' }
         resolve(timeoutResult)
       }, timeout)
@@ -275,13 +287,15 @@ export class PingEngine {
           } as Record<string, string>
         } as http.HttpRequestOptions,
         (error, result) => {
+          if (resolved) return
+          resolved = true
           clearTimeout(timeoutId)
           const endTime = Date.now()
           const time = endTime - startTime
 
           try {
             httpRequest.destroy()
-          } catch {}
+          } catch (e) {}
 
           if (error) {
             const errorResult: HttpPingResult = { time: -1, status: 'error' }
@@ -350,7 +364,7 @@ export class PingEngine {
     if (this.abortController) {
       try {
         this.abortController.abort()
-      } catch {}
+      } catch (e) {}
       this.abortController = null
     }
   }
@@ -367,7 +381,7 @@ export class PingEngine {
         return `Error ${err.code}: ${err.message || 'Unknown'}`
       }
       return String(error)
-    } catch {
+    } catch (e) {
       return 'Unknown error'
     }
   }

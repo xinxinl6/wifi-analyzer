@@ -1,81 +1,23 @@
-# Windows 保留文件名
-nul
-con
-prn
-aux
-
-# HarmonyOS / DevEco Studio
-.idea/
-.gradle/
-local.properties
-*.iml
-*.iws
-*.ipr
-
-# 构建输出
-build/
-*/build/
-out/
-*/out/
-
-# DevEco 构建缓存
-.cxx/
-.hvigor/
-hvigorw
-hvigorw.bat
-node_modules/
-*/node_modules/
-
-# HarmonyOS 依赖包（类似 node_modules，不提交）
-oh_modules/
-**/oh_modules/
-oh-package-lock.json5
-**/oh-package-lock.json5
-
-# 签名密钥（绝对不要提交）
-*.p12
-*.keystore
-*.jks
+# HarmonyOS 签名证书和密钥（敏感信息，禁止提交）
 Key/
-*.key
 
-# 日志与调试
-*.log
-debug_hilog.txt
+# 构建产物
+build/
+.entry/
+.cxx/
+.node/
+oh_modules/
 
-# 临时文件
-*.tmp
-*.temp
-*.bak
+# IDE 文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
 .DS_Store
 Thumbs.db
 
-# 开发工具脚本（本地使用，不入库）
-generate_*.py
-generate_*.js
-convert_*.py
-convert_*.js
-extract_frames.py
-ocr_frames.ps1
-ocr_frames_api.py
-sync.bat
-
-# 测试截图与临时图片
-test_*.png
-*_d.png
-icon_preview*.html
-
-# 开发文档（内部使用）
-DESIGN_SYSTEM*.md
-README_ICONS.md
-
-# 备份文件
-backup_*.ets
-
-# Preview 缓存
-.preview/
-previews/
-
-# 系统文件
-.workbuddy/
-.cache/
+# 临时文件
+*.tmp
+*.log

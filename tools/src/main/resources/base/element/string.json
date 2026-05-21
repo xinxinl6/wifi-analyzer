@@ -691,6 +691,714 @@
     {
       "name": "poe_calc_intro",
       "value": "PoE计算"
+    },
+    {
+      "name": "wol_network_wake",
+      "value": "网络唤醒"
+    },
+    {
+      "name": "wol_wake_desc",
+      "value": "通过Magic Packet远程开启电脑"
+    },
+    {
+      "name": "wol_broadcast_support",
+      "value": "广播支持"
+    },
+    {
+      "name": "wol_broadcast_desc",
+      "value": "向255.255.255.255广播地址发送"
+    },
+    {
+      "name": "wol_device_save",
+      "value": "设备保存"
+    },
+    {
+      "name": "wol_device_save_desc",
+      "value": "常用设备自动保存，快速唤醒"
+    },
+    {
+      "name": "wol_mac_invalid",
+      "value": "MAC地址格式不正确"
+    },
+    {
+      "name": "wol_magic_packet_failed",
+      "value": "Magic Packet生成失败"
+    },
+    {
+      "name": "wol_no_network",
+      "value": "无网络连接，无法发送唤醒包"
+    },
+    {
+      "name": "wol_wake_sent",
+      "value": "唤醒指令已发送"
+    },
+    {
+      "name": "wol_send_failed",
+      "value": "发送失败: "
+    },
+    {
+      "name": "wol_never_wake",
+      "value": "从未唤醒"
+    },
+    {
+      "name": "wol_just_now",
+      "value": "刚刚"
+    },
+    {
+      "name": "wol_minutes_ago",
+      "value": "分钟前"
+    },
+    {
+      "name": "wol_hours_ago",
+      "value": "小时前"
+    },
+    {
+      "name": "wol_days_ago",
+      "value": "天前"
+    },
+    {
+      "name": "lan_find_device",
+      "value": "查找局域网终端"
+    },
+    {
+      "name": "lan_scan_desc",
+      "value": "通过扫描发现设备，自动识别设备类型和厂商信息"
+    },
+    {
+      "name": "lan_stop_scan",
+      "value": "停止扫描"
+    },
+    {
+      "name": "lan_start_find",
+      "value": "开始查找"
+    },
+    {
+      "name": "lan_rescan",
+      "value": "重新扫描"
+    },
+    {
+      "name": "lan_router",
+      "value": "路由器"
+    },
+    {
+      "name": "lan_computer",
+      "value": "电脑"
+    },
+    {
+      "name": "lan_device",
+      "value": "设备"
+    },
+    {
+      "name": "lan_gateway",
+      "value": "网关"
+    },
+    {
+      "name": "lan_host",
+      "value": "主机"
+    },
+    {
+      "name": "lan_discovered_devices",
+      "value": "发现的设备"
+    },
+    {
+      "name": "lan_unit",
+      "value": "台"
+    },
+    {
+      "name": "lan_search_hint",
+      "value": "搜索IP/MAC/厂商"
+    },
+    {
+      "name": "lan_only_online",
+      "value": "仅在线"
+    },
+    {
+      "name": "lan_all",
+      "value": "全部"
+    },
+    {
+      "name": "lan_scanning",
+      "value": "正在扫描..."
+    },
+    {
+      "name": "lan_scanned",
+      "value": "已扫描"
+    },
+    {
+      "name": "lan_current",
+      "value": "当前"
+    },
+    {
+      "name": "lan_discover",
+      "value": "发现"
+    },
+    {
+      "name": "lan_scan_mode",
+      "value": "扫描模式"
+    },
+    {
+      "name": "lan_quick_scan",
+      "value": "快速扫描"
+    },
+    {
+      "name": "lan_quick_scan_desc",
+      "value": "约20个常用IP"
+    },
+    {
+      "name": "lan_full_scan",
+      "value": "完整扫描"
+    },
+    {
+      "name": "lan_full_scan_desc",
+      "value": "全部254个IP"
+    },
+    {
+      "name": "lan_find_device_intro",
+      "value": "查找终端说明"
+    },
+    {
+      "name": "lan_find_device_desc",
+      "value": "结合局域网扫描和MAC厂商查询，快速定位并识别网络中的终端设备"
+    },
+    {
+      "name": "mac_vendor_query",
+      "value": "厂商查询"
+    },
+    {
+      "name": "mac_vendor_desc",
+      "value": "查询MAC地址对应的厂商信息"
+    },
+    {
+      "name": "mac_country_info",
+      "value": "国家归属"
+    },
+    {
+      "name": "mac_country_desc",
+      "value": "查看设备产地归属"
+    },
+    {
+      "name": "mac_addr_type",
+      "value": "地址类型"
+    },
+    {
+      "name": "mac_addr_type_desc",
+      "value": "识别设备类型(UAA/LAA)"
+    },
+    {
+      "name": "mac_uaa",
+      "value": "通用唯一标识"
+    },
+    {
+      "name": "mac_laa",
+      "value": "本地管理"
+    },
+    {
+      "name": "mac_vendor_info",
+      "value": "厂商信息"
+    },
+    {
+      "name": "mac_prefix",
+      "value": "MAC前缀"
+    },
+    {
+      "name": "mac_country",
+      "value": "国家"
+    },
+    {
+      "name": "mac_detail_addr",
+      "value": "详细地址"
+    },
+    {
+      "name": "mac_data_source",
+      "value": "数据来源"
+    },
+    {
+      "name": "mac_local_db",
+      "value": "本地数据库"
+    },
+    {
+      "name": "mac_online_query",
+      "value": "在线查询"
+    },
+    {
+      "name": "mac_re_query",
+      "value": "重新查询"
+    },
+    {
+      "name": "ip_geo_location",
+      "value": "地理位置"
+    },
+    {
+      "name": "ip_geo_location_desc",
+      "value": "查询IP的地理位置"
+    },
+    {
+      "name": "ip_isp_info",
+      "value": "运营商信息"
+    },
+    {
+      "name": "ip_isp_desc",
+      "value": "查看ISP和网络运营商"
+    },
+    {
+      "name": "ip_coordinates",
+      "value": "坐标定位"
+    },
+    {
+      "name": "ip_coordinates_desc",
+      "value": "获取经纬度坐标"
+    },
+    {
+      "name": "ip_province",
+      "value": "省份"
+    },
+    {
+      "name": "ip_city",
+      "value": "城市"
+    },
+    {
+      "name": "ip_isp",
+      "value": "运营商"
+    },
+    {
+      "name": "ip_coords",
+      "value": "坐标"
+    },
+    {
+      "name": "ip_timezone",
+      "value": "时区"
+    },
+    {
+      "name": "ip_re_query",
+      "value": "重新查询"
+    },
+    {
+      "name": "ping_test",
+      "value": "Ping 测试"
+    },
+    {
+      "name": "ping_test_desc",
+      "value": "检测网络连通性与延迟"
+    },
+    {
+      "name": "ping_input_hint",
+      "value": "输入 IP 或域名"
+    },
+    {
+      "name": "ping_quick_test",
+      "value": "快速测试"
+    },
+    {
+      "name": "ping_latency_test",
+      "value": "延迟检测"
+    },
+    {
+      "name": "ping_latency_desc",
+      "value": "测量到目标的网络往返延迟"
+    },
+    {
+      "name": "ping_connectivity",
+      "value": "连通性分析"
+    },
+    {
+      "name": "ping_connectivity_desc",
+      "value": "检测网络是否可达"
+    },
+    {
+      "name": "ping_stats_report",
+      "value": "统计报告"
+    },
+    {
+      "name": "ping_stats_desc",
+      "value": "丢包率、平均延迟等数据"
+    },
+    {
+      "name": "ping_enter_target",
+      "value": "请输入目标地址"
+    },
+    {
+      "name": "ping_addr_too_long",
+      "value": "输入地址过长"
+    },
+    {
+      "name": "ping_invalid_format",
+      "value": "无效的IP地址或域名格式"
+    },
+    {
+      "name": "ping_failed",
+      "value": "Ping 失败: "
+    },
+    {
+      "name": "ping_complete",
+      "value": "完成"
+    },
+    {
+      "name": "ping_sent",
+      "value": "发送"
+    },
+    {
+      "name": "ping_success",
+      "value": "成功"
+    },
+    {
+      "name": "ping_packet_loss",
+      "value": "丢包"
+    },
+    {
+      "name": "ping_avg",
+      "value": "平均"
+    },
+    {
+      "name": "ping_result",
+      "value": "Ping 结果"
+    },
+    {
+      "name": "result_timeout",
+      "value": "超时"
+    },
+    {
+      "name": "result_failed",
+      "value": "失败"
+    },
+    {
+      "name": "wol_new_device",
+      "value": "新设备"
+    },
+    {
+      "name": "dns_query_title",
+      "value": "DNS 查询"
+    },
+    {
+      "name": "dns_multi_server",
+      "value": "多服务器"
+    },
+    {
+      "name": "dns_multi_server_desc",
+      "value": "支持多个DNS服务器"
+    },
+    {
+      "name": "dns_record_types",
+      "value": "A/AAAA/CNAME/MX/NS/TXT"
+    },
+    {
+      "name": "ip_geo_location_title",
+      "value": "归属地查询"
+    },
+    {
+      "name": "ip_isp_title",
+      "value": "运营商信息"
+    },
+    {
+      "name": "ip_coords_title",
+      "value": "坐标定位"
+    },
+    {
+      "name": "ip_coords_desc",
+      "value": "获取经纬度坐标"
+    },
+    {
+      "name": "ip_geo_detail_title",
+      "value": "地理位置"
+    },
+    {
+      "name": "ip_province_label",
+      "value": "省份"
+    },
+    {
+      "name": "ip_city_label",
+      "value": "城市"
+    },
+    {
+      "name": "ip_isp_label",
+      "value": "运营商"
+    },
+    {
+      "name": "ip_coords_label",
+      "value": "坐标"
+    },
+    {
+      "name": "ip_timezone_label",
+      "value": "时区"
+    },
+    {
+      "name": "mac_vendor_title",
+      "value": "厂商查询"
+    },
+    {
+      "name": "mac_country_title",
+      "value": "国家归属"
+    },
+    {
+      "name": "mac_addr_type_title",
+      "value": "地址类型"
+    },
+    {
+      "name": "mac_type_uaa",
+      "value": "通用唯一标识"
+    },
+    {
+      "name": "mac_type_laa",
+      "value": "本地管理"
+    },
+    {
+      "name": "mac_type_unknown",
+      "value": "未知"
+    },
+    {
+      "name": "mac_vendor_info_title",
+      "value": "厂商信息"
+    },
+    {
+      "name": "mac_prefix_label",
+      "value": "MAC前缀"
+    },
+    {
+      "name": "mac_country_label",
+      "value": "国家"
+    },
+    {
+      "name": "mac_detail_addr_label",
+      "value": "详细地址"
+    },
+    {
+      "name": "mac_data_source_label",
+      "value": "数据来源"
+    },
+    {
+      "name": "mac_source_local",
+      "value": "本地数据库"
+    },
+    {
+      "name": "mac_source_online",
+      "value": "在线查询"
+    },
+    {
+      "name": "mac_re_query_title",
+      "value": "重新查询"
+    },
+    {
+      "name": "ping_sent_label",
+      "value": "发送"
+    },
+    {
+      "name": "ping_success_label",
+      "value": "成功"
+    },
+    {
+      "name": "ping_loss_label",
+      "value": "丢包"
+    },
+    {
+      "name": "ping_avg_label",
+      "value": "平均"
+    },
+    {
+      "name": "ping_result_title",
+      "value": "Ping 结果"
+    },
+    {
+      "name": "ping_timeout",
+      "value": "超时"
+    },
+    {
+      "name": "ping_failure",
+      "value": "失败"
+    },
+    {
+      "name": "stop_action_btn",
+      "value": "停止"
+    },
+    {
+      "name": "ping_re_ping_btn",
+      "value": "重新 Ping"
+    },
+    {
+      "name": "poe_feature_intro",
+      "value": "功能说明"
+    },
+    {
+      "name": "poe_power_calc_title",
+      "value": "功率计算"
+    },
+    {
+      "name": "poe_power_calc_desc",
+      "value": "基于IEEE 802.3af/at/bt标准精确计算"
+    },
+    {
+      "name": "poe_loss_analysis_title",
+      "value": "损耗分析"
+    },
+    {
+      "name": "poe_loss_analysis_desc",
+      "value": "实时计算线缆压降和功率损耗"
+    },
+    {
+      "name": "poe_smart_suggest_title",
+      "value": "智能建议"
+    },
+    {
+      "name": "poe_smart_suggest_desc",
+      "value": "自动推荐最大线缆长度和优化方案"
+    },
+    {
+      "name": "subnet_calc_title",
+      "value": "子网计算"
+    },
+    {
+      "name": "subnet_calc_desc",
+      "value": "计算网络地址、广播地址、可用主机范围"
+    },
+    {
+      "name": "subnet_binary_title",
+      "value": "二进制掩码"
+    },
+    {
+      "name": "subnet_binary_desc",
+      "value": "可视化显示子网掩码的二进制形式"
+    },
+    {
+      "name": "subnet_preset_title",
+      "value": "快速预设"
+    },
+    {
+      "name": "subnet_preset_desc",
+      "value": "支持 /8 /16 /24 等常用 CIDR 掩码"
+    },
+    {
+      "name": "port_status_open_label",
+      "value": "开放"
+    },
+    {
+      "name": "port_status_closed_label",
+      "value": "关闭"
+    },
+    {
+      "name": "port_status_filtered_label",
+      "value": "超时"
+    },
+    {
+      "name": "port_status_unknown_label",
+      "value": "未知"
+    },
+    {
+      "name": "poe_cable_length_label",
+      "value": "线缆长度"
+    },
+    {
+      "name": "poe_cable_spec_label",
+      "value": "线缆规格"
+    },
+    {
+      "name": "poe_device_power_label",
+      "value": "设备功率"
+    },
+    {
+      "name": "poe_common_devices_label",
+      "value": "常用设备"
+    },
+    {
+      "name": "poe_delivered_power_label",
+      "value": "送达功率"
+    },
+    {
+      "name": "poe_voltage_drop_label",
+      "value": "电压降"
+    },
+    {
+      "name": "poe_working_current_label",
+      "value": "工作电流"
+    },
+    {
+      "name": "poe_power_pair_label",
+      "value": "供电线对"
+    },
+    {
+      "name": "poe_cable_too_long_warning",
+      "value": "线缆过长"
+    },
+    {
+      "name": "poe_cable_too_long_detail",
+      "value": "设备可能无法正常工作，请缩短线缆或升级PoE标准"
+    },
+    {
+      "name": "poe_warning_title",
+      "value": "警告"
+    },
+    {
+      "name": "mac_format_hint",
+      "value": "支持 XX:XX:XX:XX:XX:XX 或 XX-XX-XX-XX-XX-XX 格式"
+    },
+    {
+      "name": "common_vendor_examples",
+      "value": "常用设备示例"
+    },
+    {
+      "name": "input_mac_hint",
+      "value": "输入 MAC 地址"
+    },
+    {
+      "name": "ping_action",
+      "value": "Ping"
+    },
+    {
+      "name": "huawei",
+      "value": "华为"
+    },
+    {
+      "name": "xiaomi",
+      "value": "小米"
+    },
+    {
+      "name": "port_detection",
+      "value": "端口检测"
+    },
+    {
+      "name": "port_detection_desc",
+      "value": "检测常用端口是否开放"
+    },
+    {
+      "name": "security_scan",
+      "value": "安全扫描"
+    },
+    {
+      "name": "security_scan_desc",
+      "value": "发现潜在安全风险"
+    },
+    {
+      "name": "result_export",
+      "value": "结果导出"
+    },
+    {
+      "name": "result_export_desc",
+      "value": "查看开放端口详情"
+    },
+    {
+      "name": "label_cidr",
+      "value": "CIDR"
+    },
+    {
+      "name": "label_bits_32",
+      "value": "/ 32 bits"
+    },
+    {
+      "name": "label_pinging",
+      "value": "Pinging "
+    },
+    {
+      "name": "signal_ge_neg50",
+      "value": "≥-50"
+    },
+    {
+      "name": "signal_ge_neg60",
+      "value": "≥-60"
+    },
+    {
+      "name": "signal_ge_neg70",
+      "value": "≥-70"
+    },
+    {
+      "name": "signal_lt_neg70",
+      "value": "<-70"
     }
   ]
 }

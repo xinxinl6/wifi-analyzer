@@ -3,6 +3,7 @@
 // ============================================
 
 import { AuroraBreakpoints, auroraResponsive, getWindowWidth } from './AuroraBreakpoints'
+import { COLOR_GLASS_SURFACE_LIGHT, COLOR_GLASS_DARK_BORDER, COLOR_GLASS_AURORA, COLOR_DANGER, COLOR_TEXT_GLASS_PRIMARY } from '@wifi-analyzer/design-system'
 
 // ============================================
 // Aurora 响应式网格
@@ -28,7 +29,7 @@ export struct AuroraGrid {
     Column()
       .width('100%')
       .height(80)
-      .backgroundColor('rgba(255,255,255,0.1)')
+      .backgroundColor(COLOR_GLASS_SURFACE_LIGHT)
       .borderRadius(12)
   }
 
@@ -94,7 +95,7 @@ export struct AuroraList {
   defaultBuilder(index: number) {
     Row() {
       Text(`Item ${index}`)
-        .fontColor('#FFFFFF')
+        .fontColor(COLOR_TEXT_GLASS_PRIMARY)
     }
     .width('100%')
     .height(this.itemHeight)
@@ -114,7 +115,7 @@ export struct AuroraList {
     .height('100%')
     .divider(this.showDivider ? {
       strokeWidth: 0.5,
-      color: 'rgba(255,255,255,0.08)',
+      color: COLOR_GLASS_DARK_BORDER,
       startMargin: this.dividerIndent,
       endMargin: this.dividerIndent
     } : null)
@@ -123,9 +124,9 @@ export struct AuroraList {
   @Builder
   buildSwipeAction(index: number) {
     Row() {
-      Text('删除')
-        .fontColor('#FFFFFF')
-        .backgroundColor('#EF4444')
+      Text($r('app.string.swipe_delete'))
+        .fontColor(COLOR_TEXT_GLASS_PRIMARY)
+        .backgroundColor(COLOR_DANGER)
         .padding({ left: 20, right: 20 })
         .height('100%')
     }
@@ -158,9 +159,9 @@ export struct AuroraCardGrid {
     Column()
       .width('100%')
       .height(120)
-      .backgroundColor('rgba(255,255,255,0.08)')
+      .backgroundColor(COLOR_GLASS_SURFACE_LIGHT)
       .borderRadius(16)
-      .border({ width: 0.5, color: 'rgba(255,255,255,0.1)', radius: 16 })
+      .border({ width: 0.5, color: COLOR_GLASS_DARK_BORDER, radius: 16 })
   }
 
   build() {

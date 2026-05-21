@@ -12,7 +12,13 @@ import {
 import {
   COLOR_AURORA_PRIMARY,
   COLOR_TEXT_GLASS_PRIMARY,
-  COLOR_TEXT_GLASS_TERTIARY
+  COLOR_TEXT_GLASS_TERTIARY,
+  COLOR_GLASS_DARK_BORDER,
+  COLOR_GLASS_AURORA,
+  COLOR_GLASS_AURORA_BORDER,
+  COLOR_GLASS_SURFACE_LIGHT,
+  COLOR_BG_TOP,
+  COLOR_SHADOW_GLASS
 } from '@wifi-analyzer/design-system'
 
 // Tab 配置项
@@ -48,15 +54,15 @@ export struct AuroraBottomNav {
     .width('100%')
     .height(auroraResponsive(64, 56, 72))
     .padding({ left: 8, right: 8, top: 8, bottom: 8 })
-    .backgroundColor('rgba(10,22,40,0.92)')
+    .backgroundColor(COLOR_GLASS_DARK_BORDER)
     .border({
       width: { top: 0.5 },
-      color: 'rgba(255,255,255,0.08)',
+      color: COLOR_GLASS_DARK_BORDER,
       radius: { topLeft: 24, topRight: 24 }
     })
     .shadow({
       radius: 24,
-      color: 'rgba(0,0,0,0.25)',
+      color: COLOR_SHADOW_GLASS,
       offsetX: 0,
       offsetY: -6
     })
@@ -80,7 +86,7 @@ export struct AuroraBottomNav {
             Circle()
               .width(auroraResponsive(40, 36, 44))
               .height(auroraResponsive(40, 36, 44))
-              .fill('rgba(74,144,217,0.15)')
+              .fill(COLOR_GLASS_AURORA)
           }
           Image(this.currentIndex === index ? item.iconActive : item.icon)
             .width(auroraResponsive(24, 22, 26))
@@ -132,7 +138,7 @@ export struct AuroraSideNav {
       // Logo 区域
       this.buildHeader()
 
-      Divider().width('80%').color('rgba(255,255,255,0.08)').margin({ top: 16, bottom: 16 })
+      Divider().width('80%').color(COLOR_GLASS_DARK_BORDER).margin({ top: 16, bottom: 16 })
 
       // 导航列表
       Column() {
@@ -144,7 +150,7 @@ export struct AuroraSideNav {
       .width('100%')
       .padding({ left: 8, right: 8 })
 
-      Divider().width('80%').color('rgba(255,255,255,0.08)').margin({ top: 16, bottom: 16 })
+      Divider().width('80%').color(COLOR_GLASS_DARK_BORDER).margin({ top: 16, bottom: 16 })
 
       // 折叠按钮
       Row() {
@@ -154,16 +160,16 @@ export struct AuroraSideNav {
           .animation({ duration: 200, curve: Curve.EaseInOut })
       }
       .width(40).height(40).borderRadius(20)
-      .backgroundColor('rgba(255,255,255,0.05)')
+      .backgroundColor(COLOR_GLASS_SURFACE_LIGHT)
       .justifyContent(FlexAlign.Center)
       .onClick(() => this.onToggleCollapse())
     }
     .width('100%').height('100%')
     .padding({ top: 16, bottom: 16 })
-    .backgroundColor('rgba(10,22,40,0.95)')
+    .backgroundColor(COLOR_GLASS_DARK_BORDER)
     .border({
       width: { right: 0.5 },
-      color: 'rgba(255,255,255,0.08)',
+      color: COLOR_GLASS_DARK_BORDER,
       radius: { topRight: 20, bottomRight: 20 }
     })
   }
@@ -198,8 +204,8 @@ export struct AuroraSideNav {
             .width('100%')
             .height(auroraResponsive(48, 44, 52))
             .borderRadius(12)
-            .backgroundColor('rgba(74,144,217,0.15)')
-            .border({ width: 1, color: 'rgba(74,144,217,0.25)', radius: 12 })
+            .backgroundColor(COLOR_GLASS_AURORA)
+            .border({ width: 1, color: COLOR_GLASS_AURORA_BORDER, radius: 12 })
             .clip(true)
         }
         // 悬停效果
@@ -208,7 +214,7 @@ export struct AuroraSideNav {
             .width('100%')
             .height(auroraResponsive(48, 44, 52))
             .borderRadius(12)
-            .backgroundColor('rgba(255,255,255,0.05)')
+            .backgroundColor(COLOR_GLASS_SURFACE_LIGHT)
             .clip(true)
         }
         // 内容
@@ -271,13 +277,13 @@ export struct AuroraMainLayout {
         })
         .width(this.sidebarCollapsed ? AuroraBreakpoints.SIDEBAR_WIDTH_COMPACT : AuroraBreakpoints.SIDEBAR_WIDTH_EXPANDED)
         Column() { this.contentBuilder() }.layoutWeight(1).height('100%').clip(true)
-      }.width('100%').height('100%').backgroundColor('#0A1628')
+      }.width('100%').height('100%').backgroundColor(COLOR_BG_TOP)
     } else {
       // 手机：底部Tab + 内容
       Column() {
         Column() { this.contentBuilder() }.layoutWeight(1).width('100%')
         AuroraBottomNav({ items: this.tabItems, currentIndex: this.currentIndex, onSelect: this.onTabChange })
-      }.width('100%').height('100%').backgroundColor('#0A1628')
+      }.width('100%').height('100%').backgroundColor(COLOR_BG_TOP)
     }
   }
 }

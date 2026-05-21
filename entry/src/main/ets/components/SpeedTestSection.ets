@@ -1,4 +1,4 @@
-// 测速页组件 - 天蓝色透明毛玻璃悬浮风格
+// 测速页组件 - 天蓝色透明毛玻璃悬浮风格（容器组件）
 // 功能：测速节点选择、真实HTTP测速、实时速度显示、历史记录
 // 风格：天蓝色渐变 + 透明毛玻璃 + 悬浮卡片
 
@@ -30,11 +30,21 @@ import { COLOR_SUCCESS, COLOR_WARNING, COLOR_DANGER,
   COLOR_TEXT_GLASS_TERTIARY,
   COLOR_GLASS_DARK_SURFACE,
   COLOR_GLASS_DARK_CARD,
-  COLOR_GLASS_DARK_BORDER } from '@wifi-analyzer/design-system'
+  COLOR_GLASS_DARK_BORDER,
+  COLOR_SHADOW_AURORA
+} from '@wifi-analyzer/design-system'
 import { SpeedTestResult } from '@wifi-analyzer/core'
 import { SpeedTestEngine, SERVER_NODES, SpeedTestCallbacks, ServerNode } from '@wifi-analyzer/speed-test'
-import { preferences } from '@kit.ArkData'
+import { SpeedGauge } from './SpeedGauge'
+import { SpeedServerSelector, SpeedServerPopup } from './SpeedServerPopup'
+import { SpeedHistoryList } from './SpeedHistoryList'
+import { SpeedDetailPopup, SpeedDetailCard } from './SpeedDetailPopup'
+import { SpeedCurve, SpeedSample } from './SpeedCurve'
+import { addToHistory, saveHistory, loadHistoryAsyncWithCallback } from '../utils/SpeedTestStorage'
+import { hilog } from '@kit.PerformanceAnalysisKit'
 import { common } from '@kit.AbilityKit'
+
+const DOMAIN = 0x0000
 
 @Component
 export struct SpeedTestSection {
@@ -51,7 +61,11 @@ export struct SpeedTestSection {
   @State displayJitter: number = 0
   @State displayDownloadSpeed: number = 0
   @State displayUploadSpeed: number = 0
+  @State displayBufferbloatDownloadMs: number = 0
+  @State displayBufferbloatUploadMs: number = 0
   @State phaseLabel: string = ''
+  @State detectedNetworkType: string = ''
+  @State speedSamples: SpeedSample[] = []
   @State gaugeProgress: number = 0
   @State historyList: Array<SpeedTestResult> = []
   @State showAllHistory: boolean = false
@@ -63,7 +77,7 @@ export struct SpeedTestSection {
   private engine: SpeedTestEngine = new SpeedTestEngine()
 
   aboutToAppear(): void {
-    this.loadHistoryAsync()
+    this.loadHistory()
   }
 
   aboutToDisappear(): void {
@@ -98,184 +112,94 @@ export struct SpeedTestSection {
         .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
-      // 主内容
-      Column({ space: SPACE_LG }) {
-        this.buildServerSelector()
-        this.buildGaugeCard()
-        this.buildActionButton()
-        if (this.currentPhase === 'done') {
-          this.buildDetailCard()
+      // 主内容（可滚动）
+      Scroll() {
+        Column({ space: SPACE_LG }) {
+          SpeedServerSelector({
+            selectedServerIndex: this.selectedServerIndex,
+            onServerSelectorClick: () => { this.showServerPanelWithAnimation() }
+          })
+
+          if (this.detectedNetworkType !== '') {
+            Text(this.detectedNetworkType)
+              .fontSize(FONT_SIZE_XS)
+              .fontColor(COLOR_SKY_BLUE)
+              .fontWeight(FONT_WEIGHT_BOLD)
+              .padding({ left: 10, right: 10, top: 2, bottom: 2 })
+              .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_SKY_TAG_BG)
+              .borderRadius(6)
+          }
+
+          SpeedGauge({
+            isTesting: this.isTesting,
+            currentPhase: this.currentPhase,
+            displaySpeed: this.displaySpeed,
+            displayPing: this.displayPing,
+            displayDownloadSpeed: this.displayDownloadSpeed,
+            displayUploadSpeed: this.displayUploadSpeed,
+            phaseLabel: this.phaseLabel,
+            gaugeProgress: this.gaugeProgress
+          })
+
+          this.buildActionButton()
+
+          if (this.currentPhase === 'done') {
+            SpeedDetailCard({
+              displayDownloadSpeed: this.displayDownloadSpeed,
+              displayUploadSpeed: this.displayUploadSpeed,
+              displayPing: this.displayPing,
+              serverName: this.getServerName(),
+              bufferbloatDownloadMs: this.displayBufferbloatDownloadMs,
+              bufferbloatUploadMs: this.displayBufferbloatUploadMs
+            })
+          }
+
+          if (!this.isTesting) {
+            SpeedHistoryList({
+              historyList: this.historyList,
+              showAllHistory: this.showAllHistory,
+              onToggleHistory: () => { this.showAllHistory = !this.showAllHistory },
+              onHistoryItemClick: (item: SpeedTestResult) => {
+                this.selectedResult = item
+                this.showDetailPopupWithAnimation()
+              }
+            })
+          }
         }
-        if (!this.isTesting) {
-          this.buildHistoryCard()
-        }
+        .alignItems(HorizontalAlign.Center)
+        .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: 140 })
+        .width('100%')
       }
-      .alignItems(HorizontalAlign.Center)
-      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_LG, bottom: TAB_BAR_SAFE_BOTTOM })
+      .scrollBar(BarState.Off)
+      .edgeEffect(EdgeEffect.Spring)
+      .scrollable(ScrollDirection.Vertical)
       .width('100%')
       .layoutWeight(1)
 
       if (this.showServerPanel) {
-        this.buildServerPopup()
+        SpeedServerPopup({
+          selectedServerIndex: this.selectedServerIndex,
+          serverPopupScale: this.serverPopupScale,
+          serverPopupOpacity: this.serverPopupOpacity,
+          onClose: () => { this.hideServerPanelWithAnimation() },
+          onServerSelect: (index: number) => {
+            this.selectedServerIndex = index
+            this.hideServerPanelWithAnimation()
+          }
+        })
       }
 
       if (this.showDetailPopup && this.selectedResult !== null) {
-        this.buildDetailPopup()
+        SpeedDetailPopup({
+          selectedResult: this.selectedResult,
+          detailPopupScale: this.detailPopupScale,
+          detailPopupOpacity: this.detailPopupOpacity,
+          onClose: () => { this.hideDetailPopupWithAnimation() }
+        })
       }
     }
     .width('100%')
     .height('100%')
-  }
-
-  // 节点选择器 - 天蓝色毛玻璃
-  @Builder buildServerSelector() {
-    Row({ space: 12 }) {
-      Column() {
-        Text('📡').fontSize(FONT_SIZE_4XL)
-      }
-      .width(42).height(42)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
-      .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.20)' : COLOR_GLASS_SKY_ACTIVE)
-      .borderRadius(14)
-
-      Column({ space: 4 }) {
-        Text($r('app.string.select_speed_server')).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        Text(this.getServerName()).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
-      }
-      .alignItems(HorizontalAlign.Start)
-      .layoutWeight(1)
-
-      Column() {
-        Text('›').fontSize(FONT_SIZE_3XL).fontColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_SKY_BLUE)
-      }
-      .width(28).height(28)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
-      .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_TAG_BG)
-      .borderRadius(8)
-    }
-    .width('100%')
-    .padding({ left: 16, right: 16, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(18)
-    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
-    .backdropBlur(GLASS_BLUR_LG)
-    .borderWidth(1)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : 'rgba(255,255,255,0.6)')
-    .onClick(() => { this.showServerPanelWithAnimation() })
-  }
-
-  // 测速仪表盘 - 天蓝色渐变毛玻璃
-  @Builder buildGaugeCard() {
-    Column({ space: 0 }) {
-      Column({ space: 0 }) {
-        // 顶部状态标签
-        Row() {
-          if (this.isTesting && this.phaseLabel.length > 0) {
-            Row({ space: 6 }) {
-              Circle().width(6).height(6).fill(this.getGaugeColor())
-              Text(this.getSpeedLabelResource()).fontSize(FONT_SIZE_LG).fontColor(COLOR_SKY_BLUE)
-            }
-          } else if (this.currentPhase === 'done') {
-            Row({ space: 6 }) {
-              Circle().width(6).height(6).fill(COLOR_SUCCESS)
-              Text($r('app.string.speed_test_complete')).fontSize(FONT_SIZE_LG).fontColor(COLOR_SKY_BLUE)
-            }
-          } else {
-            Text($r('app.string.speed_test_title')).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-        }
-        .width('100%')
-        .justifyContent(FlexAlign.Center)
-        .padding({ top: 24, bottom: 16 })
-
-        // 仪表盘主体
-        Stack() {
-          // 外圈渐变背景
-          Circle().width(GAUGE_SIZE_XL).height(GAUGE_SIZE_XL)
-            .fill(this.isDarkMode ? 'rgba(74,144,217,0.12)' : COLOR_SKY_BLUE_GAUGE_BG)
-
-          // 背景轨道
-          Circle().width(GAUGE_SIZE_XL - 16).height(GAUGE_SIZE_XL - 16)
-            .fill(this.isDarkMode ? 'rgba(20,38,72,0.90)' : 'rgba(255,255,255,0.90)')
-            .strokeWidth(1)
-            .stroke(COLOR_SKY_BLUE_DIVIDER)
-
-          // 进度弧
-          Circle().width(GAUGE_SIZE_XL - 16).height(GAUGE_SIZE_XL - 16)
-            .fillOpacity(0)
-            .stroke(this.getGaugeColor())
-            .strokeWidth(STROKE_WIDTH_3XL)
-            .strokeDashArray([this.getGaugeArcLength(), 400])
-            .rotate({ angle: -90 })
-            .shadow({ radius: GLASS_SHADOW_MD, color: this.getGaugeShadowColor(), offsetX: 0, offsetY: 0 })
-
-          // 中心数值
-          Column({ space: 4 }) {
-            Text(this.currentPhase === 'ping' ? 'ms' : 'Mbps')
-              .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode)).letterSpacing(3)
-            Text(this.formatDisplaySpeed())
-              .fontSize(58).fontWeight(FontWeight.Bold).fontColor(COLOR_SKY_BLUE).letterSpacing(-2)
-            Text(this.getSpeedLabelResource())
-              .fontSize(FONT_SIZE_XL).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          }
-        }
-        .width(GAUGE_SIZE_XL).height(GAUGE_SIZE_XL).margin({ top: 10, bottom: 10 })
-
-        // 下方实时数据（测速中或完成时显示）
-        if (this.isTesting || this.currentPhase === 'done') {
-          Row() {
-            // 下载速度
-            Column({ space: SPACE_SM }) {
-              Text(this.displayDownloadSpeed > 0 ? this.displayDownloadSpeed.toFixed(1) : '--')
-                .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'download' ? COLOR_SKY_BLUE : adaptiveTextPrimary(this.isDarkMode))
-              Row({ space: 3 }) {
-                Text('↓').fontSize(FONT_SIZE_XS).fontColor(COLOR_SKY_BLUE)
-                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              }
-            }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-
-            Column().width(1).height(44).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
-
-            // 延迟
-            Column({ space: SPACE_SM }) {
-              Text(this.displayPing > 0 ? this.displayPing.toFixed(0) : '--')
-                .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'ping' ? COLOR_WARNING : adaptiveTextPrimary(this.isDarkMode))
-              Row({ space: 3 }) {
-                Text('⊙').fontSize(FONT_SIZE_XS).fontColor(COLOR_WARNING)
-                Text('ms').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              }
-            }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-
-            Column().width(1).height(44).backgroundColor(COLOR_SKY_BLUE_DIVIDER)
-
-            // 上传速度
-            Column({ space: SPACE_SM }) {
-              Text(this.displayUploadSpeed > 0 ? this.displayUploadSpeed.toFixed(1) : '--')
-                .fontSize(22).fontWeight(FontWeight.Bold)
-                .fontColor(this.currentPhase === 'upload' ? COLOR_SUCCESS : adaptiveTextPrimary(this.isDarkMode))
-              Row({ space: 3 }) {
-                Text('↑').fontSize(FONT_SIZE_XS).fontColor(COLOR_SUCCESS)
-                Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              }
-            }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-          }
-          .width('100%')
-          .padding({ left: SPACE_2XL, right: SPACE_2XL, top: SPACE_LG, bottom: SPACE_LG })
-        }
-      }
-      .width('100%')
-      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE_SOLID)
-      .borderRadius({ topLeft: 24, topRight: 24 })
-      .shadow({ radius: GLASS_SHADOW_2XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : 'rgba(14,165,233,0.15)', offsetX: 0, offsetY: 8 })
-    }
-    .width('100%')
-    .borderRadius(24)
-    .shadow({ radius: GLASS_SHADOW_3XL, color: COLOR_SKY_BLUE_DIVIDER, offsetX: 0, offsetY: 8 })
-    .clip(true)
   }
 
   // 开始/停止按钮 — 居中悬浮胶囊风格
@@ -284,14 +208,14 @@ export struct SpeedTestSection {
       Text(this.isTesting ? $r('app.string.stop_test') : $r('app.string.start_test'))
         .fontSize(FONT_SIZE_2XL)
         .fontWeight(FONT_WEIGHT_BOLD)
-        .fontColor('#FFFFFF')
+        .fontColor(COLOR_TEXT_GLASS_PRIMARY)
         .letterSpacing(1)
     }
     .justifyContent(FlexAlign.Center)
     .padding({ left: 48, right: 48, top: 14, bottom: 14 })
-    .backgroundColor(this.isTesting ? 'rgba(239,68,68,0.85)' : COLOR_SKY_BLUE)
+    .backgroundColor(this.isTesting ? COLOR_DANGER : COLOR_SKY_BLUE)
     .borderRadius(999)
-    .shadow({ radius: GLASS_SHADOW_2XL, color: this.isTesting ? 'rgba(239,68,68,0.4)' : 'rgba(14,165,233,0.45)', offsetX: 0, offsetY: 6 })
+    .shadow({ radius: GLASS_SHADOW_2XL, color: this.isTesting ? COLOR_SHADOW_AURORA : COLOR_SHADOW_AURORA, offsetX: 0, offsetY: 6 })
     .onClick(() => {
       if (this.isTesting) {
         this.engine.cancel()
@@ -299,369 +223,6 @@ export struct SpeedTestSection {
         this.startSpeedTest()
       }
     })
-  }
-
-  // 详情卡片 - 天蓝色毛玻璃
-  @Builder buildDetailCard() {
-    Column({ space: 16 }) {
-      Row() {
-        Row({ space: 8 }) {
-          Circle().width(8).height(8).fill(COLOR_SUCCESS)
-          Text($r('app.string.test_result')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
-        }
-        Text(this.getServerName()).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
-      }.width('100%').justifyContent(FlexAlign.SpaceBetween)
-
-      Row() {
-        Column({ space: 4 }) {
-          Text($r('app.string.download')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          Text(this.displayDownloadSpeed > 0 ? this.displayDownloadSpeed.toFixed(1) : '--')
-            .fontSize(32).fontWeight(FontWeight.Bold).fontColor(COLOR_SKY_BLUE)
-          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-
-        Column({ space: 4 }) {
-          Text($r('app.string.upload')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          Text(this.displayUploadSpeed > 0 ? this.displayUploadSpeed.toFixed(1) : '--')
-            .fontSize(32).fontWeight(FontWeight.Bold).fontColor(COLOR_SUCCESS)
-          Text('Mbps').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-
-        Column({ space: 4 }) {
-          Text($r('app.string.ping')).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          Text(this.displayPing > 0 ? this.displayPing.toFixed(0) : '--')
-            .fontSize(32).fontWeight(FontWeight.Bold).fontColor(this.getPingColor())
-          Text('ms').fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }.layoutWeight(1).alignItems(HorizontalAlign.Center)
-      }.width('100%')
-    }
-    .width('100%')
-    .padding({ left: 18, right: 18, top: 18, bottom: 18 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(20)
-    .shadow({ radius: GLASS_SHADOW_2XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_ACTIVE, offsetX: 0, offsetY: 4 })
-    .backdropBlur(GLASS_BLUR_XL)
-    .borderWidth(1)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
-  }
-
-  // 历史记录 - 天蓝色毛玻璃（支持展开/收起）
-  @Builder buildHistoryCard() {
-    Column({ space: 14 }) {
-      Row() {
-        Row({ space: 8 }) {
-          Text('📊').fontSize(FONT_SIZE_3XL)
-          Text($r('app.string.speed_history')).fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
-        }
-        Blank()
-        // 展开/收起按钮
-        if (this.historyList.length > 5) {
-          Row({ space: 4 }) {
-            Text(this.showAllHistory ? '收起' : '展开全部')
-              .fontSize(FONT_SIZE_SM)
-              .fontColor(COLOR_SKY_BLUE)
-            Text(this.showAllHistory ? '∧' : '∨')
-              .fontSize(FONT_SIZE_SM)
-              .fontColor(COLOR_SKY_BLUE)
-          }
-          .padding({ left: 12, right: 12, top: 6, bottom: 6 })
-          .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_TAG_BG)
-          .borderRadius(8)
-          .onClick(() => {
-            this.showAllHistory = !this.showAllHistory
-          })
-        }
-      }.width('100%')
-
-      if (this.historyList.length > 0) {
-        // 可滚动的历史记录列表
-        Column() {
-          Scroll() {
-            Column({ space: 12 }) {
-              ForEach(this.showAllHistory ? this.historyList : this.historyList.slice(0, 5),
-                (item: SpeedTestResult) => {
-                  this.buildHistoryRow(item)
-                }, (item: SpeedTestResult): string => item.timestamp)
-            }
-          }
-          .scrollBar(BarState.Off)
-          .height(this.showAllHistory ? 300 : undefined)
-        }
-
-        // 底部提示（仅展开时显示）
-        if (this.showAllHistory && this.historyList.length > 5) {
-          Text(`共 ${this.historyList.length} 条记录`)
-            .fontSize(FONT_SIZE_XS)
-            .fontColor(adaptiveTextTertiary(this.isDarkMode))
-            .margin({ top: 8 })
-        }
-      } else {
-        Column({ space: 12 }) {
-          Text('📈').fontSize(42)
-          Text($r('app.string.no_test_record')).fontSize(FONT_SIZE_XL).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }
-        .width('100%')
-        .padding({ top: 28, bottom: 28 })
-        .justifyContent(FlexAlign.Center)
-        .alignItems(HorizontalAlign.Center)
-      }
-    }
-    .width('100%')
-    .padding({ left: 18, right: 18, top: 18, bottom: 18 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(20)
-    .backdropBlur(GLASS_BLUR_XL)
-    .borderWidth(1)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
-    .shadow({ radius: GLASS_SHADOW_XL, color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_SKY_BLUE_GAUGE_BG, offsetX: 0, offsetY: 3 })
-  }
-
-  @Builder buildHistoryRow(item: SpeedTestResult) {
-    Row({ space: 12 }) {
-      Column().width(3).height(56).borderRadius(2)
-        .linearGradient({ angle: 180, colors: [[COLOR_SKY_BLUE, 0.0], [COLOR_SKY_BLUE_LIGHT, 1.0]] })
-
-      Column({ space: SPACE_SM }) {
-        Row({ space: 20 }) {
-          Row({ space: SPACE_SM }) {
-            Text('↓').fontSize(FONT_SIZE_LG).fontColor(COLOR_SKY_BLUE).fontWeight(FontWeight.Bold)
-            Text(item.downloadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
-            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-          Row({ space: SPACE_SM }) {
-            Text('↑').fontSize(FONT_SIZE_LG).fontColor(COLOR_SUCCESS).fontWeight(FontWeight.Bold)
-            Text(item.uploadSpeed.toFixed(1)).fontSize(FONT_SIZE_2XL).fontWeight(FONT_WEIGHT_MEDIUM).fontColor(adaptiveTextPrimary(this.isDarkMode))
-            Text('Mbps').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-        }
-        Text(item.timeLabel).fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }.alignItems(HorizontalAlign.Start).layoutWeight(1)
-
-      Column({ space: 2 }) {
-        Text(item.pingMs.toFixed(0)).fontSize(FONT_SIZE_4XL).fontWeight(FONT_WEIGHT_BOLD)
-          .fontColor(item.pingMs < 30 ? COLOR_SUCCESS : (item.pingMs < 80 ? COLOR_WARNING : COLOR_DANGER))
-        Text('ms').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }
-      .alignItems(HorizontalAlign.Center)
-      .padding({ left: 14, right: 14, top: 10, bottom: 10 })
-      .backgroundColor(
-        this.isDarkMode ?
-          (item.pingMs < 30 ? 'rgba(16,185,129,0.25)' : (item.pingMs < 80 ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.25)')) :
-          (item.pingMs < 30 ? 'rgba(16,185,129,0.1)' : (item.pingMs < 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)'))
-      )
-      .borderRadius(12)
-    }
-    .width('100%')
-    .onClick(() => {
-      this.selectedResult = item
-      this.showDetailPopupWithAnimation()
-    })
-  }
-
-  // 节点选择弹窗 - WiFi详细卡片样式 + 线性弹出动画
-  @Builder buildServerPopup() {
-    Stack({ alignContent: Alignment.Center }) {
-      // 遮罩
-      Column()
-        .width('100%').height('100%')
-        .backgroundColor(this.isDarkMode ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)')
-        .opacity(this.serverPopupOpacity)
-        .onClick(() => { this.hideServerPanelWithAnimation() })
-
-      // 弹窗内容 - 线性缩放动画，居中显示
-      Column() {
-        // 拖动手柄
-        Column().width(36).height(4).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(74,144,217,0.40)').borderRadius(2)
-          .margin({ top: 12, bottom: 14 })
-
-        // 标题栏
-        Row() {
-          Text($r('app.string.select_speed_server'))
-            .fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
-          Blank()
-          Column() {
-            Text('✕').fontSize(FONT_SIZE_2XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : COLOR_SKY_BLUE)
-          }
-          .width(36).height(36)
-          .justifyContent(FlexAlign.Center)
-          .alignItems(HorizontalAlign.Center)
-          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.1)' : COLOR_GLASS_SKY_TAG_BG)
-          .borderRadius(10)
-          .onClick(() => { this.hideServerPanelWithAnimation() })
-        }
-        .width('100%')
-        .padding({ left: 18, right: 18, bottom: 14 })
-
-        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(74,144,217,0.15)')
-
-        // 节点列表
-        Scroll() {
-          Column({ space: 3 }) {
-            ForEach(SERVER_NODES, (server: ServerNode, index: number) => {
-              Row() {
-                // 选中指示竖线
-                Column().width(4).height(24).borderRadius(2)
-                  .backgroundColor(index === this.selectedServerIndex ? COLOR_SKY_BLUE : 'transparent')
-                  .margin({ right: 12 })
-                Text(server.name)
-                  .fontSize(FONT_SIZE_2XL)
-                  .fontColor(index === this.selectedServerIndex ? COLOR_SKY_BLUE : adaptiveTextPrimary(this.isDarkMode))
-                  .layoutWeight(1)
-                if (server.latencyMs > 0) {
-                  Text(server.latencyMs + 'ms')
-                    .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
-                    .padding({ left: 10, right: 10, top: 4, bottom: 4 })
-                    .backgroundColor(this.isDarkMode ? 'rgba(74,144,217,0.2)' : COLOR_GLASS_SKY_TAG_BG)
-                    .borderRadius(8)
-                    .margin({ right: 8 })
-                }
-                if (index === this.selectedServerIndex) {
-                  Text('✓').fontSize(FONT_SIZE_XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.9)' : COLOR_SKY_BLUE).fontWeight(FontWeight.Bold)
-                }
-              }
-              .width('100%')
-              .padding({ top: 12, bottom: 12, left: 12, right: 16 })
-              .backgroundColor(index === this.selectedServerIndex ? (this.isDarkMode ? 'rgba(74,144,217,0.15)' : COLOR_GLASS_SKY_ACTIVE) : 'transparent')
-              .borderRadius(12)
-              .onClick(() => {
-                this.selectedServerIndex = index
-                this.hideServerPanelWithAnimation()
-              })
-            }, (server: ServerNode): string => server.id)
-          }
-          .padding({ left: 12, right: 12, top: 10, bottom: 24 })
-        }
-        .edgeEffect(EdgeEffect.Spring)
-        .scrollBar(BarState.Off)
-        .layoutWeight(1)
-        .width('100%')
-      }
-      .width('88%')  // 宽度改为88%，居中显示
-      .constraintSize({ maxHeight: '55%' })
-      // WiFi 详细卡片样式：半透明白色 + 毛玻璃边框 + 阴影
-      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.78)' : 'rgba(255,255,255,0.78)')
-      .borderRadius(20)
-      .shadow({ radius: 8, color: 'rgba(0,0,0,0.10)', offsetX: 0, offsetY: 2 })
-      .backdropBlur(10)
-      .borderWidth(1)
-      .borderColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.20)')
-      // 线性弹出动画：中心缩放
-      .scale({ x: this.serverPopupScale, y: this.serverPopupScale, centerX: '50%', centerY: '50%' })
-    }
-  }
-
-  // 测速详情弹窗 - 天蓝色毛玻璃风格
-  @Builder buildDetailPopup() {
-    Stack({ alignContent: Alignment.Center }) {
-      // 遮罩
-      Column()
-        .width('100%').height('100%')
-        .backgroundColor(this.isDarkMode ? 'rgba(0,0,0,0.55)' : 'rgba(0,0,0,0.25)')
-        .opacity(this.detailPopupOpacity)
-        .onClick(() => { this.hideDetailPopupWithAnimation() })
-
-      // 弹窗内容
-      Column({ space: 16 }) {
-        // 拖动手柄
-        Column().width(36).height(4).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(74,144,217,0.40)').borderRadius(2)
-          .margin({ top: 12, bottom: 8 })
-
-        // 标题栏
-        Row() {
-          Row({ space: 8 }) {
-            Text('📊').fontSize(FONT_SIZE_3XL)
-            Text('测速详情').fontSize(FONT_SIZE_3XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(adaptiveTextPrimary(this.isDarkMode))
-          }
-          Blank()
-          Column() {
-            Text('✕').fontSize(FONT_SIZE_2XL).fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : COLOR_SKY_BLUE)
-          }
-          .width(36).height(36)
-          .justifyContent(FlexAlign.Center)
-          .alignItems(HorizontalAlign.Center)
-          .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.1)' : COLOR_GLASS_SKY_TAG_BG)
-          .borderRadius(10)
-          .onClick(() => { this.hideDetailPopupWithAnimation() })
-        }
-        .width('100%')
-        .padding({ left: 18, right: 18, bottom: 8 })
-
-        Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(74,144,217,0.15)')
-
-        // 主要内容 - 可滚动
-        Scroll() {
-          Column({ space: 18 }) {
-            // 下载速度
-            this.buildDetailItem('↓ 下载速度',
-              this.selectedResult ? this.selectedResult.downloadSpeed.toFixed(1) : '0.0',
-              'Mbps',
-              COLOR_SKY_BLUE)
-
-            // 上传速度
-            this.buildDetailItem('↑ 上传速度',
-              this.selectedResult ? this.selectedResult.uploadSpeed.toFixed(1) : '0.0',
-              'Mbps',
-              COLOR_SUCCESS)
-
-            // Ping 延迟
-            this.buildDetailItem('⊙ 延迟 (Ping)',
-              this.selectedResult ? this.selectedResult.pingMs.toFixed(0) : '0',
-              'ms',
-              COLOR_WARNING)
-
-            // Jitter 抖动
-            this.buildDetailItem('⚡ 抖动 (Jitter)',
-              this.selectedResult ? this.selectedResult.jitterMs.toFixed(0) : '0',
-              'ms',
-              COLOR_SKY_BLUE_LIGHT)
-
-            // 测试时间
-            if (this.selectedResult) {
-              this.buildDetailItem('🕐 测试时间',
-                this.selectedResult.timeLabel || '未知',
-                '',
-                adaptiveTextSecondary(this.isDarkMode))
-            }
-
-            // 服务器
-            if (this.selectedResult && this.selectedResult.serverName) {
-              this.buildDetailItem('📡 测试服务器',
-                this.selectedResult.serverName,
-                '',
-                adaptiveTextSecondary(this.isDarkMode))
-            }
-          }
-          .padding({ left: 18, right: 18, top: 10, bottom: 24 })
-        }
-        .layoutWeight(1)
-        .width('100%')
-        .scrollBar(BarState.Off)
-      }
-      .width('88%')
-      .constraintSize({ maxHeight: '65%' })
-      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.78)' : 'rgba(255,255,255,0.78)')
-      .borderRadius(20)
-      .shadow({ radius: 8, color: 'rgba(0,0,0,0.10)', offsetX: 0, offsetY: 2 })
-      .backdropBlur(10)
-      .borderWidth(1)
-      .borderColor(this.isDarkMode ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.20)')
-      .scale({ x: this.detailPopupScale, y: this.detailPopupScale, centerX: '50%', centerY: '50%' })
-    }
-  }
-
-  @Builder buildDetailItem(label: string, value: string, unit: string, valueColor: string) {
-    Column({ space: 6 }) {
-      Text(label).fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      Row({ space: 6 }) {
-        Text(value).fontSize(FONT_SIZE_4XL).fontWeight(FONT_WEIGHT_BOLD).fontColor(valueColor)
-        if (unit.length > 0) {
-          Text(unit).fontSize(FONT_SIZE_LG).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }
-      }
-    }
-    .width('100%')
-    .alignItems(HorizontalAlign.Start)
-    .padding({ top: 10, bottom: 10 })
   }
 
   // 显示详情弹窗（线性动画）
@@ -754,12 +315,15 @@ export struct SpeedTestSection {
       onCancelled: (): void => { this.onCancelled() }
     }
 
+    this.speedSamples = []
     this.engine.startTest(serverId, '', callbacks)
+    this.detectedNetworkType = SpeedTestEngine.getCurrentNetworkType()
   }
 
   private onPhaseChanged(phase: string): void {
     this.currentPhase = phase
     switch (phase) {
+      case 'selecting': this.phaseLabel = 'selecting'; this.gaugeProgress = 0.02; break
       case 'ping': this.phaseLabel = 'ping'; this.gaugeProgress = 0.05; break
       case 'download':
         this.phaseLabel = 'download'
@@ -783,11 +347,30 @@ export struct SpeedTestSection {
     this.displayDownloadSpeed = speed
     const progress: number = Math.min(speed / 300, 0.65)
     this.gaugeProgress = 0.25 + progress * 0.45
+    this.addSample(speed, 'download')
   }
+
+  private lastSampleTime: number = 0
 
   private onUploadProgress(speed: number): void {
     this.displaySpeed = speed
     this.displayUploadSpeed = speed
+    this.addSample(speed, 'upload')
+  }
+
+  private addSample(speedMbps: number, phase: string): void {
+    const now: number = Date.now()
+    // 限流：最少 400ms 采一次
+    if (now - this.lastSampleTime < 400) return
+    this.lastSampleTime = now
+    // 最多 30 个采样点
+    if (this.speedSamples.length >= 30) return
+    const sample: SpeedSample = {
+      timeMs: now,
+      speedMbps: speedMbps,
+      phase: phase
+    }
+    this.speedSamples = [...this.speedSamples, sample]
   }
 
   private onPingResult(ping: number, jitter: number): void {
@@ -797,19 +380,22 @@ export struct SpeedTestSection {
   }
 
   private onComplete(result: SpeedTestResult): void {
-    console.log('[SpeedTest] Complete:', JSON.stringify(result))
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Complete: ' + JSON.stringify(result))
     this.isTesting = false
     this.displayDownloadSpeed = result.downloadSpeed
     this.displayUploadSpeed = result.uploadSpeed
     this.displayPing = result.pingMs
     this.displayJitter = result.jitterMs
+    this.displayBufferbloatDownloadMs = result.bufferbloatDownloadMs
+    this.displayBufferbloatUploadMs = result.bufferbloatUploadMs
     this.displaySpeed = result.downloadSpeed
     this.currentPhase = 'done'
-    this.addToHistory(result)
+    this.historyList = addToHistory(this.historyList, result)
+    this.doSaveHistory()
   }
 
   private onError(error: string): void {
-    console.error('[SpeedTest] Error:', error)
+    hilog.error(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Error: ' + error)
     this.isTesting = false
     this.currentPhase = 'error'
     this.phaseLabel = 'error'
@@ -822,122 +408,26 @@ export struct SpeedTestSection {
     this.phaseLabel = 'cancelled'
   }
 
-  private addToHistory(result: SpeedTestResult): void {
-    const newList: Array<SpeedTestResult> = [result]
-    for (let i = 0; i < this.historyList.length; i++) {
-      newList.push(this.historyList[i])
-    }
-    while (newList.length > 20) {
-      newList.pop()
-    }
-    this.historyList = newList
-    this.saveHistory(newList)
-  }
-
-  // 异步保存历史记录
-  private saveHistory(list: Array<SpeedTestResult>): void {
-    try {
-      const jsonStr: string = JSON.stringify(list)
-      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
-      preferences.getPreferences(context, 'speedtest_data').then((pref: preferences.Preferences) => {
-        pref.put('history_list', jsonStr).then(() => {
-          pref.flush()
-        }).catch((e: Object) => {
-          console.warn('[SpeedTest] Failed to flush history:', e)
-        })
-      }).catch((e: Object) => {
-        console.warn('[SpeedTest] Failed to get preferences:', e)
-      })
-    } catch (e) {
-      console.warn('[SpeedTest] Failed to save history:', e)
-    }
-  }
-
-  // 异步加载历史记录（不返回Promise，内部更新状态）
-  private loadHistoryAsync(): void {
-    try {
-      const context = this.getUIContext().getHostContext() as common.UIAbilityContext
-      preferences.getPreferences(context, 'speedtest_data').then((pref: preferences.Preferences) => {
-        pref.get('history_list', '[]').then((value: Object) => {
-          const jsonStr: string = String(value)
-          try {
-            const parsed: Array<SpeedTestResult> = JSON.parse(jsonStr)
-            if (parsed && parsed.length > 0) {
-              this.historyList = parsed
-            }
-          } catch (parseError) {
-            console.warn('[SpeedTest] Failed to parse history:', parseError)
-            this.historyList = []
-          }
-        }).catch((e: Object) => {
-          console.warn('[SpeedTest] Failed to get history:', e)
-          this.historyList = []
-        })
-      }).catch((e: Object) => {
-        console.warn('[SpeedTest] Failed to get preferences:', e)
-        this.historyList = []
-      })
-    } catch (e) {
-      console.warn('[SpeedTest] Failed to load history:', e)
-      this.historyList = []
-    }
-  }
-
   private getServerName(): string {
     if (this.selectedServerIndex < SERVER_NODES.length) {
       return SERVER_NODES[this.selectedServerIndex].name
     }
-    return $r('app.string.unknown').toString()
+    return 'Unknown'
   }
 
-  private formatDisplaySpeed(): string {
-    if (this.currentPhase === 'idle' || (this.displaySpeed <= 0 && !this.isTesting)) {
-      return '0.0'
-    }
-    return this.displaySpeed.toFixed(1)
-  }
-
-  private getSpeedLabelResource(): Resource {
-    if (this.currentPhase === 'done') return $r('app.string.download_speed')
-    if (this.currentPhase === 'download') return $r('app.string.download_in_progress')
-    if (this.currentPhase === 'upload') return $r('app.string.upload_in_progress')
-    if (this.currentPhase === 'ping') return $r('app.string.latency_testing')
-    return $r('app.string.tap_to_start')
-  }
-
-  private getPingColor(): string {
-    if (this.displayPing < 30) return COLOR_SUCCESS
-    if (this.displayPing < 80) return COLOR_WARNING
-    return COLOR_DANGER
-  }
-
-  private getGaugeShadowColor(): string {
-    switch (this.currentPhase) {
-      case 'ping': return 'rgba(251,191,36,0.5)'
-      case 'download': return 'rgba(14,165,233,0.5)'
-      case 'upload': return 'rgba(52,211,153,0.5)'
-      case 'done': return 'rgba(52,211,153,0.5)'
-      case 'error': return 'rgba(248,113,113,0.5)'
-      default: return 'rgba(14,165,233,0.3)'
+  private loadHistory(): void {
+    const context = this.getUIContext().getHostContext()
+    if (context) {
+      loadHistoryAsyncWithCallback(context as common.UIAbilityContext, (list: Array<SpeedTestResult>) => {
+        this.historyList = list
+      })
     }
   }
 
-  private getGaugeColor(): string {
-    switch (this.currentPhase) {
-      case 'ping': return COLOR_WARNING
-      case 'download': return COLOR_SKY_BLUE
-      case 'upload': return COLOR_SUCCESS
-      case 'done': return COLOR_SUCCESS
-      case 'error': return COLOR_DANGER
-      case 'idle': return COLOR_SKY_BLUE
-      default: return COLOR_SKY_BLUE
+  private doSaveHistory(): void {
+    const context = this.getUIContext().getHostContext()
+    if (context) {
+      saveHistory(this.historyList, context as common.UIAbilityContext)
     }
-  }
-
-  private getGaugeArcLength(): number {
-    // 基于 GAUGE_SIZE_XL - 16（内圈直径）计算真实圆周长
-    const diameter: number = GAUGE_SIZE_XL - 16
-    const circumference: number = Math.round(Math.PI * diameter)
-    return Math.max(circumference * this.gaugeProgress, 0)
   }
 }

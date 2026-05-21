@@ -26,6 +26,10 @@ import {
   COLOR_GLASS_SURFACE_HIGH,
   COLOR_GLASS_BORDER_LIGHT,
   COLOR_GLASS_BORDER_MEDIUM,
+  COLOR_GLASS_AURORA,
+  COLOR_GLASS_AURORA_LIGHT,
+  COLOR_GLOW_PRIMARY,
+  COLOR_SHADOW_AURORA,
   COLOR_SHADOW_GLASS,
   COLOR_SHADOW_GLASS_STRONG,
   COLOR_TEXT_GLASS_PRIMARY,
@@ -83,7 +87,7 @@ export struct AuroraTabItem {
           Circle()
             .width('100%')
             .height(24)
-            .fill('rgba(74,144,217,0.25)')
+            .fill(COLOR_GLOW_PRIMARY)
         }
       }
       .width(56)
@@ -97,7 +101,7 @@ export struct AuroraTabItem {
           Circle()
             .width(40)
             .height(40)
-            .fill('rgba(74,144,217,0.15)')
+            .fill(COLOR_GLASS_AURORA)
         }
 
         Image(this.isActive ? this.iconActive : this.icon)
@@ -211,7 +215,7 @@ export struct AuroraAIFab {
         Circle()
           .width(64)
           .height(64)
-          .fill('rgba(74,144,217,0.1)')
+          .fill(COLOR_GLASS_AURORA_LIGHT)
 
         // 主按钮
         Column()
@@ -221,7 +225,7 @@ export struct AuroraAIFab {
           .backgroundColor(COLOR_AURORA_PRIMARY)
           .shadow({
             radius: 16,
-            color: 'rgba(74,144,217,0.5)',
+            color: COLOR_SHADOW_AURORA,
             offsetX: 0,
             offsetY: 4
           })

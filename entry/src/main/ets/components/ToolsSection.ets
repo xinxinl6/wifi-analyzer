@@ -18,29 +18,32 @@ import { COLOR_TEXT_PRIMARY, COLOR_TEXT_SECONDARY, COLOR_TEXT_TERTIARY, COLOR_SU
   COLOR_TEXT_GLASS_TERTIARY,
   COLOR_GLASS_DARK_SURFACE,
   COLOR_GLASS_DARK_CARD,
-  COLOR_GLASS_DARK_BORDER } from '@wifi-analyzer/design-system'
+  COLOR_GLASS_DARK_BORDER,
+  COLOR_PRIMARY, COLOR_PRIMARY_LIGHT, COLOR_SUCCESS, COLOR_INFO,
+  COLOR_WARNING, COLOR_DANGER, COLOR_PINK, COLOR_INDIGO,
+  COLOR_CYAN, COLOR_PURPLE, COLOR_ORANGE } from '@wifi-analyzer/design-system'
 import { ToolItem, RouterManager, RouteName } from '@wifi-analyzer/core'
 import { isMediumOrLarger } from '../utils/ResponsiveUtils'
 
 // 工具数据（统一数据源，大屏/手机共用）
 const DIAGNOSTIC_TOOLS: ToolItem[] = [
-  { name: $r('app.string.ping_test'), desc: $r('app.string.desc_test_latency'), icon: $r('app.media.ic_ping'), color: '#0066FF', action: 'ping' },
-  { name: $r('app.string.traceroute'), desc: $r('app.string.desc_trace_route'), icon: $r('app.media.ic_route'), color: '#00D4FF', action: 'traceroute' },
-  { name: $r('app.string.dns_lookup'), desc: $r('app.string.desc_dns_check'), icon: $r('app.media.ic_dns'), color: '#10B981', action: 'dns' },
-  { name: $r('app.string.port_scan'), desc: $r('app.string.desc_port_check'), icon: $r('app.media.ic_port'), color: '#8B5CF6', action: 'portscan' }
+  { name: $r('app.string.ping_test'), desc: $r('app.string.desc_test_latency'), icon: $r('app.media.ic_ping'), color: COLOR_PRIMARY, action: 'ping' },
+  { name: $r('app.string.traceroute'), desc: $r('app.string.desc_trace_route'), icon: $r('app.media.ic_route'), color: COLOR_PRIMARY_LIGHT, action: 'traceroute' },
+  { name: $r('app.string.dns_lookup'), desc: $r('app.string.desc_dns_check'), icon: $r('app.media.ic_dns'), color: COLOR_SUCCESS, action: 'dns' },
+  { name: $r('app.string.port_scan'), desc: $r('app.string.desc_port_check'), icon: $r('app.media.ic_port'), color: COLOR_INFO, action: 'portscan' }
 ]
 
 const NETWORK_TOOLS: ToolItem[] = [
-  { name: $r('app.string.subnet_calc'), desc: $r('app.string.desc_subnet_calc'), icon: $r('app.media.ic_subnet'), color: '#F59E0B', action: 'subnet' },
-  { name: $r('app.string.poe_calc'), desc: $r('app.string.desc_poe_calc'), icon: $r('app.media.ic_poe'), color: '#EF4444', action: 'poe' },
-  { name: $r('app.string.ip_geo'), desc: $r('app.string.desc_ip_query'), icon: $r('app.media.ic_ip'), color: '#EC4899', action: 'ipgeo' },
-  { name: $r('app.string.mac_lookup'), desc: $r('app.string.desc_mac_query'), icon: $r('app.media.ic_mac'), color: '#6366F1', action: 'maclookup' }
+  { name: $r('app.string.subnet_calc'), desc: $r('app.string.desc_subnet_calc'), icon: $r('app.media.ic_subnet'), color: COLOR_WARNING, action: 'subnet' },
+  { name: $r('app.string.poe_calc'), desc: $r('app.string.desc_poe_calc'), icon: $r('app.media.ic_poe'), color: COLOR_DANGER, action: 'poe' },
+  { name: $r('app.string.ip_geo'), desc: $r('app.string.desc_ip_query'), icon: $r('app.media.ic_ip'), color: COLOR_PINK, action: 'ipgeo' },
+  { name: $r('app.string.mac_lookup'), desc: $r('app.string.desc_mac_query'), icon: $r('app.media.ic_mac'), color: COLOR_INDIGO, action: 'maclookup' }
 ]
 
 const ADVANCED_TOOLS: ToolItem[] = [
-  { name: $r('app.string.wake_on_lan'), desc: $r('app.string.desc_wol'), icon: $r('app.media.ic_wol'), color: '#14B8A6', action: 'wol' },
-  { name: $r('app.string.lan_scan'), desc: $r('app.string.desc_lan_scan'), icon: $r('app.media.ic_lan'), color: '#A855F7', action: 'lanscan' },
-  { name: $r('app.string.roam_test'), desc: $r('app.string.desc_roam_test'), icon: $r('app.media.ic_roaming'), color: '#F97316', action: 'roamtest' }
+  { name: $r('app.string.wake_on_lan'), desc: $r('app.string.desc_wol'), icon: $r('app.media.ic_wol'), color: COLOR_CYAN, action: 'wol' },
+  { name: $r('app.string.lan_scan'), desc: $r('app.string.desc_lan_scan'), icon: $r('app.media.ic_lan'), color: COLOR_PURPLE, action: 'lanscan' },
+  { name: $r('app.string.roam_test'), desc: $r('app.string.desc_roam_test'), icon: $r('app.media.ic_roaming'), color: COLOR_ORANGE, action: 'roamtest' }
 ]
 
 @Component
@@ -132,7 +135,7 @@ export struct ToolsSection {
         .width(36)
         .height(36)
         .borderRadius(9)
-        .backgroundColor('#0066FF')
+        .backgroundColor(COLOR_PRIMARY)
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Center)
 
@@ -156,7 +159,7 @@ export struct ToolsSection {
       .width('100%')
       .height(60)
       .padding({ left: 14, right: 14 })
-      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.85)' : COLOR_SURFACE)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_SURFACE)
       .borderRadius(RADIUS_LG)
       .shadow({ radius: CARD_SHADOW_RADIUS, color: COLOR_CARD_SHADOW, offsetX: 0, offsetY: 1 })
       .onClick(() => { RouterManager.navigate('about') })
@@ -233,7 +236,7 @@ export struct ToolsSection {
         })
       }
       .width('100%')
-      .backgroundColor(this.isDarkMode ? 'rgba(20,38,72,0.85)' : COLOR_SURFACE)
+      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_SURFACE)
       .borderRadius(RADIUS_LG)
       .shadow({ radius: CARD_SHADOW_RADIUS, color: COLOR_CARD_SHADOW, offsetX: 0, offsetY: 1 })
       .clip(true)

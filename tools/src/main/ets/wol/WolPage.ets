@@ -16,66 +16,53 @@ import {
   adaptiveBackgroundList, adaptiveGlowLarge, adaptiveGlowMedium,
   adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adaptiveDivider
 } from '@wifi-analyzer/design-system'
-import { BackButtonGlass, PulseIndicator } from '@wifi-analyzer/design-system'
+import { BackButtonGlass } from '@wifi-analyzer/design-system'
 import {
   WolEngine, WolDevice, WolResult, WolCallbacks,
 } from '../wol/WolEngine'
 import { RouterManager } from '@wifi-analyzer/core'
+import { WolInfoCard } from './WolInfoCard'
+import { WolDeviceList } from './WolDeviceList'
+import { WolSendingState, WolErrorTip } from './WolSendingState'
+import { WolLastResult } from './WolLastResult'
 
 @Component
 export struct WolPage {
   @StorageLink('isDarkMode') isDarkMode: boolean = false
 
-  // UI 状态：'idle' | 'sending'
   @State viewMode: string = 'idle'
   @State sendingDeviceName: string = ''
-
-  // 设备列表
   @State deviceList: WolDevice[] = []
-
-  // 添加设备表单
   @State showAddForm: boolean = false
   @State newDeviceName: string = ''
   @State newDeviceMac: string = ''
   @State newDeviceIp: string = ''
-
-  // 唤醒结果
   @State lastResult: WolResult | null = null
   @State showError: boolean = false
-  @State errorMessage: string = ''
+  @State errorMessage: string | Resource = ''
 
-  // 引擎
   private engine: WolEngine = new WolEngine()
-
-  // 脉冲动画
-  private pulser: PulseIndicator = new PulseIndicator()
 
   aboutToAppear(): void {
     this.deviceList = this.engine.getDevices()
   }
 
-  aboutToDisappear(): void {
-    this.pulser.stop()
-  }
   // ==================== 业务逻辑 ====================
 
   async sendWake(device: WolDevice): Promise<void> {
     this.sendingDeviceName = device.name
     this.viewMode = 'sending'
     this.showError = false
-    this.pulser.start(800)
 
     const callbacks: WolCallbacks = {
       onSuccess: (result: WolResult): void => {
         this.lastResult = result
-        this.pulser.stop()
         this.viewMode = 'idle'
         this.deviceList = this.engine.getDevices()
       },
       onError: (message: string): void => {
         this.errorMessage = message
         this.showError = true
-        this.pulser.stop()
         this.viewMode = 'idle'
       }
     }
@@ -86,7 +73,7 @@ export struct WolPage {
   addDevice(): void {
     const mac: string = WolEngine.normalizeMac(this.newDeviceMac)
     if (mac.length === 0) {
-      this.errorMessage = 'MAC地址格式不正确'
+      this.errorMessage = $r('app.string.wol_mac_invalid')
       this.showError = true
       return
     }
@@ -107,11 +94,6 @@ export struct WolPage {
     this.newDeviceIp = ''
   }
 
-  removeDevice(mac: string): void {
-    this.engine.removeDevice(mac)
-    this.deviceList = this.engine.getDevices()
-  }
-
   addFromPreset(name: string): void {
     this.newDeviceName = name
     this.newDeviceMac = ''
@@ -122,7 +104,6 @@ export struct WolPage {
   // ==================== 页面入口 ====================
   build() {
     Stack() {
-      // ===== Aurora 天蓝渐变背景 =====
       Column() {}
         .width('100%')
         .height('100%')
@@ -131,7 +112,6 @@ export struct WolPage {
           colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
-      // 极光装饰光晕
       Circle()
         .width(280)
         .height(280)
@@ -144,9 +124,7 @@ export struct WolPage {
         .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
 
-      // 主内容
       Column() {
-        // 顶部返回按钮栏
         Row() {
           BackButtonGlass({ onBack: () => RouterManager.goBack() })
           Blank()
@@ -157,38 +135,34 @@ export struct WolPage {
 
         Scroll() {
           Column({ space: SPACE_LG }) {
-            // 提示信息
-            this.InfoCard()
+            WolInfoCard({ isDarkMode: this.isDarkMode, onAddFromPreset: (name: string) => this.addFromPreset(name) })
 
-            // 快速添加预设
-            this.QuickPresets()
+            WolDeviceList({
+              isDarkMode: this.isDarkMode,
+              deviceList: this.deviceList,
+              showAddForm: this.showAddForm,
+              newDeviceName: this.newDeviceName,
+              newDeviceMac: this.newDeviceMac,
+              newDeviceIp: this.newDeviceIp,
+              onSendWake: (device: WolDevice) => this.sendWake(device),
+              onToggleAddForm: () => { this.showAddForm = !this.showAddForm },
+              onCancelAdd: () => { this.showAddForm = false },
+              onConfirmAdd: () => this.addDevice(),
+              onNameChange: (value: string) => { this.newDeviceName = value },
+              onMacChange: (value: string) => { this.newDeviceMac = value },
+              onIpChange: (value: string) => { this.newDeviceIp = value }
+            })
 
-            // 设备列表
-            if (this.deviceList.length > 0) {
-              this.DeviceListSection()
-            }
-
-            // 添加设备按钮
-            this.AddDeviceButton()
-
-            // 添加表单
-            if (this.showAddForm) {
-              this.AddDeviceForm()
-            }
-
-            // 唤醒状态
             if (this.viewMode === 'sending') {
-              this.SendingState()
+              WolSendingState({ isDarkMode: this.isDarkMode, sendingDeviceName: this.sendingDeviceName })
             }
 
-            // 错误提示
             if (this.showError) {
-              this.ErrorTip()
+              WolErrorTip({ isDarkMode: this.isDarkMode, errorMessage: this.errorMessage })
             }
 
-            // 最近唤醒结果
             if (this.lastResult) {
-              this.LastResultCard()
+              WolLastResult({ isDarkMode: this.isDarkMode, lastResult: this.lastResult })
             }
 
             this.FeatureCard()
@@ -205,314 +179,7 @@ export struct WolPage {
     .width('100%').height('100%')
   }
 
-  // 提示信息卡
-  @Builder InfoCard() {
-    Column({ space: SPACE_MD }) {
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(44).height(44)
-            .fill(this.isDarkMode ? 'rgba(34,211,238,0.15)' : '#E0F7FE')
-          Image($r('app.media.ic_wol')).width(24).height(24).fillColor(COLOR_CYAN)
-        }
-        Column({ space: 4 }) {
-          Text($r('app.string.remote_wake'))
-            .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-          Text($r('app.string.remote_wake_desc'))
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-      }
-    }
-    .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
-    .backdropBlur(GLASS_BLUR_LG)
-    .shadow({
-      radius: GLASS_SHADOW_LG,
-      color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT,
-      offsetX: 0,
-      offsetY: 4
-    })
-    .clip(true)
-  }
-
-  // 快速添加预设
-  @Builder QuickPresets() {
-    Column({ space: SPACE_SM }) {
-      Text($r('app.string.quick_add'))
-        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode)).alignSelf(ItemAlign.Start)
-
-      Flex({ wrap: FlexWrap.Wrap }) {
-        ForEach(WolEngine.DEVICE_PRESETS, (preset: WolDevice) => {
-          Text(preset.name)
-            .fontSize(FONT_SIZE_XS)
-            .fontColor(COLOR_CYAN)
-            .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_XS, bottom: SPACE_XS })
-            .backgroundColor(this.isDarkMode ? 'rgba(34,211,238,0.15)' : '#E0F7FE')
-            .borderRadius(999)
-            .stateStyles({ pressed: { opacity: 0.8 } })
-            .onClick(() => this.addFromPreset(preset.name))
-        }, (preset: WolDevice): string => preset.name)
-      }
-      .width('100%')
-    }
-    .width('100%').alignItems(HorizontalAlign.Start)
-  }
-
-  // 设备列表
-  @Builder DeviceListSection() {
-    Column({ space: SPACE_SM }) {
-      Row() {
-        Text($r('app.string.saved_devices'))
-          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-        Blank()
-        Text() {
-          Span(String(this.deviceList.length))
-          Span(' ')
-          Span($r('app.string.devices_count'))
-        }.fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }
-      .width('100%')
-
-      ForEach(this.deviceList, (device: WolDevice, index: number) => {
-        this.DeviceRow(device, index)
-      }, (device: WolDevice, index: number): string => device.mac)
-    }
-    .width('100%')
-  }
-
-  @Builder DeviceRow(device: WolDevice, index: number) {
-    Row({ space: SPACE_MD }) {
-      Stack({ alignContent: Alignment.Center }) {
-        Circle().width(40).height(40)
-          .fill(device.lastWakeTime > 0
-            ? (this.isDarkMode ? 'rgba(16,185,129,0.15)' : '#ECFDF5')
-            : (this.isDarkMode ? 'rgba(255,255,255,0.08)' : COLOR_GLASS_WHITE))
-        Image($r('app.media.ic_wol')).width(20).height(20)
-          .fillColor(device.lastWakeTime > 0 ? COLOR_SUCCESS : adaptiveTextTertiary(this.isDarkMode))
-      }
-
-      Column({ space: 4 }) {
-        Text(device.name)
-          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_MEDIUM)
-        Row({ space: SPACE_SM }) {
-          Text(device.mac).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          if (device.lastWakeTime > 0) {
-            Text(' | ').fontSize(FONT_SIZE_XS).fontColor(adaptiveDivider(this.isDarkMode))
-            Text(WolEngine.formatLastWakeTime(device.lastWakeTime)).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-        }
-      }
-      .alignItems(HorizontalAlign.Start).layoutWeight(1)
-
-      Button($r('app.string.wake_action'))
-        .fontSize(FONT_SIZE_SM).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_CYAN)
-        .borderRadius(999).height(32)
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.sendWake(device))
-    }
-    .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
-    .backdropBlur(GLASS_BLUR_LG)
-    .shadow({
-      radius: GLASS_SHADOW_LG,
-      color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT,
-      offsetX: 0,
-      offsetY: 4
-    })
-    .clip(true)
-  }
-
-  // 添加设备按钮
-  @Builder AddDeviceButton() {
-    Button() {
-      Row({ space: 6 }) {
-        Text('+')
-          .fontSize(FONT_SIZE_LG)
-          .fontColor(COLOR_CYAN)
-        Text() {
-          Span($r('app.string.add_device_action'))
-        }
-        .fontSize(FONT_SIZE_MD).fontColor(COLOR_CYAN).fontWeight(FONT_WEIGHT_MEDIUM)
-      }
-    }
-    .width('100%').height(48)
-    .backgroundColor(this.isDarkMode ? 'rgba(34,211,238,0.12)' : '#E0F7FE')
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? 'rgba(34,211,238,0.3)' : COLOR_CYAN)
-    .stateStyles({ pressed: { opacity: 0.8 } })
-    .onClick(() => { this.showAddForm = !this.showAddForm })
-  }
-
-  // 添加设备表单
-  @Builder AddDeviceForm() {
-    Column({ space: SPACE_MD }) {
-      Row() {
-        Text($r('app.string.add_device_action'))
-          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-        Blank()
-        Text($r('app.string.cancel_action'))
-          .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          .onClick(() => { this.showAddForm = false })
-      }
-      .width('100%')
-
-      // 设备名称
-      this.FormInput(
-        $r('app.string.device_name'),
-        $r('app.string.device_name_placeholder'),
-        this.newDeviceName,
-        (value: string) => { this.newDeviceName = value }
-      )
-
-      // MAC地址
-      this.FormInput(
-        $r('app.string.mac_label'),
-        $r('app.string.mac_placeholder'),
-        this.newDeviceMac,
-        (value: string) => { this.newDeviceMac = value }
-      )
-
-      // 广播地址
-      this.FormInput(
-        $r('app.string.ip_label'),
-        $r('app.string.ip_optional_placeholder'),
-        this.newDeviceIp,
-        (value: string) => { this.newDeviceIp = value }
-      )
-
-      Button($r('app.string.confirm_add'))
-        .fontSize(FONT_SIZE_MD).fontColor(Color.White).fontWeight(FONT_WEIGHT_MEDIUM)
-        .backgroundColor(COLOR_CYAN)
-        .borderRadius(999).height(48)
-        .width('100%')
-        .stateStyles({ pressed: { opacity: 0.8 } })
-        .onClick(() => this.addDevice())
-    }
-    .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER)
-    .backdropBlur(GLASS_BLUR_LG)
-    .shadow({
-      radius: GLASS_SHADOW_LG,
-      color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT,
-      offsetX: 0,
-      offsetY: 4
-    })
-    .clip(true)
-  }
-
-  @Builder FormInput(label: ResourceStr, placeholder: ResourceStr, value: string, onChange: (value: string) => void) {
-    Row({ space: SPACE_SM }) {
-      Text(label)
-        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode)).width(70)
-      TextInput({ placeholder: placeholder, text: value })
-        .layoutWeight(1).fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode))
-        .placeholderColor(adaptiveTextTertiary(this.isDarkMode))
-        .backgroundColor(Color.Transparent)
-        .onChange((val: string) => onChange(val))
-    }
-    .width('100%')
-    .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_SM, bottom: SPACE_SM })
-    .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)')
-    .borderRadius(12)
-  }
-
-  // 发送中状态
-  @Builder SendingState() {
-    Row({ space: SPACE_MD }) {
-      Stack({ alignContent: Alignment.Center }) {
-        Circle().width(40).height(40).fill(COLOR_CYAN).opacity(this.pulser.opacity)
-        Image($r('app.media.ic_wol')).width(20).height(20).fillColor(Color.White)
-      }
-      Text() {
-        Span($r('app.string.sending_wake_packet'))
-        Span(' ' + this.sendingDeviceName + ' ')
-        Span($r('app.string.sending_wake_packet_suffix'))
-      }
-        .fontSize(FONT_SIZE_MD).fontColor(COLOR_CYAN)
-        .layoutWeight(1)
-    }
-    .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? 'rgba(34,211,238,0.12)' : '#E0F7FE')
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? 'rgba(34,211,238,0.3)' : COLOR_CYAN)
-    .clip(true)
-  }
-
-  // 错误提示
-  @Builder ErrorTip() {
-    Row({ space: SPACE_SM }) {
-      Text('!')
-        .fontSize(FONT_SIZE_SM).fontColor(Color.White).fontWeight(FONT_WEIGHT_BOLD)
-        .width(24).height(24).textAlign(TextAlign.Center)
-        .backgroundColor(COLOR_DANGER).borderRadius(12)
-      Text(this.errorMessage).fontSize(FONT_SIZE_SM).fontColor(COLOR_DANGER)
-    }
-    .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-    .backgroundColor(this.isDarkMode ? 'rgba(239,68,68,0.12)' : '#FEF2F2')
-    .borderRadius(18)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? 'rgba(239,68,68,0.3)' : COLOR_DANGER)
-    .clip(true)
-  }
-
-  // 最近唤醒结果
-  @Builder LastResultCard() {
-    if (this.lastResult) {
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(40).height(40)
-            .fill(this.lastResult.success
-              ? (this.isDarkMode ? 'rgba(16,185,129,0.15)' : '#ECFDF5')
-              : (this.isDarkMode ? 'rgba(239,68,68,0.15)' : '#FEF2F2'))
-          Text(this.lastResult.success ? '✓' : '!').fontSize(FONT_SIZE_LG)
-            .fontColor(this.lastResult.success ? COLOR_SUCCESS : COLOR_DANGER)
-        }
-        Column({ space: 4 }) {
-          Text(this.lastResult.success ? $r('app.string.wake_success') : $r('app.string.wake_failed'))
-            .fontSize(FONT_SIZE_MD).fontColor(this.lastResult.success ? COLOR_SUCCESS : COLOR_DANGER)
-            .fontWeight(FONT_WEIGHT_MEDIUM)
-          Text(this.lastResult.deviceName + ' (' + this.lastResult.mac + ')')
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-      }
-      .width('100%')
-      .padding({ left: 16, right: 14, top: 14, bottom: 14 })
-      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-      .borderRadius(18)
-      .borderWidth(1.5)
-      .borderColor(this.lastResult.success
-        ? (this.isDarkMode ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.3)')
-        : (this.isDarkMode ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.3)'))
-      .backdropBlur(GLASS_BLUR_LG)
-      .shadow({
-        radius: GLASS_SHADOW_LG,
-        color: this.isDarkMode ? 'rgba(0,0,0,0.3)' : COLOR_GLASS_SKY_LIGHT,
-        offsetX: 0,
-        offsetY: 4
-      })
-      .clip(true)
-    }
-  }
-
-  // 功能说明卡片
+  // ==================== 功能说明卡片（内联） ====================
   @Builder FeatureCard() {
     Column({ space: 0 }) {
       Text($r('app.string.usage_intro'))
@@ -522,11 +189,11 @@ export struct WolPage {
         .padding({ left: 16, right: 14, top: 14, bottom: 12 })
 
       Column({ space: 0 }) {
-        this.FeatureItem('🔮', '网络唤醒', '通过Magic Packet远程开启电脑')
+        this.FeatureItem('🔮', $r('app.string.wol_network_wake'), $r('app.string.wol_wake_desc'))
         Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
-        this.FeatureItem('📡', '广播支持', '向255.255.255.255广播地址发送')
+        this.FeatureItem('📡', $r('app.string.wol_broadcast_support'), $r('app.string.wol_broadcast_desc'))
         Column().width('100%').height(0.5).backgroundColor(adaptiveDivider(this.isDarkMode))
-        this.FeatureItem('💾', '设备保存', '常用设备自动保存，快速唤醒')
+        this.FeatureItem('💾', $r('app.string.wol_device_save'), $r('app.string.wol_device_save_desc'))
       }
     }
     .width('100%')
@@ -544,11 +211,11 @@ export struct WolPage {
     .clip(true)
   }
 
-  @Builder FeatureItem(emoji: string, title: string, desc: string) {
+  @Builder FeatureItem(emoji: string, title: string | Resource, desc: string | Resource) {
     Row({ space: 14 }) {
       Stack({ alignContent: Alignment.Center }) {
         Circle().width(38).height(38)
-          .fill(this.isDarkMode ? 'rgba(34,211,238,0.12)' : '#E0F7FE')
+          .fill(this.isDarkMode ? COLOR_GLASS_SKY_ACTIVE : '#E0F7FE')
         Text(emoji).fontSize(16)
       }
 

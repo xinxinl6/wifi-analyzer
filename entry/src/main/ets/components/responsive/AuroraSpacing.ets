@@ -3,6 +3,7 @@
 // ============================================
 
 import { auroraResponsive, getLayoutMode, AuroraLayoutMode } from './AuroraBreakpoints'
+import { COLOR_SHADOW_GLASS, COLOR_SHADOW_GLASS_STRONG, COLOR_SHADOW_AURORA } from '@wifi-analyzer/design-system'
 
 // ============================================
 // Aurora 间距 Token
@@ -234,35 +235,35 @@ export const AuroraShadow = {
   // 轻微阴影
   sm: {
     radius: 8,
-    color: 'rgba(0,0,0,0.12)',
+    color: COLOR_SHADOW_GLASS,
     offsetX: 0,
     offsetY: 2
   },
   // 标准阴影
   md: {
     radius: 16,
-    color: 'rgba(0,0,0,0.16)',
+    color: COLOR_SHADOW_GLASS_STRONG,
     offsetX: 0,
     offsetY: 4
   },
   // 强阴影
   lg: {
     radius: 24,
-    color: 'rgba(0,0,0,0.20)',
+    color: COLOR_SHADOW_GLASS_STRONG,
     offsetX: 0,
     offsetY: 8
   },
   // 悬浮阴影（底部导航）
   floating: {
     radius: 32,
-    color: 'rgba(0,0,0,0.25)',
+    color: COLOR_SHADOW_GLASS_STRONG,
     offsetX: 0,
     offsetY: -8
   },
   // Aurora 光晕阴影
   aurora: {
     radius: 20,
-    color: 'rgba(74,144,217,0.25)',
+    color: COLOR_SHADOW_AURORA,
     offsetX: 0,
     offsetY: 4
   }

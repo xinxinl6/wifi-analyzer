@@ -8,12 +8,17 @@ import { adaptiveTextPrimary, adaptiveTextSecondary, adaptiveTextTertiary, adapt
   COLOR_GLASS_WHITE, COLOR_GLASS_SKY_LIGHT, COLOR_GLASS_SKY_ACTIVE,
   COLOR_GLASS_SKY_TAG_BG, COLOR_GLASS_SKY_TAG_BORDER, COLOR_GLASS_SKY_SHADOW_MED,
   COLOR_GLASS_DARK_CARD, COLOR_GLASS_DARK_BORDER,
+  COLOR_SKY_BLUE_GAUGE_BG, COLOR_SIGNAL_TEXT_ON_BG,
   FONT_SIZE_XS, FONT_SIZE_SM, FONT_SIZE_MD, FONT_SIZE_LG, FONT_SIZE_XL, FONT_SIZE_2XL, FONT_SIZE_3XL,
   FONT_WEIGHT_MEDIUM, FONT_WEIGHT_BOLD,
   SPACE_XS, SPACE_SM, SPACE_MD, SPACE_LG,
   GLASS_BLUR_LG, GLASS_BLUR_MD, GLASS_BLUR_XL,
   GLASS_SHADOW_SM, GLASS_SHADOW_LG, GLASS_SHADOW_XL } from '@wifi-analyzer/design-system'
 import { PingResult, PingStats, PingSessionSummary } from './PingTestPage'
+import { PingMode, getDuration } from '../utils/NativePing'
+import { PingStatsCard } from './PingStatsCard'
+import { PingLiveChart } from './PingLiveChart'
+import { PingTrendChart } from './PingTrendChart'
 
 // ==================== Props 接口 ====================
 export interface TestingViewProps {
@@ -32,10 +37,12 @@ export interface TestingViewProps {
   chartMinMs: number
   chartMaxMs: number
   lastPingResult: PingResult | null
+  pingMode: PingMode
   isChartBest: (item: PingResult) => boolean
   isChartWorst: (item: PingResult) => boolean
   onEndTest: () => void
   onTogglePause: () => void
+  onToggleMode: () => void
   onChartModeChange: (mode: string) => void
 }
 
@@ -43,28 +50,30 @@ export interface TestingViewProps {
 @Component
 export struct TestingView {
   @Prop isDarkMode: boolean = false
-  @State pingHistory: PingResult[] = []
-  @State sessionStats: PingStats = {
+  @Prop pingHistory: PingResult[] = []
+  @Prop sessionStats: PingStats = {
     sentCount: 0, receivedCount: 0, lossRate: 0,
     minTime: 0, maxTime: 0, avgTime: 0, jitter: 0, stabilityScore: 0
   }
-  @State sessionSummaries: PingSessionSummary[] = []
-  @State targetHost: string = ''
-  @State resolvedIp: string = ''
-  @State isTesting: boolean = false
-  @State isPaused: boolean = false
-  @State chartMode: string = 'live'
-  @State chartData: PingResult[] = []
-  @State chartMaxY: number = 100
-  @State chartAvgMs: number = 0
-  @State chartMinMs: number = 0
-  @State chartMaxMs: number = 0
-  @State lastPingResult: PingResult | null = null
+  @Prop sessionSummaries: PingSessionSummary[] = []
+  @Prop targetHost: string = ''
+  @Prop resolvedIp: string = ''
+  @Prop isTesting: boolean = false
+  @Prop isPaused: boolean = false
+  @Prop chartMode: string = 'live'
+  @Prop chartData: PingResult[] = []
+  @Prop chartMaxY: number = 100
+  @Prop chartAvgMs: number = 0
+  @Prop chartMinMs: number = 0
+  @Prop chartMaxMs: number = 0
+  @Prop lastPingResult: PingResult | null = null
+  @Prop pingMode: PingMode = PingMode.FAST
 
   isChartBest: (item: PingResult) => boolean = () => false
   isChartWorst: (item: PingResult) => boolean = () => false
   onEndTest: () => void = () => {}
   onTogglePause: () => void = () => {}
+  onToggleMode: () => void = () => {}
   onChartModeChange: (mode: string) => void = () => {}
 
   build() {
@@ -80,7 +89,16 @@ export struct TestingView {
 
         // 统计概览
         if (this.pingHistory.length > 0) {
-          this.StatsOverviewCard()
+          PingStatsCard({
+            sentCount: this.sessionStats.sentCount,
+            receivedCount: this.sessionStats.receivedCount,
+            lossRate: this.sessionStats.lossRate,
+            maxTime: this.sessionStats.maxTime,
+            minTime: this.sessionStats.minTime,
+            avgTime: this.sessionStats.avgTime,
+            jitter: this.sessionStats.jitter,
+            stabilityScore: this.sessionStats.stabilityScore
+          })
         }
 
         // 图表卡片
@@ -91,7 +109,7 @@ export struct TestingView {
         // 操作按钮
         this.ActionButtons()
       }
-      .padding({ left: SPACE_LG, right: SPACE_LG, top: SPACE_MD, bottom: 100 })
+      .padding({ left: SPACE_LG, right: SPACE_LG, top: 0, bottom: 100 })
       .width('100%')
     }
     .edgeEffect(EdgeEffect.Spring)
@@ -104,10 +122,10 @@ export struct TestingView {
     Row({ space: 14 }) {
       // 图标容器
       Stack({ alignContent: Alignment.Center }) {
-        Circle().width(44).height(44).fill(this.isDarkMode ? 'rgba(14,165,233,0.12)' : COLOR_GLASS_SKY_LIGHT)
+        Circle().width(44).height(44).fill(this.isDarkMode ? COLOR_GLASS_SKY_ACTIVE : COLOR_GLASS_SKY_LIGHT)
         Circle().width(36).height(36)
           .fill(this.isTesting ? (this.isPaused ? COLOR_WARNING : COLOR_SKY_BLUE) : COLOR_SUCCESS)
-        Image($r('app.media.ic_ping')).width(18).height(18).fillColor('#FFFFFF')
+        Image($r('app.media.ic_ping')).width(18).height(18).fillColor(adaptiveTextPrimary(this.isDarkMode))
       }
 
       Column({ space: 4 }) {
@@ -124,6 +142,11 @@ export struct TestingView {
               .fontSize(FONT_SIZE_XS)
               .fontColor(adaptiveTextTertiary(this.isDarkMode))
           }
+          // 当前 Ping 模式标签
+          Text(this.pingMode === PingMode.FAST ? $r('app.string.ping_fast_mode') : $r('app.string.ping_accurate_mode'))
+            .fontSize(FONT_SIZE_XS)
+            .fontColor(COLOR_SKY_BLUE)
+            .fontWeight(FONT_WEIGHT_MEDIUM)
           if (this.isTesting) {
             Row({ space: 4 }) {
               Circle().width(5).height(5)
@@ -195,290 +218,88 @@ export struct TestingView {
       .layoutWeight(1)
     }
     .width('100%')
-    .padding({ left: 16, right: 16, top: 20, bottom: 20 })
-    .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
-    .borderRadius(20)
-    .borderWidth(1.5)
-    .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
-    .backdropBlur(GLASS_BLUR_LG)
-    .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
-  }
-
-  // ==================== 统计概览 — 4 格毛玻璃卡片 ====================
-  @Builder StatsOverviewCard() {
-    Column({ space: 0 }) {
-      // 第一行：发送 / 接收 / 丢包
-      Row() {
-        this.StatCell($r('app.string.ping_count'), String(this.sessionStats.sentCount), COLOR_SKY_BLUE)
-        this.StatDivider()
-        this.StatCell($r('app.string.ping_received'), String(this.sessionStats.receivedCount), COLOR_SUCCESS)
-        this.StatDivider()
-        this.StatCell($r('app.string.ping_loss'), String(this.sessionStats.lossRate) + '%', COLOR_DANGER)
-      }
-      .width('100%')
-
-      Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
-
-      // 第二行：最大 / 最小 / 平均
-      Row() {
-        this.StatCell($r('app.string.ping_max'), this.sessionStats.maxTime > 0 ? String(this.sessionStats.maxTime) + 'ms' : '--', COLOR_SKY_BLUE_LIGHT)
-        this.StatDivider()
-        this.StatCell($r('app.string.ping_min'), this.sessionStats.minTime > 0 ? String(this.sessionStats.minTime) + 'ms' : '--', COLOR_SUCCESS)
-        this.StatDivider()
-        this.StatCell($r('app.string.ping_avg'), this.sessionStats.avgTime > 0 ? String(this.sessionStats.avgTime) + 'ms' : '--', COLOR_SKY_BLUE)
-      }
-      .width('100%')
-
-      Column().width('100%').height(0.5).backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
-
-      // 第三行：抖动 / 稳定性
-      Row() {
-        this.StatCell($r('app.string.jitter'), this.sessionStats.jitter > 0 ? String(this.sessionStats.jitter) + 'ms' : '--', COLOR_WARNING)
-        this.StatDivider()
-        this.StatCell($r('app.string.stability'), String(this.sessionStats.stabilityScore), this.getStabilityColor(this.sessionStats.stabilityScore))
-      }
-      .width('100%')
-    }
-    .width('100%')
+    .padding({ left: 16, right: 16, top: 12, bottom: 12 })
     .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
     .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
-    .clip(true)
-  }
-
-  @Builder StatCell(label: Resource | string, value: string, valueColor: string) {
-    Column({ space: 4 }) {
-      Text(value)
-        .fontSize(FONT_SIZE_2XL)
-        .fontColor(valueColor)
-        .fontWeight(FONT_WEIGHT_BOLD)
-      Text(label)
-        .fontSize(FONT_SIZE_XS)
-        .fontColor(adaptiveTextTertiary(this.isDarkMode))
-    }
-    .layoutWeight(1)
-    .alignItems(HorizontalAlign.Center)
-    .padding({ top: 14, bottom: 14 })
-  }
-
-  @Builder StatDivider() {
-    Column()
-      .width(1).height(36)
-      .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER)
-  }
-
-  getStabilityColor(score: number): string {
-    if (score >= 80) return COLOR_SUCCESS
-    if (score >= 60) return COLOR_SKY_BLUE
-    if (score >= 40) return COLOR_WARNING
-    return COLOR_DANGER
   }
 
   // ==================== 图表卡片 ====================
   @Builder ChartCard() {
     Column({ space: SPACE_SM }) {
-      // 选项卡选择器
+      // 顶部栏：选项卡 + 图例 + 当前值 一行搞定
       Row({ space: SPACE_SM }) {
-        Text($r('app.string.live_chart'))
-          .fontSize(FONT_SIZE_SM)
-          .fontColor(this.chartMode === 'live' ? '#FFFFFF' : COLOR_SKY_BLUE)
-          .fontWeight(this.chartMode === 'live' ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
-          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-          .backgroundColor(this.chartMode === 'live' ? COLOR_SKY_BLUE : 'rgba(14,165,233,0.1)')
-          .borderRadius(999)
-          .borderWidth(1)
-          .borderColor(this.chartMode === 'live' ? COLOR_SKY_BLUE : COLOR_GLASS_SKY_TAG_BORDER)
-          .onClick(() => { this.onChartModeChange('live') })
-          .layoutWeight(1)
+        // 选项卡
+        Row({ space: SPACE_SM }) {
+          Text($r('app.string.live_chart'))
+            .fontSize(FONT_SIZE_XS)
+            .fontColor(this.chartMode === 'live' ? adaptiveTextPrimary(this.isDarkMode) : COLOR_SKY_BLUE)
+            .fontWeight(this.chartMode === 'live' ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
+            .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+            .backgroundColor(this.chartMode === 'live' ? COLOR_SKY_BLUE : COLOR_SKY_BLUE_GAUGE_BG)
+            .borderRadius(999)
+            .onClick(() => { this.onChartModeChange('live') })
 
-        Text($r('app.string.history_trend'))
-          .fontSize(FONT_SIZE_SM)
-          .fontColor(this.chartMode === 'trend' ? '#FFFFFF' : COLOR_SKY_BLUE)
-          .fontWeight(this.chartMode === 'trend' ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
-          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-          .backgroundColor(this.chartMode === 'trend' ? COLOR_SKY_BLUE : 'rgba(14,165,233,0.1)')
-          .borderRadius(999)
-          .borderWidth(1)
-          .borderColor(this.chartMode === 'trend' ? COLOR_SKY_BLUE : COLOR_GLASS_SKY_TAG_BORDER)
-          .onClick(() => { this.onChartModeChange('trend') })
-          .layoutWeight(1)
-      }
-      .width('100%')
+          Text($r('app.string.history_trend'))
+            .fontSize(FONT_SIZE_XS)
+            .fontColor(this.chartMode === 'trend' ? adaptiveTextPrimary(this.isDarkMode) : COLOR_SKY_BLUE)
+            .fontWeight(this.chartMode === 'trend' ? FONT_WEIGHT_BOLD : FONT_WEIGHT_MEDIUM)
+            .padding({ left: 12, right: 12, top: 6, bottom: 6 })
+            .backgroundColor(this.chartMode === 'trend' ? COLOR_SKY_BLUE : COLOR_GLASS_SKY_TAG_BG)
+            .borderRadius(999)
+            .onClick(() => { this.onChartModeChange('trend') })
+        }
 
-      // 图例
-      if (this.chartMode === 'live') {
-        Row({ space: SPACE_LG }) {
-          Row({ space: 4 }) {
-            Circle().width(8).height(8).fill(COLOR_SUCCESS)
-            Text($r('app.string.best')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          }
-          Row({ space: 4 }) {
-            Circle().width(8).height(8).fill(COLOR_DANGER)
-            Text($r('app.string.worst')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          }
-          Row({ space: 4 }) {
-            Circle().width(8).height(8).fill(COLOR_SKY_BLUE)
-            Text($r('app.string.avg')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
+        Blank()
+
+        // 图例（紧凑内联）
+        if (this.chartMode === 'live') {
+          Row({ space: 10 }) {
+            Row({ space: 3 }) { Circle().width(6).height(6).fill(COLOR_SUCCESS); Text($r('app.string.best')).fontSize(9).fontColor(adaptiveTextTertiary(this.isDarkMode)) }
+            Row({ space: 3 }) { Circle().width(6).height(6).fill(COLOR_DANGER); Text($r('app.string.worst')).fontSize(9).fontColor(adaptiveTextTertiary(this.isDarkMode)) }
           }
         }
-        .width('100%')
-        .padding({ top: SPACE_XS })
-      }
 
-      // 图表区域
+        // 实时数值高亮
+        if (this.chartMode === 'live' && this.lastPingResult?.status === 'success') {
+          Text(String(this.lastPingResult.timeMs) + 'ms')
+            .fontSize(13).fontColor(COLOR_SKY_BLUE).fontWeight(FONT_WEIGHT_BOLD)
+        }
+      }
+      .width('100%')
+      .alignItems(VerticalAlign.Center)
+
+      // 图表绘制区 - 使用独立组件
       if (this.chartMode === 'live') {
-        this.BarChartWithData()
+        PingLiveChart({
+          isDarkMode: this.isDarkMode,
+          chartData: this.chartData,
+          chartMaxY: this.chartMaxY,
+          chartAvgMs: this.chartAvgMs,
+          chartMinMs: this.chartMinMs,
+          chartMaxMs: this.chartMaxMs,
+          lastPingResult: this.lastPingResult,
+          isChartBest: this.isChartBest,
+          isChartWorst: this.isChartWorst
+        })
       } else {
-        this.TrendChartBody()
+        PingTrendChart({
+          isDarkMode: this.isDarkMode,
+          sessionSummaries: this.sessionSummaries
+        })
       }
     }
     .width('100%')
-    .padding({ left: 16, right: 14, top: 14, bottom: 14 })
+    .padding({ left: 14, right: 14, top: 12, bottom: 12 })
     .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_WHITE)
     .borderRadius(18)
     .borderWidth(1.5)
     .borderColor(this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_SKY_LIGHT)
     .backdropBlur(GLASS_BLUR_LG)
     .shadow({ radius: GLASS_SHADOW_LG, color: COLOR_GLASS_SKY_LIGHT, offsetX: 0, offsetY: 4 })
-  }
-
-  // ==================== 柱状图数据 ====================
-  @Builder BarChartWithData() {
-    Column() {
-      Row({ space: SPACE_XS }) {
-        // Y 轴刻度列
-        Column({ space: 0 }) {
-          Text(String(Math.round(this.chartMaxY))).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
-          Text(String(Math.round(this.chartMaxY * 0.5))).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
-          Text('0').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(20).textAlign(TextAlign.End)
-        }
-        .height(160).justifyContent(FlexAlign.SpaceBetween).alignItems(HorizontalAlign.End)
-
-        // 图表区域（使用 Stack 叠加）
-        Column() {
-          // 背景网格
-          Column() {
-            Row().width('100%').height(80).backgroundColor('rgba(14,165,233,0.03)')
-            Row().width('100%').height(80).backgroundColor(Color.Transparent)
-          }
-          .width('100%').height(160)
-
-          // 平均值参考线
-          if (this.chartAvgMs > 0) {
-            Row() {
-              Text() {
-                Span($r('app.string.avg_colon'))
-                Span(' ' + String(Math.round(this.chartAvgMs * 10) / 10) + 'ms')
-              }
-                .fontSize(FONT_SIZE_XS).fontColor(COLOR_SKY_BLUE).opacity(0.8)
-            }
-            .width('100%')
-            .height(160)
-            .justifyContent(FlexAlign.Center)
-            .alignItems(VerticalAlign.Top)
-            .margin({ top: Math.max(0, (1 - this.chartAvgMs / this.chartMaxY) * 160) })
-          }
-
-          // 柱子容器
-          Row() {
-            ForEach(this.chartData, (item: PingResult, index: number) => {
-              Column() {
-                // 柱子上部分（透明占位，让柱子底部对齐）
-                Blank()
-                  .height(
-                    item.status === 'success'
-                      ? Math.max(0, 160 - (item.timeMs / this.chartMaxY) * 160)
-                      : 160 - 4
-                  )
-                // 柱子
-                Column()
-                  .width(8)
-                  .height(
-                    item.status === 'success'
-                      ? Math.max(2, (item.timeMs / this.chartMaxY) * 160)
-                      : 4
-                  )
-                  .borderRadius({ topLeft: 2, topRight: 2 })
-                  .backgroundColor(
-                    this.isChartBest(item) ? COLOR_SUCCESS :
-                      (this.isChartWorst(item) ? COLOR_DANGER :
-                        (item.status === 'success' ? COLOR_SKY_BLUE : COLOR_SKY_BLUE_DIVIDER)))
-                // 底部标签
-                Text(String(index + 1))
-                  .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              }
-              .alignItems(HorizontalAlign.Center)
-            }, (item: PingResult, index: number): string => String(index + '_' + item.timestamp))
-          }
-          .width('100%')
-          .padding({ left: 2, right: 2 })
-          .alignItems(VerticalAlign.Bottom)
-        }
-        .width('100%')
-        .layoutWeight(1)
-      }
-      .width('100%')
-    }.width('100%')
-  }
-
-  // ==================== 历史趋势图表 ====================
-  @Builder TrendChartBody() {
-    if (this.sessionSummaries.length === 0) {
-      Column({ space: SPACE_MD }) {
-        Text($r('app.string.no_history_data'))
-          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        Text($r('app.string.chart_hint'))
-          .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }
-      .width('100%').height(180).justifyContent(FlexAlign.Center)
-    } else {
-      Column() {
-        Row({ space: SPACE_XS }) {
-          // Y 轴刻度列
-          Column({ space: 0 }) {
-            Text('100').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
-            Text('50').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
-            Text('0').fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode)).width(24).textAlign(TextAlign.End)
-          }
-          .height(160).justifyContent(FlexAlign.SpaceBetween)
-
-          // 折线图绘制区
-          Stack({ alignContent: Alignment.Bottom }) {
-            Column() {
-              Row().width('100%').height(80).border({ width: { bottom: 0.5 }, color: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_SKY_BLUE_DIVIDER })
-              Row().width('100%').height(80)
-            }.width('100%').height(160)
-
-            Row() {
-              ForEach(this.sessionSummaries, (summary: PingSessionSummary, index: number) => {
-                Column() {
-                  Circle()
-                    .width(8).height(8)
-                    .fill(this.getStabilityColor(summary.stabilityScore))
-                    .margin({ bottom: (summary.stabilityScore / 100) * 160 - 4 })
-
-                  Text(this.formatTime(summary.timestamp))
-                    .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-                    .margin({ top: 4 })
-                }.alignItems(HorizontalAlign.Center)
-              }, (summary: PingSessionSummary, index: number): string => String(index + '_' + summary.timestamp))
-            }.width('100%').padding({ left: 4, right: 4 }).position({ x: 0, y: 0 })
-          }
-          .width('100%').constraintSize({ maxHeight: 160 })
-        }
-        .width('100%')
-      }.width('100%')
-    }
-  }
-
-  private formatTime(timestamp: number): string {
-    const date = new Date(timestamp)
-    const hours = date.getHours().toString().padStart(2, '0')
-    const minutes = date.getMinutes().toString().padStart(2, '0')
-    return `${hours}:${minutes}`
   }
 
   // ==================== 操作按钮 ====================
@@ -491,17 +312,17 @@ export struct TestingView {
       .justifyContent(FlexAlign.Center)
       .layoutWeight(1)
       .padding({ top: 13, bottom: 13 })
-      .backgroundColor(this.isDarkMode ? 'rgba(14,165,233,0.15)' : COLOR_GLASS_SKY_TAG_BG)
+      .backgroundColor(this.isDarkMode ? COLOR_SKY_BLUE_GAUGE_BG : COLOR_GLASS_SKY_TAG_BG)
       .borderRadius(999)
       .borderWidth(1)
-      .borderColor(this.isDarkMode ? 'rgba(14,165,233,0.25)' : COLOR_GLASS_SKY_TAG_BORDER)
+      .borderColor(this.isDarkMode ? COLOR_SKY_BLUE_DIVIDER : COLOR_GLASS_SKY_TAG_BORDER)
       .onClick(() => this.onEndTest())
 
       // 暂停/继续按钮
       Row() {
         Text(this.isPaused ? $r('app.string.continue_action') : $r('app.string.pause_action'))
           .fontSize(FONT_SIZE_MD)
-          .fontColor('#FFFFFF')
+          .fontColor(COLOR_SIGNAL_TEXT_ON_BG)
           .fontWeight(FONT_WEIGHT_BOLD)
       }
       .justifyContent(FlexAlign.Center)

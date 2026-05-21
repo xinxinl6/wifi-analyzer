@@ -4,6 +4,7 @@ import { connection, http } from '@kit.NetworkKit'
 import { wifiManager } from '@kit.ConnectivityKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
+import { PublicIpConfig } from '../config/NetworkConfig'
 
 const DOMAIN = 0xFF00
 const TAG = 'NetworkDiagnostics'
@@ -60,6 +61,10 @@ export class NetworkDiagnostics {
   // 完成回调
   private onComplete?: (result: NetworkDiagnosticsResult) => void
 
+  // 任务完成计数器（localIp, gateway, publicIp 三个任务）
+  private completedTasks: number = 0
+  private totalTasks: number = 3
+
   static getInstance(): NetworkDiagnostics {
     if (!NetworkDiagnostics.instance) {
       NetworkDiagnostics.instance = new NetworkDiagnostics()
@@ -87,6 +92,7 @@ export class NetworkDiagnostics {
       dns: '获取中...',
       isTesting: true
     }
+    this.completedTasks = 0
 
     logInfo('Starting diagnostics...')
 
@@ -118,6 +124,7 @@ export class NetworkDiagnostics {
           if (ip !== '0.0.0.0') {
             this.currentState.localIp = ip
             logInfo('Local IP fetched successfully')
+            this.markTaskComplete()
             return
           }
       }
@@ -127,6 +134,7 @@ export class NetworkDiagnostics {
     }
     this.currentState.localIp = '--'
     logInfo('fetchLocalIp completed: --')
+    this.markTaskComplete()
   }
 
   // 获取网关和DNS - 使用同步API
@@ -168,7 +176,7 @@ export class NetworkDiagnostics {
           // 脱敏：不在日志中输出可能的敏感网络信息
           logInfo('Gateway and DNS fetched successfully')
         }
-        this.notifyComplete()
+        this.markTaskComplete()
         return
       }
     } catch (e) {
@@ -178,17 +186,15 @@ export class NetworkDiagnostics {
 
     this.currentState.gateway = '--'
     this.currentState.dns = '--'
-    this.notifyComplete()
+    this.markTaskComplete()
   }
 
   // 获取公网IP - 使用Promise版本，更可靠
   private async fetchPublicIp(): Promise<void> {
     const apis = [
-      'https://myip.ipip.net',
-      'https://ip.3322.net',
-      'https://pv.sohu.com/ipimsg',
-      'https://api.ipify.org?format=text',
-      'https://checkip.amazonaws.com'
+      PublicIpConfig.PRIMARY_API,
+      PublicIpConfig.FALLBACK_API,
+      PublicIpConfig.THIRD_API,
     ]
 
     for (let i = 0; i < apis.length; i++) {
@@ -207,7 +213,7 @@ export class NetworkDiagnostics {
           if (ip) {
             this.currentState.publicIp = ip
             logInfo('Public IP: ' + ip)
-            this.notifyComplete()
+            this.markTaskComplete()
             return
           }
         }
@@ -220,7 +226,16 @@ export class NetworkDiagnostics {
 
     logWarn('All public IP APIs failed')
     this.currentState.publicIp = '--'
-    this.notifyComplete()
+    this.markTaskComplete()
+  }
+
+  // 标记单个任务完成，当所有任务完成后通知
+  private markTaskComplete(): void {
+    this.completedTasks++
+    logInfo('Task completed: ' + this.completedTasks + '/' + this.totalTasks)
+    if (this.completedTasks >= this.totalTasks) {
+      this.notifyComplete()
+    }
   }
 
   private notifyComplete(): void {

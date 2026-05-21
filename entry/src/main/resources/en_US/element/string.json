@@ -2551,6 +2551,178 @@
     {
       "name": "history_trend_desc",
       "value": "View historical ping records and trends"
+    },
+    {
+      "name": "permission_dialog_title",
+      "value": "Permission Required"
+    },
+    {
+      "name": "permission_dialog_content",
+      "value": "WlAN-Analyzer requires location permission to scan nearby WiFi networks.\n\nTap \"Open Settings\" to enable location permission. We'll continue automatically when you return."
+    },
+    {
+      "name": "continue_usage",
+      "value": "Continue"
+    },
+    {
+      "name": "go_to_settings",
+      "value": "Open Settings"
+    },
+    {
+      "name": "ping_mode_label",
+      "value": "Detection Mode"
+    },
+    {
+      "name": "ping_fast_mode",
+      "value": "Fast"
+    },
+    {
+      "name": "ping_accurate_mode",
+      "value": "Accurate"
+    },
+    {
+      "name": "ping_interval_fast",
+      "value": "1s/interval"
+    },
+    {
+      "name": "ping_interval_accurate",
+      "value": "3s/interval"
+    },
+    {
+      "name": "ping_mode_fast_desc",
+      "value": "1s/interval · Real-time"
+    },
+    {
+      "name": "ping_mode_accurate_desc",
+      "value": "3s/interval · Accurate"
+    },
+    {
+      "name": "speed_estimate",
+      "value": "Est."
+    },
+    {
+      "name": "speed_simulated",
+      "value": "Sim."
+    },
+    {
+      "name": "no_history_data_trend",
+      "value": "No History Data"
+    },
+    {
+      "name": "trend_hint",
+      "value": "Start a Ping test to see results here"
+    },
+    {
+      "name": "avg_label",
+      "value": "Avg:"
+    },
+    {
+      "name": "hidden_network",
+      "value": "(Hidden Network)"
+    },
+    {
+      "name": "ping_records",
+      "value": "Ping Records"
+    },
+    {
+      "name": "history_sessions",
+      "value": "Sessions"
+    },
+    {
+      "name": "no_ping_records",
+      "value": "No Ping Records"
+    },
+    {
+      "name": "ping_records_hint",
+      "value": "Records will appear after testing"
+    },
+    {
+      "name": "total_records",
+      "value": "Total Records"
+    },
+    {
+      "name": "min_latency",
+      "value": "Min Latency"
+    },
+    {
+      "name": "max_latency",
+      "value": "Max Latency"
+    },
+    {
+      "name": "no_history_sessions",
+      "value": "No Sessions"
+    },
+    {
+      "name": "sessions_save_hint",
+      "value": "Summary saved after test ends"
+    },
+    {
+      "name": "ping_count_label",
+      "value": "Ping Count"
+    },
+    {
+      "name": "speed_detail",
+      "value": "Speed Details"
+    },
+    {
+      "name": "speed_download_detail",
+      "value": "Download Speed"
+    },
+    {
+      "name": "speed_upload_detail",
+      "value": "Upload Speed"
+    },
+    {
+      "name": "speed_ping_detail",
+      "value": "Latency"
+    },
+    {
+      "name": "speed_jitter_detail",
+      "value": "Jitter"
+    },
+    {
+      "name": "speed_test_time",
+      "value": "Test Time"
+    },
+    {
+      "name": "speed_test_server",
+      "value": "Test Server"
+    },
+    {
+      "name": "unsupported_url",
+      "value": "Unsupported URL"
+    },
+    {
+      "name": "ai_analyzing",
+      "value": "Analyzing network..."
+    },
+    {
+      "name": "ai_network_optimization",
+      "value": "Network Optimization"
+    },
+    {
+      "name": "blocked_unsafe_url",
+      "value": "Blocked unsafe link"
+    },
+    {
+      "name": "expand_all",
+      "value": "Expand All"
+    },
+    {
+      "name": "health_score_unit",
+      "value": "pts"
+    },
+    {
+      "name": "simulator_data_warning",
+      "value": "Mock data shown. Test on a real device for full functionality."
+    },
+    {
+      "name": "privacy_agreement_title",
+      "value": "Terms & Privacy"
+    },
+    {
+      "name": "swipe_delete",
+      "value": "Delete"
     }
   ]
 }

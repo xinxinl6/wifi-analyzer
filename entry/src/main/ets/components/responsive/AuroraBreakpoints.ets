@@ -197,7 +197,7 @@ export function isFoldable(): boolean {
     const displayInfo = display.getDefaultDisplaySync()
     // 折叠屏通常有特殊的屏幕属性
     return displayInfo.rotation !== 0 || displayInfo.densityDPI > 400
-  } catch {
+  } catch (e) {
     return false
   }
 }
@@ -214,7 +214,7 @@ export function getWindowWidth(): number {
   try {
     const w = window.getLastWindowSync().getWindowProperties().windowRect.width
     return w / (px2vp(1)) // 转换为 vp
-  } catch {
+  } catch (e) {
     const val = AppStorage.get<number>('windowWidth')
     return val ?? 360
   }
@@ -227,7 +227,7 @@ export function getWindowHeight(): number {
   try {
     const h = window.getLastWindowSync().getWindowProperties().windowRect.height
     return h / (px2vp(1))
-  } catch {
+  } catch (e) {
     const val = AppStorage.get<number>('windowHeight')
     return val ?? 720
   }

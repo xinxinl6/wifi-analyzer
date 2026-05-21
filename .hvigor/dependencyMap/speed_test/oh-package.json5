@@ -1,0 +1,1 @@
+{"name":"@wifi-analyzer/speed-test","version":"1.0.0","description":"WiFi Analyzer 测速引擎 — HTTP下载/上传测速、Ping延迟、抖动测量","main":"src/main/ets/Index.ets","author":"","license":"Apache-2.0","dependencies":{"@wifi-analyzer/core":"file:../core"}}

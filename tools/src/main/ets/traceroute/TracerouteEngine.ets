@@ -3,6 +3,9 @@
 
 import http from '@ohos.net.http'
 import connection from '@ohos.net.connection'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0x0000
 
 // ==================== 数据接口 ====================
 
@@ -60,19 +63,51 @@ export class TracerouteEngine {
 
   constructor() {}
 
-  // 检测默认网关 (简化实现)
+  // 检测默认网关（从系统连接属性获取真实值）
   async detectGateway(): Promise<string> {
     try {
       const netHandle = connection.getDefaultNetSync()
-      if (netHandle) {
-        // 尝试获取连接属性以得到网关，但为简化直接使用默认值
-        // 实际项目中可以通过 connection.getConnectionProperties 获取
+      if (netHandle && netHandle.netId !== 0) {
+        const props = connection.getConnectionPropertiesSync(netHandle)
+        if (props && props.routes) {
+          for (let i = 0; i < props.routes.length; i++) {
+            const route = props.routes[i]
+            if (route && route.hasGateway && route.gateway) {
+              const gwAddr = route.gateway as connection.NetAddress
+              if (gwAddr && gwAddr.address && gwAddr.address !== '0.0.0.0') {
+                console.info('[TracerouteEngine] detected gateway:', gwAddr.address)
+                return gwAddr.address
+              }
+            }
+          }
+        }
       }
     } catch (e) {
-      console.error('[TracerouteEngine] detectGateway error:', e)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[TracerouteEngine] detectGateway error: ' + e)
     }
-    // 返回默认网关
     return '192.168.1.1'
+  }
+
+  // 检测系统DNS服务器（从系统连接属性获取真实值）
+  async detectDns(): Promise<string> {
+    try {
+      const netHandle = connection.getDefaultNetSync()
+      if (netHandle && netHandle.netId !== 0) {
+        const props = connection.getConnectionPropertiesSync(netHandle)
+        if (props && props.dnses) {
+          for (let i = 0; i < props.dnses.length; i++) {
+            const d = props.dnses[i]
+            if (d && d.address && !d.address.startsWith('::') && d.address !== '0.0.0.0') {
+              console.info('[TracerouteEngine] detected DNS:', d.address)
+              return d.address
+            }
+          }
+        }
+      }
+    } catch (e) {
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[TracerouteEngine] detectDns error: ' + e)
+    }
+    return '223.5.5.5'
   }
 
   // DNS 解析
@@ -86,7 +121,7 @@ export class TracerouteEngine {
         }
       }
     } catch (e) {
-      console.error('[TracerouteEngine] resolveHost error:', e)
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[TracerouteEngine] resolveHost error: ' + e)
     }
     return {
       address: hostname,

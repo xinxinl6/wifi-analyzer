@@ -8,7 +8,7 @@ import { COLOR_TEXT_PRIMARY, COLOR_SURFACE,
 export struct StatusBar {
   build() {
     Row() {
-      Text('WlAN-分析仪')
+      Text($r('app.string.app_name_wifi_analyzer'))
         .fontSize(FONT_SIZE_4XL)
         .fontWeight(FONT_WEIGHT_BOLD)
         .fontColor(COLOR_TEXT_PRIMARY)

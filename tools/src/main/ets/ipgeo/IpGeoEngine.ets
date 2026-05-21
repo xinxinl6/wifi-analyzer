@@ -3,6 +3,9 @@
 
 import { http } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+
+const DOMAIN = 0x0000
 
 // IP 归属查询结果
 export interface IpGeoResult {
@@ -50,15 +53,21 @@ interface IpSimpleResult {
   isp: string
 }
 
+// 公网IP查询API条目
+interface IpQueryApiEntry {
+  url: string
+  parser: (text: string) => string
+}
+
 export class IpGeoEngine {
-  // 备用 API 列表
+  // 备用 API 列表（全部使用 HTTPS）
   private static readonly API_URLS: string[] = [
-    'http://ip-api.com/json/',
     'https://ipinfo.io/json',
+    'https://ipapi.co/json/',
   ]
 
-  // 国内 API（支持中文）
-  private static readonly CN_API_URL: string = 'http://whois.pconline.com.cn/ipJson.jsp?ip='
+  // 国内 API（支持中文，使用 HTTPS）
+  private static readonly CN_API_URL: string = 'https://whois.pconline.com.cn/ipJson.jsp?ip='
 
   // 查询历史
   private history: string[] = []
@@ -78,43 +87,45 @@ export class IpGeoEngine {
   }
 
   /**
-   * 查询当前设备公网 IP
+   * 查询当前设备公网 IP（多API降级：国内优先 → 海外备选）
+   * API列表：ipip.net / ip.sb / ip3322 / sohu / ipinfo.io / ipify
    */
   async queryMyIp(): Promise<string> {
-    try {
-      const req = http.createHttp()
-      const options: IpGeoHttpOptions = {
-        method: http.RequestMethod.GET,
-        connectTimeout: 5000,
-        readTimeout: 5000,
-      }
+    // 国内API优先，响应更快更稳定
+    const apis: IpQueryApiEntry[] = [
+      { url: 'https://myip.ipip.net', parser: (t: string): string => { const m = t.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/); return m ? m[1] : '' } },
+      { url: 'https://ip.sb/ip', parser: (t: string): string => t.trim() },
+      { url: 'https://ip.3322.net', parser: (t: string): string => t.trim() },
+      { url: 'https://pv.sohu.com/ipimsg', parser: (t: string): string => { const m = t.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/); return m ? m[1] : '' } },
+      // 海外备选
+      { url: 'https://ipinfo.io/json', parser: (t: string): string => { try { const j: Record<string, string> = JSON.parse(t) as Record<string, string>; return j['ip'] || '' } catch (e) { return '' } } },
+      { url: 'https://api.ipify.org?format=json', parser: (t: string): string => { try { const j: Record<string, string> = JSON.parse(t) as Record<string, string>; return j['ip'] || '' } catch (e) { return '' } } }
+    ]
 
-      const ipStr: string = await new Promise<string>((resolve: (v: string) => void, reject: (e: Error) => void) => {
-        req.request(
-          'https://api.ipify.org?format=json',
-          options,
-          (err: BusinessError, resp: http.HttpResponse): void => {
-            req.destroy()
-            if (err) {
-              reject(new Error(err.message))
-              return
-            }
-            try {
-              const resultStr: string = resp.result as string
-              const jsonObj: Record<string, string> = JSON.parse(resultStr) as Record<string, string>
-              resolve(jsonObj['ip'] || '')
-            } catch (e2) {
-              reject(new Error('JSON解析失败'))
-            }
+    for (let i = 0; i < apis.length; i++) {
+      try {
+        const req = http.createHttp()
+        const result = await req.request(apis[i].url, {
+          method: http.RequestMethod.GET,
+          connectTimeout: 4000,
+          readTimeout: 4000,
+        })
+        req.destroy()
+
+        if (result.responseCode === 200 && result.result) {
+          const ip: string = apis[i].parser(result.result.toString())
+          if (ip && ip !== '0.0.0.0' && !ip.startsWith('::')) {
+            console.info(`[IpGeoEngine] queryMyIp success via ${apis[i].url}: ${ip}`)
+            return ip
           }
-        )
-        setTimeout((): void => reject(new Error('超时')), 6000)
-      })
-
-      return ipStr
-    } catch (e) {
-      return ''
+        }
+      } catch (e) {
+        hilog.warn(DOMAIN, 'testTag', '%{public}s', '[IpGeoEngine] queryMyIp fallback ' + (i + 1) + '/' + apis.length + ' failed: ' + apis[i].url)
+      }
     }
+
+    hilog.error(DOMAIN, 'testTag', '%{public}s', '[IpGeoEngine] queryMyIp all APIs failed')
+    return ''
   }
 
   /**
@@ -168,7 +179,7 @@ export class IpGeoEngine {
 
       const result: IpGeoResult = await new Promise<IpGeoResult>((resolve: (v: IpGeoResult) => void, reject: (e: Error) => void) => {
         req.request(
-          'http://ip-api.com/json/' + ip + '?lang=zh-CN',
+          'https://ipapi.co/' + ip + '/json/',
           options,
           (err: BusinessError, resp: http.HttpResponse): void => {
             req.destroy()
@@ -179,18 +190,19 @@ export class IpGeoEngine {
             try {
               const resultStr: string = resp.result as string
               const data: Record<string, string> = JSON.parse(resultStr) as Record<string, string>
-              const status: string = data['status'] || 'fail'
+              // ipapi.co 格式：无 status 字段，有 error 字段表示失败
+              const hasError: boolean = data['error'] !== undefined
 
-              if (status === 'success') {
+              if (!hasError) {
                 const geoResult: IpGeoResult = {
-                  ip: data['query'] || ip,
-                  country: data['country'] || '',
-                  province: data['regionName'] || '',
+                  ip: data['ip'] || ip,
+                  country: data['country_name'] || data['country'] || '',
+                  province: data['region'] || '',
                   city: data['city'] || '',
-                  isp: data['isp'] || '',
+                  isp: data['org'] || '',
                   district: '',
-                  latitude: parseFloat(data['lat'] || '0'),
-                  longitude: parseFloat(data['lon'] || '0'),
+                  latitude: parseFloat(data['latitude'] || '0'),
+                  longitude: parseFloat(data['longitude'] || '0'),
                   timezone: data['timezone'] || '',
                   queryTime: Date.now() - startTime,
                   status: 'success',
@@ -198,7 +210,7 @@ export class IpGeoEngine {
                 }
                 resolve(geoResult)
               } else {
-                const errMsg: string = data['message'] || '查询失败'
+                const errMsg: string = data['reason'] || '查询失败'
                 resolve(this.makeErrorResult(ip, errMsg, Date.now() - startTime))
               }
             } catch (e2) {

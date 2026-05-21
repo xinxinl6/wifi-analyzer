@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WiFi Analyzer - Icon Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 50%, #f5f7fa 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 8px;
+    }
+    
+    .header h1 span { color: #0066FF; }
+    
+    .header p {
+      font-size: 15px;
+      color: #64748b;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    
+    .icon-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px 16px 20px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,102,255,0.08);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    
+    .icon-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,102,255,0.14);
+    }
+    
+    .icon-card img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin-bottom: 16px;
+      image-rendering: -webkit-optimize-contrast;
+    }
+    
+    .icon-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+    
+    .icon-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      grid-column: 1 / -1;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0066FF;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding-top: 8px;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 8px;
+    }
+    
+    .section-title:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #0066FF, #00d4ff);
+      color: white;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px; }
+      body { padding: 24px 12px; }
+      .header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="header">
+    <div class="badge">v3.0 Ultra HD Icons</div>
+    <h1><span>WiFi Analyzer</span> 图标库预览</h1>
+    <p>现代扁平化设计 · 蓝白信号美学 · 透明背景 · 96×96 px 超高分辨率 (2倍缩放)</p>
+    <p style="font-size: 13px; color: #10B981; margin-top: 8px; font-weight: 500;">
+      ✅ 已升级到96×96像素超高分辨率，专为高清显示设备优化
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <div class="section-title">底部导航 (Tab Bar)</div>
+
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_home.png" alt="Home">
+      <div class="icon-name">ic_home</div>
+      <div class="icon-desc">首页 · 首页导航</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_wifi.png" alt="WiFi">
+      <div class="icon-name">ic_wifi</div>
+      <div class="icon-desc">WiFi · WiFi列表</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_chart.png" alt="Chart">
+      <div class="icon-name">ic_chart</div>
+      <div class="icon-desc">图表 · 信道分析</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_speed.png" alt="Speed">
+      <div class="icon-name">ic_speed</div>
+      <div class="icon-desc">速度 · 测速工具</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_tool.png" alt="Tool">
+      <div class="icon-name">ic_tool</div>
+      <div class="icon-desc">工具 · 工具箱</div>
+    </div>
+
+
+    <div class="section-title">状态与交互 (Status)</div>
+
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_battery.png" alt="Battery">
+      <div class="icon-name">ic_battery</div>
+      <div class="icon-desc">电池 · 电量状态</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_arrow_down.png" alt="Arrow Down">
+      <div class="icon-name">ic_arrow_down</div>
+      <div class="icon-desc">下箭头 · 展开</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_arrow_up.png" alt="Arrow Up">
+      <div class="icon-name">ic_arrow_up</div>
+      <div class="icon-desc">上箭头 · 上传</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_arrow_right.png" alt="Arrow Right">
+      <div class="icon-name">ic_arrow_right</div>
+      <div class="icon-desc">右箭头 · 跳转</div>
+    </div>
+
+
+    <div class="section-title">诊断工具 (Diagnostic)</div>
+
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_ping.png" alt="Ping">
+      <div class="icon-name">ic_ping</div>
+      <div class="icon-desc">Ping测试</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_route.png" alt="Route">
+      <div class="icon-name">ic_route</div>
+      <div class="icon-desc">路由追踪</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_dns.png" alt="DNS">
+      <div class="icon-name">ic_dns</div>
+      <div class="icon-desc">DNS查询</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_port.png" alt="Port">
+      <div class="icon-name">ic_port</div>
+      <div class="icon-desc">端口扫描</div>
+    </div>
+
+
+    <div class="section-title">网络工具 (Network Tools)</div>
+
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_subnet.png" alt="Subnet">
+      <div class="icon-name">ic_subnet</div>
+      <div class="icon-desc">子网换算</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_poe.png" alt="PoE">
+      <div class="icon-name">ic_poe</div>
+      <div class="icon-desc">PoE计算器</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_ip.png" alt="IP">
+      <div class="icon-name">ic_ip</div>
+      <div class="icon-desc">IP归属查询</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_mac.png" alt="MAC">
+      <div class="icon-name">ic_mac</div>
+      <div class="icon-desc">MAC厂商查询</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_wol.png" alt="WoL">
+      <div class="icon-name">ic_wol</div>
+      <div class="icon-desc">Wake On LAN</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_lan.png" alt="LAN">
+      <div class="icon-name">ic_lan</div>
+      <div class="icon-desc">局域网扫描</div>
+    </div>
+
+
+    <div class="section-title">功能模块 (Features)</div>
+
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_roaming.png" alt="Roaming">
+      <div class="icon-name">ic_roaming</div>
+      <div class="icon-desc">漫游测试</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_device.png" alt="Device">
+      <div class="icon-name">ic_device</div>
+      <div class="icon-desc">查找终端</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_surround.png" alt="Surround">
+      <div class="icon-name">ic_surround</div>
+      <div class="icon-desc">周边WiFi</div>
+    </div>
+    <div class="icon-card">
+      <img src="entry/src/main/resources/base/media/ic_channel.png" alt="Channel">
+      <div class="icon-name">ic_channel</div>
+      <div class="icon-desc">信道分析</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

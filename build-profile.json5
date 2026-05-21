@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer02_sbJvcVsAPfdLR7N58c9oksrrrH9nOGnoinsh9cgBJgo=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001BA3DEE93A8D61B92343AA37915C6D32B84EF08D9B3500C9927C72EA685C7B5AC946160AD438C11B",
-          "profile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer02_sbJvcVsAPfdLR7N58c9oksrrrH9nOGnoinsh9cgBJgo=.p7b",
+          "storeFile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release.p12",
+          "storePassword": "0000001A95A0988BEE9FC696B295A9738EE15DB79EE2384E3D50165E9FCCE45C3A94A65397474452C9AC",
+          "keyAlias": "releaseKey",
+          "keyPassword": "0000001A971F4976CA0B536AFD26635FD1CE109C512EF55958779C4638A254667763E7906C157F8CED9F",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\xinxin\\.ohos\\config\\default_wifi-analyzer02_sbJvcVsAPfdLR7N58c9oksrrrH9nOGnoinsh9cgBJgo=.p12",
-          "storePassword": "0000001BE7CF2B33B11E5BE3B65D5F43608F66C0B4742D637D85737731D84B221D335E22E3A2024B2168FA"
+          "profile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-profileRelease.p7b",
+          "certpath": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release.cer"
         }
       }
     ],
@@ -32,10 +32,37 @@
     ],
     "buildModeSet": [
       {
-        "name": "debug",
+        "name": "debug"
       },
       {
         "name": "release"
+      }
+    ],
+    "capabilities": [
+      {
+        "bundleName": "com.xinxin.analyzer",
+        "config": [
+          {
+            "name": "webAccessServiceForAIQA",
+            "capability": "webAccessServiceForAIQA"
+          },
+          {
+            "name": "Push Kit",
+            "capability": "com.huawei.service.push.base_service"
+          },
+          {
+            "name": "Device status detection",
+            "capability": "com.huawei.service.device_security.device_verify"
+          },
+          {
+            "name": "Map Kit",
+            "capability": "com.huawei.service.mapkit"
+          },
+          {
+            "name": "Safety Detect",
+            "capability": "com.huawei.service.device_security.safety_detect"
+          }
+        ]
       }
     ]
   },

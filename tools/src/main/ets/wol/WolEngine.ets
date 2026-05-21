@@ -100,7 +100,7 @@ export class WolEngine {
 
     const packet: string = WolEngine.generateMagicPacket(mac)
     if (packet.length === 0) {
-      callbacks.onError('Magic Packet 生成失败')
+      callbacks.onError('Magic Packet生成失败')
       return
     }
 
@@ -173,6 +173,7 @@ export class WolEngine {
 
   /**
    * 获取上次唤醒时间格式化
+   * 注意：时间单位保留硬编码，因为它们是格式化模板的一部分
    */
   static formatLastWakeTime(timestamp: number): string {
     if (timestamp === 0) return '从未唤醒'

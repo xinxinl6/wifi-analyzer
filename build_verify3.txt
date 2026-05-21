@@ -1,0 +1,189 @@
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mUP-TO-DATE :design_system:default@PreBuild...  [39m
+> hvigor [32mUP-TO-DATE :core:default@PreBuild...  [39m
+> hvigor [32mUP-TO-DATE :speed_test:default@PreBuild...  [39m
+> hvigor [32mUP-TO-DATE :tools:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateMetadata...  [39m
+> hvigor [32mFinished :entry:default@PreCheckSyscap... after 1 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgSdkInfo... after 6 ms [39m
+> hvigor [32mFinished :entry:default@ProcessIntegratedHsp... after 2 ms [39m
+> hvigor [32mUP-TO-DATE :design_system:default@CreateHarBuildProfile...  [39m
+> hvigor [32mFinished :design_system:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :design_system:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :core:default@CreateHarBuildProfile...  [39m
+> hvigor [32mFinished :core:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :core:default@MergeProfile...  [39m
+> hvigor [32mFinished :entry:default@SyscapTransform... after 21 ms [39m
+> hvigor [32mFinished :design_system:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :speed_test:default@CreateHarBuildProfile...  [39m
+> hvigor [32mUP-TO-DATE :tools:default@CreateHarBuildProfile...  [39m
+> hvigor [32mFinished :core:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :speed_test:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :tools:default@MergeProfile...  [39m
+> hvigor [32mFinished :design_system:default@BuildNativeWithNinja... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
+> hvigor [32mFinished :core:default@BuildNativeWithNinja... after 1 ms [39m
+> hvigor [32mFinished :speed_test:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mFinished :tools:default@ConfigureCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :design_system:default@ProcessLibs...  [39m
+> hvigor [32mUP-TO-DATE :core:default@ProcessLibs...  [39m
+> hvigor [32mFinished :speed_test:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mFinished :tools:default@BuildNativeWithCmake... after 1 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MakePackInfo...  [39m
+> hvigor [32mUP-TO-DATE :design_system:default@DoNativeStrip...  [39m
+> hvigor [32mUP-TO-DATE :core:default@DoNativeStrip...  [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 57 ms [39m
+> hvigor [32mFinished :speed_test:default@BuildNativeWithNinja... after 1 ms [39m
+> hvigor [32mFinished :tools:default@BuildNativeWithNinja... after 1 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 38 ms [39m
+> hvigor [32mUP-TO-DATE :speed_test:default@ProcessLibs...  [39m
+> hvigor [32mUP-TO-DATE :tools:default@ProcessLibs...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgContextInfo...  [39m
+> hvigor [32mUP-TO-DATE :speed_test:default@DoNativeStrip...  [39m
+> hvigor [32mUP-TO-DATE :tools:default@DoNativeStrip...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 4 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CompileResource...  [39m
+> hvigor [32mFinished :entry:default@BuildJS... after 11 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithNinja... after 266 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessLibs...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@DoNativeStrip...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CacheNativeLibs...  [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/core/src/main/ets/wifi/WifiService.ets:59:44
+ To use this API, you need to apply for the permissions: ohos.permission.SET_WIFI_INFO
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/core/src/main/ets/permission/PermissionManager.ets:273:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dnslookup/DnsLookupEngine.ets:590:22
+ The 'FamilyType' API is supported since SDK version 23. However, the current compatible SDK version is 5.0.2(14).
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dnslookup/DnsLookupEngine.ets:590:33
+ The 'FAMILY_TYPE_IPV6' API is supported since SDK version 23. However, the current compatible SDK version is 5.0.2(14).
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dnslookup/DnsLookupEngine.ets:591:22
+ The 'FamilyType' API is supported since SDK version 23. However, the current compatible SDK version is 5.0.2(14).
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dnslookup/DnsLookupEngine.ets:591:33
+ The 'FAMILY_TYPE_IPV4' API is supported since SDK version 23. However, the current compatible SDK version is 5.0.2(14).
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dnslookup/DnsLookupEngine.ets:597:18
+ The 'getAddressesByNameWithOptions' API is supported since SDK version 23. However, the current compatible SDK version is 5.0.2(14).
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/route/TraceroutePage.ets:92:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/route/TraceroutePage.ets:92:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/ping/PingPage.ets:133:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/ping/PingPage.ets:133:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/ping/PingPage.ets:176:22
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dns/DnsLookupPage.ets:80:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/dns/DnsLookupPage.ets:80:41
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/port/PortScanPage.ets:111:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/port/PortScanPage.ets:111:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/ip/IpGeoPage.ets:72:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/ip/IpGeoPage.ets:72:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/mac/MacLookupPage.ets:59:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/mac/MacLookupPage.ets:59:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:47:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:50:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:52:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:57:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:60:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/tools/src/main/ets/lan/LanDeviceList.ets:62:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/utils/NativePing.ets:7:24
+ Currently module for 'libpingnative.so' is not verified. If you're importing napi, its verification will be enabled in later SDK version. Please make sure the corresponding .d.ts file is provided and the napis are correctly declared.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/PingTestPage.ets:232:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/PingTestPage.ets:232:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AboutPage.ets:222:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AboutPage.ets:222:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/ChannelSection.ets:185:12
+ 'onScroll' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AIAnalysisPanel.ets:91:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AIAnalysisPanel.ets:91:20
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AIAnalysisPanel.ets:98:5
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AIAnalysisPanel.ets:98:18
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/components/AIAnalysisPanel.ets:183:30
+ 'showToast' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: C:/Users/xinxin/WlAN-02/entry/src/main/ets/pages/Index.ets:510:7
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 20 s 174 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgModuleJson... after 4 ms [39m
+> hvigor [32mFinished :entry:default@ProcessCompiledResources... after 2 ms [39m
+> hvigor [91mERROR: Failed :entry:default@PackageHap... [39m
+> hvigor [91mERROR: [31mError Code: 00308018 Unknown Error
+spawn java ENOENT
+
+* Try the following:
+  > This error is unknown, view the detailed error logs in the '.hvigor > outputs > build-logs' directory in the project directory for analysis, or contact the developer's official website for help.
+  > More info: https://developer.huawei.com/consumer/cn/doc/harmonyos-faqs/faqs-compiling-and-building
+
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+[39m
+> hvigor [91mERROR: BUILD FAILED in 27 s 237 ms [39m

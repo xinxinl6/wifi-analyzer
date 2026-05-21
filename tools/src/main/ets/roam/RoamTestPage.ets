@@ -23,20 +23,17 @@ import {
   RoamTestInfo, RoamTestSummary, BssidRecord, WifiInfo,
 } from '../roamtest/RoamTestEngine'
 import { RouterManager } from '@wifi-analyzer/core'
-
-// 信号等级信息
-interface RssiLevel {
-  label: string
-  color: ResourceColor
-}
+import { RssiLevel } from './RoamTestingView'
+import { RoamIdleState, RoamDurationSelector, RoamFeatureCard } from './RoamIdleView'
+import { RoamTestingCard } from './RoamTestingView'
+import { RoamSummaryCard } from './RoamSummaryCard'
+import { RoamTimelineCard } from './RoamTimelineCard'
+import { RoamEventsList } from './RoamEventsList'
 
 @Component
 export struct RoamTestPage {
   @StorageLink('isDarkMode') isDarkMode: boolean = false
-  // UI 状态：'idle' | 'testing' | 'summary'
   @State viewMode: string = 'idle'
-
-  // 实时测试信息
   @State currentBssid: string = ''
   @State currentRssi: number = 0
   @State elapsedSec: number = 0
@@ -44,26 +41,18 @@ export struct RoamTestPage {
   @State roamCount: number = 0
   @State avgRssi: number = 0
   @State bssidHistory: BssidRecord[] = []
-
-  // 测试配置
   @State testDuration: number = 60
   @State currentSsid: string = ''
-
-  // 测试结果摘要
   @State summary: RoamTestSummary | null = null
-
-  // 漫游事件列表（展开/收起）
   @State showEvents: boolean = false
 
-  // 引擎
   private engine: RoamTestEngine = new RoamTestEngine()
 
-  // 获取资源字符串的辅助方法
   private getString(str: Resource): string {
     try {
       const ctx = this.getUIContext().getHostContext()
       return ctx ? ctx.resourceManager.getStringSync(str.id) : ''
-    } catch {
+    } catch (e) {
       return ''
     }
   }
@@ -111,7 +100,6 @@ export struct RoamTestPage {
         this.bssidHistory = info.bssidHistory
       },
       onRoamDetected: (event: RoamEvent): void => {
-        // 漫游事件已通过 onUpdate 中的 roamCount 反映
       },
       onComplete: (testSummary: RoamTestSummary): void => {
         this.summary = testSummary
@@ -163,7 +151,6 @@ export struct RoamTestPage {
   // ==================== 页面入口 ====================
   build() {
     Stack({ alignContent: Alignment.Top }) {
-      // 天蓝极光渐变背景
       Column() {}
         .width('100%').height('100%')
         .linearGradient({
@@ -171,21 +158,18 @@ export struct RoamTestPage {
           colors: adaptiveBackgroundList(this.isDarkMode)
         })
 
-      // 装饰光晕 - 左上
       Circle()
         .width(260).height(260)
         .fill(adaptiveGlowLarge(this.isDarkMode))
         .position({ x: -60, y: -60 })
         .blur(50)
 
-      // 装饰光晕 - 右下
       Circle()
         .width(200).height(200)
         .fill(adaptiveGlowMedium(this.isDarkMode))
         .position({ x: '68%', y: '45%' })
         .blur(40)
 
-      // 主内容区
       Column() {
         this.MainContent()
       }
@@ -200,7 +184,6 @@ export struct RoamTestPage {
   @Builder MainContent() {
     Scroll() {
       Column({ space: SPACE_LG }) {
-        // 顶部导航
         Row() {
           BackButtonGlass({ onBack: () => RouterManager.goBack() })
           Blank()
@@ -210,29 +193,58 @@ export struct RoamTestPage {
         // 当前连接信息
         this.ConnectionCard()
 
-        // 测试进行中：实时数据
+        // 测试进行中
         if (this.viewMode === 'testing') {
-          this.TestingCard()
-          this.BssidTimelineCard()
+          RoamTestingCard({
+            isDarkMode: this.isDarkMode,
+            currentRssi: this.currentRssi,
+            elapsedSec: this.elapsedSec,
+            totalSec: this.totalSec,
+            roamCount: this.roamCount,
+            avgRssi: this.avgRssi,
+            formatDuration: (sec: number) => this.formatDuration(sec),
+            getRssiLevel: (rssi: number) => this.getRssiLevel(rssi)
+          })
+          RoamTimelineCard({
+            isDarkMode: this.isDarkMode,
+            bssidHistory: this.bssidHistory,
+            getRssiLevel: (rssi: number) => this.getRssiLevel(rssi)
+          })
         }
 
         // 测试摘要
         if (this.viewMode === 'summary' && this.summary) {
-          this.SummaryCard()
-          this.RoamEventsSection()
+          RoamSummaryCard({
+            isDarkMode: this.isDarkMode,
+            summary: this.summary,
+            formatDuration: (sec: number) => this.formatDuration(sec),
+            getStabilityColor: (score: number) => this.getStabilityColor(score),
+            getStabilityLabel: (score: number) => this.getStabilityLabel(score)
+          })
+          RoamEventsList({
+            isDarkMode: this.isDarkMode,
+            showEvents: this.showEvents,
+            summary: this.summary,
+            onToggleEvents: () => { this.showEvents = !this.showEvents },
+            getRssiLevel: (rssi: number) => this.getRssiLevel(rssi)
+          })
         }
 
         // 空状态
         if (this.viewMode === 'idle') {
-          this.IdleState()
-          this.DurationSelector()
+          RoamIdleState({ isDarkMode: this.isDarkMode })
+          RoamDurationSelector({
+            isDarkMode: this.isDarkMode,
+            testDuration: this.testDuration,
+            onDurationChange: (sec: number) => { this.testDuration = sec }
+          })
         }
 
         // 操作按钮
         this.ActionButtons()
 
         // 功能说明
-        this.FeatureCard()
+        RoamFeatureCard({ isDarkMode: this.isDarkMode })
       }
       .padding(SPACE_LG)
       .width('100%')
@@ -242,7 +254,7 @@ export struct RoamTestPage {
     .layoutWeight(1)
   }
 
-  // ==================== 当前连接信息 ====================
+  // ==================== 当前连接信息（内联） ====================
   @Builder ConnectionCard() {
     Column({ space: SPACE_MD }) {
       Row({ space: SPACE_MD }) {
@@ -274,366 +286,7 @@ export struct RoamTestPage {
     .backdropBlur(GLASS_BLUR_LG)
   }
 
-  // ==================== 测试进行中卡片 ====================
-  @Builder TestingCard() {
-    Column({ space: SPACE_MD }) {
-      // 环形进度 + 信号强度
-      Row({ space: SPACE_XL }) {
-        // 倒计时
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(80).height(80)
-            .fill(this.isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.5)')
-          Text(this.formatDuration(this.totalSec - this.elapsedSec))
-            .fontSize(FONT_SIZE_2XL).fontColor(COLOR_ORANGE).fontWeight(FONT_WEIGHT_BOLD)
-        }
-        .width(80).height(80)
-
-        // 实时数据
-        Column({ space: SPACE_SM }) {
-          Row({ space: SPACE_XL }) {
-            Column({ space: SPACE_XS }) {
-              Text($r('app.string.signal_label')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              Text(String(this.currentRssi) + ' dBm')
-                .fontSize(FONT_SIZE_MD).fontColor(this.getRssiLevel(this.currentRssi).color)
-                .fontWeight(FONT_WEIGHT_BOLD)
-            }
-            .alignItems(HorizontalAlign.Start)
-
-            Column({ space: SPACE_XS }) {
-              Text($r('app.string.avg_signal')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              Text(String(this.avgRssi) + ' dBm')
-                .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-            }
-            .alignItems(HorizontalAlign.Start)
-
-            Column({ space: SPACE_XS }) {
-              Text($r('app.string.roam_label')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-              Text() {
-                Span(String(this.roamCount))
-                Span(' ')
-                Span($r('app.string.times_suffix'))
-              }
-                .fontSize(FONT_SIZE_MD)
-                .fontColor(this.roamCount === 0 ? COLOR_SUCCESS : COLOR_WARNING)
-                .fontWeight(FONT_WEIGHT_BOLD)
-            }
-            .alignItems(HorizontalAlign.Start)
-          }
-          .width('100%')
-        }
-        .layoutWeight(1).alignItems(HorizontalAlign.Start)
-      }
-      .width('100%')
-
-      // 进度条
-      Row() {
-        Row()
-          .width(this.elapsedSec > 0 && this.totalSec > 0
-            ? Math.min(100, Math.round(this.elapsedSec / this.totalSec * 100)) + '%' : '0%')
-          .height(4).backgroundColor(COLOR_ORANGE).borderRadius(2)
-      }
-      .width('100%').height(4)
-      .backgroundColor(this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')
-      .borderRadius(2)
-
-      Row({ space: SPACE_SM }) {
-        Text() {
-          Span($r('app.string.tested'))
-          Span(' ' + this.formatDuration(this.elapsedSec))
-        }
-          .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        Blank()
-        Text() {
-          Span($r('app.string.total_duration'))
-          Span(' ' + this.formatDuration(this.totalSec))
-        }
-          .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }
-      .width('100%')
-    }
-    .width('100%').padding(SPACE_LG)
-    .backgroundColor(adaptiveCardBg(this.isDarkMode))
-    .borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: adaptiveDivider(this.isDarkMode) })
-    .backdropBlur(GLASS_BLUR_LG)
-  }
-
-  // ==================== BSSID 时间线 ====================
-  @Builder BssidTimelineCard() {
-    if (this.bssidHistory.length > 0) {
-      Column({ space: SPACE_SM }) {
-        Row() {
-          Text($r('app.string.bssid_history'))
-            .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-          Blank()
-          Text() {
-            Span($r('app.string.recent_records'))
-            Span(' ' + String(this.bssidHistory.length) + ' ')
-            Span($r('app.string.records_suffix'))
-          }
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-        .width('100%')
-
-        // 信号强度可视化（用水平色条表示）
-        Scroll() {
-          Row({ space: 2 }) {
-            ForEach(this.bssidHistory, (record: BssidRecord) => {
-              Column() {
-                Stack() {
-                  Row()
-                    .width(4)
-                    .height(record.rssi > -40 ? 40 : record.rssi > -60 ? 32 : record.rssi > -70 ? 24 : 16)
-                    .backgroundColor(this.getRssiLevel(record.rssi).color)
-                    .borderRadius(2)
-                }
-              }
-            }, (record: BssidRecord, index: number): string => String(index))
-          }
-          .width('100%')
-          .padding({ top: SPACE_SM, bottom: SPACE_SM })
-        }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .width('100%')
-
-        // 图例
-        Row({ space: SPACE_LG }) {
-          Row({ space: SPACE_XS }) {
-            Circle().width(8).height(8).fill(COLOR_SUCCESS)
-            Text('>=-50').fontSize(FONT_SIZE_XXS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-          Row({ space: SPACE_XS }) {
-            Circle().width(8).height(8).fill(COLOR_INFO)
-            Text('>=-60').fontSize(FONT_SIZE_XXS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-          Row({ space: SPACE_XS }) {
-            Circle().width(8).height(8).fill(COLOR_WARNING)
-            Text('>=-70').fontSize(FONT_SIZE_XXS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-          Row({ space: SPACE_XS }) {
-            Circle().width(8).height(8).fill(COLOR_DANGER)
-            Text('<-70').fontSize(FONT_SIZE_XXS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          }
-        }
-        .width('100%')
-      }
-      .width('100%').padding(SPACE_LG)
-      .backgroundColor(adaptiveCardBg(this.isDarkMode))
-      .borderRadius(RADIUS_2XL)
-      .border({ width: 1, color: adaptiveDivider(this.isDarkMode) })
-      .backdropBlur(GLASS_BLUR_LG)
-    }
-  }
-
-  // ==================== 测试摘要卡片 ====================
-  @Builder SummaryCard() {
-    if (this.summary) {
-      Column({ space: SPACE_LG }) {
-      // 稳定性评分
-      Row({ space: SPACE_XL }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(80).height(80).fill(this.getStabilityColor(this.summary.stabilityScore) + '20')
-          Text(String(this.summary.stabilityScore))
-            .fontSize(FONT_SIZE_3XL).fontColor(this.getStabilityColor(this.summary.stabilityScore))
-            .fontWeight(FONT_WEIGHT_BOLD)
-        }
-        .width(80).height(80)
-
-        Column({ space: SPACE_SM }) {
-          Text($r('app.string.stability_score'))
-            .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-          Text(this.getStabilityLabel(this.summary.stabilityScore))
-            .fontSize(FONT_SIZE_SM).fontColor(this.getStabilityColor(this.summary.stabilityScore))
-          Text() {
-            Span($r('app.string.test_duration'))
-            Span(': ' + this.formatDuration(Math.round(this.summary.totalDuration / 1000)))
-          }
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-      }
-      .width('100%')
-
-      // 分割线
-      Row()
-        .width('100%').height(1)
-        .backgroundColor(adaptiveDivider(this.isDarkMode))
-
-      // 详细数据
-      Row({ space: SPACE_XL }) {
-        Column({ space: SPACE_XS }) {
-          Text($r('app.string.roam_count')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          Text() {
-            Span(String(this.summary.roamCount))
-            Span(' ')
-            Span($r('app.string.times_suffix'))
-          }
-            .fontSize(FONT_SIZE_2XL)
-            .fontColor(this.summary.roamCount === 0 ? COLOR_SUCCESS : COLOR_WARNING)
-            .fontWeight(FONT_WEIGHT_BOLD)
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-
-        Column({ space: SPACE_XS }) {
-          Text($r('app.string.roaming_ap')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          Text() {
-            Span(String(this.summary.bssidCount))
-            Span(' ')
-            Span($r('app.string.count_suffix'))
-          }
-            .fontSize(FONT_SIZE_2XL).fontColor(COLOR_INFO).fontWeight(FONT_WEIGHT_BOLD)
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-
-        Column({ space: SPACE_XS }) {
-          Text($r('app.string.signal_range')).fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          Text(String(this.summary.minRssi) + '~' + String(this.summary.maxRssi))
-            .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-      }
-      .width('100%')
-    }
-    .width('100%').padding(SPACE_LG)
-    .backgroundColor(adaptiveCardBg(this.isDarkMode))
-    .borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: adaptiveDivider(this.isDarkMode) })
-    .backdropBlur(GLASS_BLUR_LG)
-    }
-  }
-
-  // ==================== 漫游事件列表 ====================
-  @Builder RoamEventsSection() {
-    if (this.summary && this.summary.roamEvents.length > 0) {
-      Column({ space: SPACE_SM }) {
-      Row() {
-        Text($r('app.string.roam_events_detail'))
-          .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-        Blank()
-        Text(this.showEvents ? $r('app.string.collapse') : $r('app.string.expand'))
-          .fontSize(FONT_SIZE_XS).fontColor(COLOR_ORANGE)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => { this.showEvents = !this.showEvents })
-      }
-      .width('100%')
-
-      if (this.showEvents) {
-        ForEach(this.summary.roamEvents, (event: RoamEvent, index: number) => {
-          this.RoamEventRow(event, index)
-        }, (event: RoamEvent, index: number): string => String(index))
-      } else {
-        Text() {
-          Span($r('app.string.total_roam_events'))
-          Span(' ' + String(this.summary.roamEvents.length) + ' ')
-          Span($r('app.string.roam_event_hint'))
-        }
-          .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-      }
-    }
-    .width('100%').padding(SPACE_LG)
-    .backgroundColor(adaptiveCardBg(this.isDarkMode))
-    .borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: adaptiveDivider(this.isDarkMode) })
-    .backdropBlur(GLASS_BLUR_LG)
-    }
-  }
-
-  @Builder RoamEventRow(event: RoamEvent, index: number) {
-    Row({ space: SPACE_MD }) {
-      // 序号
-      Stack({ alignContent: Alignment.Center }) {
-        Circle().width(24).height(24)
-          .fill(this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)')
-        Text('#' + String(index + 1))
-          .fontSize(FONT_SIZE_XS).fontColor(COLOR_ORANGE).fontWeight(FONT_WEIGHT_BOLD)
-      }
-
-      // 事件详情
-      Column({ space: SPACE_XS }) {
-        Row({ space: SPACE_SM }) {
-          Text(RoamTestEngine.formatBssid(event.fromBssid))
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
-          Text(' → ')
-            .fontSize(FONT_SIZE_XS).fontColor(COLOR_ORANGE).fontWeight(FONT_WEIGHT_BOLD)
-          Text(RoamTestEngine.formatBssid(event.toBssid))
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextSecondary(this.isDarkMode))
-        }
-        Row({ space: SPACE_SM }) {
-          Text(String(event.rssiBefore) + 'dBm')
-            .fontSize(FONT_SIZE_XS).fontColor(this.getRssiLevel(event.rssiBefore).color)
-          Text('→')
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-          Text(String(event.rssiAfter) + 'dBm')
-            .fontSize(FONT_SIZE_XS).fontColor(this.getRssiLevel(event.rssiAfter).color)
-          Text(' | ').fontSize(FONT_SIZE_XS).fontColor(adaptiveDivider(this.isDarkMode))
-          Text(String(event.duration) + 'ms')
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-      }
-      .alignItems(HorizontalAlign.Start).layoutWeight(1)
-    }
-    .width('100%').padding({ top: SPACE_SM, bottom: SPACE_SM })
-  }
-
-  // ==================== 空状态 ====================
-  @Builder IdleState() {
-    Column({ space: SPACE_MD }) {
-      Stack({ alignContent: Alignment.Center }) {
-        Circle().width(80).height(80)
-          .fill(this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)')
-        Image($r('app.media.ic_roaming')).width(40).height(40)
-      }
-      Text($r('app.string.wifi_roam_test'))
-        .fontSize(FONT_SIZE_LG).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_BOLD)
-      Text($r('app.string.roam_test_desc'))
-        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextTertiary(this.isDarkMode))
-    }
-    .width('100%').padding({ top: SPACE_2XL, bottom: SPACE_2XL }).justifyContent(FlexAlign.Center)
-  }
-
-  // ==================== 测试时长选择 ====================
-  @Builder DurationSelector() {
-    Column({ space: SPACE_SM }) {
-      Text($r('app.string.test_duration'))
-        .fontSize(FONT_SIZE_SM).fontColor(adaptiveTextSecondary(this.isDarkMode)).alignSelf(ItemAlign.Start)
-
-      Row({ space: SPACE_SM }) {
-        Text('30s')
-          .fontSize(FONT_SIZE_XS).fontColor(this.testDuration === 30 ? Color.White : COLOR_ORANGE)
-          .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_XS, bottom: SPACE_XS })
-          .backgroundColor(this.testDuration === 30 ? COLOR_ORANGE : (this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)'))
-          .borderRadius(RADIUS_3XL)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => { this.testDuration = 30 })
-        Text('60s')
-          .fontSize(FONT_SIZE_XS).fontColor(this.testDuration === 60 ? Color.White : COLOR_ORANGE)
-          .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_XS, bottom: SPACE_XS })
-          .backgroundColor(this.testDuration === 60 ? COLOR_ORANGE : (this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)'))
-          .borderRadius(RADIUS_3XL)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => { this.testDuration = 60 })
-        Text('120s')
-          .fontSize(FONT_SIZE_XS).fontColor(this.testDuration === 120 ? Color.White : COLOR_ORANGE)
-          .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_XS, bottom: SPACE_XS })
-          .backgroundColor(this.testDuration === 120 ? COLOR_ORANGE : (this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)'))
-          .borderRadius(RADIUS_3XL)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => { this.testDuration = 120 })
-        Text('300s')
-          .fontSize(FONT_SIZE_XS).fontColor(this.testDuration === 300 ? Color.White : COLOR_ORANGE)
-          .padding({ left: SPACE_SM, right: SPACE_SM, top: SPACE_XS, bottom: SPACE_XS })
-          .backgroundColor(this.testDuration === 300 ? COLOR_ORANGE : (this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)'))
-          .borderRadius(RADIUS_3XL)
-          .stateStyles({ pressed: { opacity: 0.8 } })
-          .onClick(() => { this.testDuration = 300 })
-      }
-      .width('100%')
-    }
-    .width('100%').alignItems(HorizontalAlign.Start)
-  }
-
-  // ==================== 操作按钮 ====================
+  // ==================== 操作按钮（内联） ====================
   @Builder ActionButtons() {
     if (this.viewMode === 'testing') {
       Button($r('app.string.stop_roam_test'))
@@ -661,30 +314,5 @@ export struct RoamTestPage {
       }
       .width('100%')
     }
-  }
-
-  // ==================== 功能说明卡片 ====================
-  @Builder FeatureCard() {
-    Column({ space: SPACE_MD }) {
-      Row({ space: SPACE_MD }) {
-        Stack({ alignContent: Alignment.Center }) {
-          Circle().width(36).height(36)
-            .fill(this.isDarkMode ? 'rgba(251,146,60,0.18)' : 'rgba(251,146,60,0.13)')
-          Image($r('app.media.ic_route')).width(18).height(18).fillColor(COLOR_ORANGE)
-        }
-        Column({ space: 2 }) {
-          Text($r('app.string.roam_test_intro'))
-            .fontSize(FONT_SIZE_MD).fontColor(adaptiveTextPrimary(this.isDarkMode)).fontWeight(FONT_WEIGHT_MEDIUM)
-          Text($r('app.string.roam_test_intro_desc'))
-            .fontSize(FONT_SIZE_XS).fontColor(adaptiveTextTertiary(this.isDarkMode))
-        }
-        .alignItems(HorizontalAlign.Start).layoutWeight(1)
-      }
-    }
-    .width('100%').padding(SPACE_MD)
-    .backgroundColor(adaptiveCardBg(this.isDarkMode))
-    .borderRadius(RADIUS_2XL)
-    .border({ width: 1, color: adaptiveDivider(this.isDarkMode) })
-    .backdropBlur(GLASS_BLUR_LG)
   }
 }

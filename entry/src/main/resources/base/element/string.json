@@ -1137,6 +1137,10 @@
       "value": "点击开始"
     },
     {
+      "name": "node_selecting",
+      "value": "智能选路中..."
+    },
+    {
       "name": "select_speed_server",
       "value": "选择测速节点"
     },
@@ -2723,6 +2727,210 @@
     {
       "name": "ai_feature_optimization_tip_desc",
       "value": "个性化网络优化方案"
+    },
+    {
+      "name": "dns_history_title",
+      "value": "查询记录"
+    },
+    {
+      "name": "dns_history_total",
+      "value": "总记录数"
+    },
+    {
+      "name": "dns_history_recent",
+      "value": "最近查询"
+    },
+    {
+      "name": "dns_history_empty_title",
+      "value": "暂无 DNS 查询记录"
+    },
+    {
+      "name": "dns_history_empty_desc",
+      "value": "完成域名查询后，记录将在此显示"
+    },
+    {
+      "name": "permission_dialog_title",
+      "value": "权限申请"
+    },
+    {
+      "name": "permission_dialog_content",
+      "value": "WlAN-分析仪需要位置权限才能扫描周围的WiFi网络。\n\n请点击「去设置」开启位置信息权限，返回应用后我们将自动继续。"
+    },
+    {
+      "name": "continue_usage",
+      "value": "继续使用"
+    },
+    {
+      "name": "go_to_settings",
+      "value": "去设置"
+    },
+    {
+      "name": "ping_mode_label",
+      "value": "探测模式"
+    },
+    {
+      "name": "ping_fast_mode",
+      "value": "快速"
+    },
+    {
+      "name": "ping_accurate_mode",
+      "value": "准确"
+    },
+    {
+      "name": "ping_interval_fast",
+      "value": "1s/次"
+    },
+    {
+      "name": "ping_interval_accurate",
+      "value": "3s/次"
+    },
+    {
+      "name": "ping_mode_fast_desc",
+      "value": "1s/次 · 实时刷新"
+    },
+    {
+      "name": "ping_mode_accurate_desc",
+      "value": "3s/次 · 精确数据"
+    },
+    {
+      "name": "speed_estimate",
+      "value": "估算"
+    },
+    {
+      "name": "speed_simulated",
+      "value": "模拟"
+    },
+    {
+      "name": "no_history_data_trend",
+      "value": "暂无历史数据"
+    },
+    {
+      "name": "trend_hint",
+      "value": "开始 Ping 测试后，结果将显示在这里"
+    },
+    {
+      "name": "avg_label",
+      "value": "均值:"
+    },
+    {
+      "name": "hidden_network",
+      "value": "(隐藏网络)"
+    },
+    {
+      "name": "ping_records",
+      "value": "Ping 记录"
+    },
+    {
+      "name": "history_sessions",
+      "value": "历史会话"
+    },
+    {
+      "name": "no_ping_records",
+      "value": "暂无 Ping 记录"
+    },
+    {
+      "name": "ping_records_hint",
+      "value": "完成测试后可在此查看详细记录"
+    },
+    {
+      "name": "total_records",
+      "value": "总记录数"
+    },
+    {
+      "name": "min_latency",
+      "value": "最低延迟"
+    },
+    {
+      "name": "max_latency",
+      "value": "最高延迟"
+    },
+    {
+      "name": "no_history_sessions",
+      "value": "暂无历史会话"
+    },
+    {
+      "name": "sessions_save_hint",
+      "value": "结束测试后会自动保存摘要"
+    },
+    {
+      "name": "ping_count_label",
+      "value": "Ping 次数"
+    },
+    {
+      "name": "speed_detail",
+      "value": "测速详情"
+    },
+    {
+      "name": "speed_download_detail",
+      "value": "下载速度"
+    },
+    {
+      "name": "speed_upload_detail",
+      "value": "上传速度"
+    },
+    {
+      "name": "speed_ping_detail",
+      "value": "延迟"
+    },
+    {
+      "name": "speed_jitter_detail",
+      "value": "抖动"
+    },
+    {
+      "name": "speed_test_time",
+      "value": "测试时间"
+    },
+    {
+      "name": "speed_test_server",
+      "value": "测试服务器"
+    },
+    {
+      "name": "unsupported_url",
+      "value": "不支持的URL地址"
+    },
+    {
+      "name": "ai_analyzing",
+      "value": "正在为您分析网络..."
+    },
+    {
+      "name": "ai_network_optimization",
+      "value": "网络优化分析"
+    },
+    {
+      "name": "blocked_unsafe_url",
+      "value": "已阻止不安全链接"
+    },
+    {
+      "name": "expand_all",
+      "value": "展开全部"
+    },
+    {
+      "name": "health_score_unit",
+      "value": "分"
+    },
+    {
+      "name": "simulator_data_warning",
+      "value": "当前为模拟数据，请在真机上测试完整功能"
+    },
+    {
+      "name": "privacy_agreement_title",
+      "value": "用户协议与隐私政策"
+    },
+    {
+      "name": "swipe_delete",
+      "value": "删除"
+    },
+    {
+      "name": "channels_count_suffix",
+      "value": "个信道"
+    },
+    {
+      "name": "btn_disagree",
+      "value": "不同意"
+    },
+    {
+      "name": "btn_agree_and_continue",
+      "value": "同意并继续"
     }
   ]
 }

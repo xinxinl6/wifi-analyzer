@@ -242,8 +242,8 @@ export enum LogLevel {
  * 日志配置
  */
 export class LoggerConfig {
-  // 当前日志级别（发布时应设置为 WARN 或 NONE）
-  static level: LogLevel = LogLevel.DEBUG
+  // 当前日志级别（发布时设置为 INFO，开发调试可改为 DEBUG）
+  static level: LogLevel = LogLevel.INFO
 
   // 是否启用控制台输出
   static enableConsole: boolean = true

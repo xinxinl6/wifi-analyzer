@@ -168,8 +168,8 @@ export class WifiScanner {
             // 确保 rssi 是数字类型
             const rssiValue = linkedInfo.rssi
             result.connectedSignal = (typeof rssiValue === 'number') ? rssiValue : -80
-            hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Connected to: ' + result.connectedSsid +
-              ', RSSI: ' + result.connectedSignal + ', BSSID: ' + result.connectedBssid)
+            hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Connected to: ' + this.maskSsid(result.connectedSsid) +
+              ', RSSI: ' + result.connectedSignal + ', BSSID: ' + this.maskBssid(result.connectedBssid))
             return result  // 成功获取，直接返回
           } else {
             hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] linkedInfo returned but ssid is empty (attempt ' + attempt + ')')
@@ -248,8 +248,8 @@ export class WifiScanner {
       }
 
       // 标记已连接的网络 — 同一SSID可能在2.4G和5G都出现，优先选5GHz（信号更好）
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Trying to mark connected network: SSID=' + result.connectedSsid +
-        ', BSSID=' + result.connectedBssid + ', list.length=' + list.length)
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Trying to mark connected network: SSID=' + this.maskSsid(result.connectedSsid) +
+        ', BSSID=' + this.maskBssid(result.connectedBssid) + ', list.length=' + list.length)
       
       // 第一步：收集所有匹配项
       const matchedIndices: number[] = []
@@ -258,7 +258,7 @@ export class WifiScanner {
         const bssidMatch: boolean = result.connectedBssid === '' || list[j].bssid === result.connectedBssid
         if (ssidMatch && bssidMatch) {
           matchedIndices.push(j)
-          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Candidate item ' + j + ': ssid=' + list[j].ssid +
+          hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] Candidate item ' + j + ': ssid=' + this.maskSsid(list[j].ssid) +
             ', freq=' + list[j].freq + ', ch=' + list[j].channel)
         }
       }
@@ -279,14 +279,14 @@ export class WifiScanner {
           }
         }
         list[bestIdx].isConnected = true
-        hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Marked connected network: ' + list[bestIdx].ssid +
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] ✓ Marked connected network: ' + this.maskSsid(list[bestIdx].ssid) +
           ' (freq: ' + list[bestIdx].freq + ', channel: ' + list[bestIdx].channel + ')')
       }
 
       result.wifiList = list
 
-      // 按信号强度排序（强→弱）
-      result.wifiList.sort((a: WifiItem, b: WifiItem): number => a.signal - b.signal)
+      // 按信号强度排序（强→弱，RSSI值越大信号越强，如-40>-80）
+      result.wifiList.sort((a: WifiItem, b: WifiItem): number => b.signal - a.signal)
 
       // 限制最大显示数量（防止高密度 WiFi 环境下列表过长）
       if (result.wifiList.length > this.MAX_WIFI_LIST_SIZE) {
@@ -360,5 +360,23 @@ export class WifiScanner {
     result.usingFallbackData = true
     result.wifiList = fallbackList
     return result
+  }
+
+  // ==================== 日志脱敏辅助方法 ====================
+
+  /** SSID 脱敏：只显示前3字符，其余用*代替 */
+  private maskSsid(ssid: string): string {
+    if (!ssid || ssid.length <= 3) {
+      return '***'
+    }
+    return ssid.substring(0, 3) + '***'
+  }
+
+  /** BSSID 脱敏：只显示前2段，其余用XX代替 */
+  private maskBssid(bssid: string): string {
+    if (!bssid || bssid.length < 8) {
+      return 'XX:XX:XX:XX:XX:XX'
+    }
+    return bssid.substring(0, 8) + ':XX:XX:XX'
   }
 }

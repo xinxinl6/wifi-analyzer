@@ -1,5 +1,6 @@
 import { common, ConfigurationConstant } from '@kit.AbilityKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
+import { preferences } from '@kit.ArkData'
 import {
   // Aurora V2 色彩
   COLOR_AURORA_PRIMARY,
@@ -13,17 +14,39 @@ import {
   COLOR_TAB_BAR_BG_DARK,
   COLOR_TAB_BAR_BORDER_DARK,
   COLOR_TEXT_GLASS_PRIMARY,
-  COLOR_TEXT_GLASS_TERTIARY
+  COLOR_TEXT_GLASS_TERTIARY,
+  COLOR_GLASS_DARK_CARD,
+  COLOR_GLASS_SURFACE_LIGHT,
+  COLOR_GLASS_DARK_BORDER,
+  COLOR_SHADOW_GLASS,
+  COLOR_OVERLAY,
+  COLOR_TEXT_DARK_SECONDARY,
+  COLOR_TEXT_LIGHT_SECONDARY,
+  COLOR_TAB_BAR_TEXT_DARK,
+  COLOR_GLASS_BORDER,
+  // 极光背景工具函数
+  adaptiveBackgroundList,
+  adaptiveGlowLarge,
+  adaptiveGlowMedium,
+  adaptiveGlowSmall
 } from '@wifi-analyzer/design-system'
 
 // Aurora V2 页面组件
 import { AuroraDashboard } from '../components/AuroraDashboard'
+import { AuroraBackground } from '../components/AuroraBackground'
 
 // 原有页面组件（可逐步迁移）
 import { WifiListSection } from '../components/WifiListSection'
 import { ChannelSection } from '../components/ChannelSection'
 import { SpeedTestSection } from '../components/SpeedTestSection'
 import { ToolsSection } from '../components/ToolsSection'
+
+// 弹窗组件
+import { PrivacyDialog } from '../components/PrivacyDialog'
+import { PermissionDialog } from '../components/PermissionDialog'
+
+// 动画辅助工具
+import { TabAnimationHelper } from '../utils/TabAnimationHelper'
 
 // 子页面（条件渲染）
 import { PingTestPage } from '../components/PingTestPage'
@@ -79,6 +102,12 @@ struct Index {
   @StorageLink('isDarkMode') isDarkMode: boolean = false
   // 权限拒绝弹窗控制
   @State showPermissionDeniedDialog: boolean = false
+  // 隐私政策同意弹窗（首次启动）
+  @State showPrivacyDialog: boolean = false
+  // 隐私政策是否已同意（DataPreferences 持久化后更新）
+  private privacyAgreed: boolean = false
+  // UIAbilityContext 引用（隐私弹窗回调需要用）
+  private abilityContextForPrivacy: common.UIAbilityContext | null = null
 
   // 子页面显示状态
   @StorageLink('showPingPage') showPingPage: boolean = false
@@ -109,16 +138,16 @@ struct Index {
   private scanTimerId: number = -1
 
   // Tab 点击动画状态
-  @State private tabScales: number[] = [1, 1, 1, 1, 1]
-  @State private tabGlows: number[] = [0, 0, 0, 0, 0]
+  @State private tabScales: number[] = TabAnimationHelper.getInitialTabScales()
+  @State private tabGlows: number[] = TabAnimationHelper.getInitialTabGlows()
   // Tab 图标弹跳偏移量（选中时向上跳）
-  @State private tabOffsetY: number[] = [0, 0, 0, 0, 0]
+  @State private tabOffsetY: number[] = TabAnimationHelper.getInitialTabOffsetY()
   // Tab 选中指示点透明度
-  @State private tabDotOpacity: number[] = [1, 0, 0, 0, 0]
+  @State private tabDotOpacity: number[] = TabAnimationHelper.getInitialTabDotOpacity()
   // 页面内容透明度（切换时淡入淡出）
-  @State private contentOpacity: number = 1
+  @State private contentOpacity: number = TabAnimationHelper.getInitialContentOpacity()
   // 页面内容偏移量（切换时上滑入场）
-  @State private contentOffsetY: number = 0
+  @State private contentOffsetY: number = TabAnimationHelper.getInitialContentOffsetY()
 
   // Tab 切换订阅句柄
   private tabUnsubscribe: (() => void) | null = null
@@ -146,14 +175,14 @@ struct Index {
     try {
       const context = this.getUIContext().getHostContext() as common.UIAbilityContext
       if (context) {
-        // 读取暗色模式（COLOR_MODE_DARK = 1 表示暗色模式）
+        // 读取暗色模式
         const colorMode = context.config.colorMode
         this.isDarkMode = (colorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK)
-        // 同步到 AppStorage，让独立页面也能访问
         AppStorage.setOrCreate('isDarkMode', this.isDarkMode)
 
-        // 直接请求权限并开始扫描
-        this.requestPermissionsAndScan(context)
+        // ★ 隐私政策前置：必须先同意隐私政策才能请求权限（华为审核要求）
+        this.abilityContextForPrivacy = context
+        this.checkPrivacyAgreement(context)
       } else {
         hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] FATAL: getUIContext().getHostContext() returned null')
         this.wifiState.error = $r('app.string.err_init_failed')
@@ -163,12 +192,12 @@ struct Index {
       this.wifiState.error = $r('app.string.err_init_failed')
     }
 
-    // 每 5 秒自动刷新 WiFi 状态
+    // 每 12 秒自动刷新 WiFi 状态（避免频繁扫描耗电）
     this.scanTimerId = setInterval(() => {
       if (this.permissionGranted) {
         this.startWifiScan()
       }
-    }, 5000) as number
+    }, 12000) as number
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === aboutToAppear END ===')
   }
@@ -191,6 +220,54 @@ struct Index {
     }
   }
 
+  // 页面每次变为可见时触发（包括从设置页返回、从后台恢复）
+  // 华为审核要求：返回后需重新检查权限状态，未授权则重新请求
+  onPageShow(): void {
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] onPageShow triggered')
+    // 仅在隐私已同意但权限尚未授予时才重检（避免隐私弹窗期间重复触发）
+    if (this.privacyAgreed && !this.permissionGranted) {
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Privacy agreed but permission not granted, re-checking...')
+      this.recheckPermissionsOnReturn()
+    }
+  }
+
+  /**
+   * 从设置页面返回后重新检查权限
+   * 如果用户已在设置中授权 → 开始扫描
+   * 如果仍未授权 → 重新弹出权限申请弹窗
+   */
+  private async recheckPermissionsOnReturn(): Promise<void> {
+    try {
+      if (!this.abilityContext) {
+        // abilityContext 可能为空（首次还未赋值），尝试重新获取
+        const context = this.getUIContext().getHostContext() as common.UIAbilityContext
+        if (context) {
+          this.abilityContext = context
+        } else {
+          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[Index] No context available for recheck')
+          return
+        }
+      }
+
+      const context = this.abilityContext
+      // 直接用 PermissionManager 重新检查并请求权限
+      const granted: boolean = await PermissionManager.requestPermissions(context)
+      this.permissionGranted = granted
+
+      if (granted) {
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Permissions granted after returning from settings!')
+        this.showPermissionDeniedDialog = false
+        this.startWifiScan()
+      } else {
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Permissions still denied after returning from settings')
+        // 重新显示权限引导弹窗（让用户再次选择"去设置"或"继续使用"）
+        this.showPermissionDeniedDialog = true
+      }
+    } catch (e) {
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] Recheck permissions error:' + JSON.stringify(e))
+    }
+  }
+
   // 路由变更回调 - 触发子页面转场动画（淡入淡出 + 缩放）
   private onRouterChange(route: string | null): void {
     if (route === null) {
@@ -207,30 +284,32 @@ struct Index {
     if (this.isClosingOverlay) {
       this.isClosingOverlay = false
     }
-    this.overlayOpacity = 0
-    this.overlayScale = 0.92
+    this.overlayOpacity = TabAnimationHelper.getOverlayEnterInitial().opacity
+    this.overlayScale = TabAnimationHelper.getOverlayEnterInitial().scale
 
     // 延迟触发动画，让内容先渲染
+    const animConfig = TabAnimationHelper.getEnterAnimationConfig()
     setTimeout(() => {
       this.getUIContext().animateTo({
-        duration: 350,
-        curve: Curve.FastOutSlowIn
+        duration: animConfig.duration,
+        curve: animConfig.curve
       }, () => {
-        this.overlayOpacity = 1
-        this.overlayScale = 1
+        this.overlayOpacity = TabAnimationHelper.getOverlayEnterFinal().opacity
+        this.overlayScale = TabAnimationHelper.getOverlayEnterFinal().scale
       })
-    }, 20)
+    }, TabAnimationHelper.getEnterAnimationDelay())
   }
 
   // 子页面退出动画（淡出 + 缩小）
   private playOverlayExitAnimation(): void {
     this.isClosingOverlay = true
+    const animConfig = TabAnimationHelper.getExitAnimationConfig()
     this.getUIContext().animateTo({
-      duration: 280,
-      curve: Curve.FastOutSlowIn
+      duration: animConfig.duration,
+      curve: animConfig.curve
     }, () => {
-      this.overlayOpacity = 0
-      this.overlayScale = 0.92
+      this.overlayOpacity = TabAnimationHelper.getOverlayExitFinal().opacity
+      this.overlayScale = TabAnimationHelper.getOverlayExitFinal().scale
     })
   }
 
@@ -245,13 +324,13 @@ struct Index {
 
   // Aurora Tab 点击处理 — 弹跳 + 光晕 + 页面淡入
   private onTabClick(index: number): void {
-    if (this.currentIndex === index) return  // 已选中，不重复触发
+    if (this.currentIndex === index) return // 已选中，不重复触发
 
     const prevIndex = this.currentIndex
 
     // === 阶段 1：页面内容淡出 ===
     this.getUIContext().animateTo({
-      duration: 100,
+      duration: TabAnimationHelper.ANIMATION_DURATION_FAST,
       curve: Curve.FastOutSlowIn
     }, () => {
       this.contentOpacity = 0.6
@@ -259,27 +338,18 @@ struct Index {
     })
 
     // === 阶段 1：旧 Tab 图标缩小 + 新 Tab 预压缩 ===
-    const scales1 = [
-      this.tabScales[0], this.tabScales[1], this.tabScales[2],
-      this.tabScales[3], this.tabScales[4]
-    ]
-    const offsets1 = [
-      this.tabOffsetY[0], this.tabOffsetY[1], this.tabOffsetY[2],
-      this.tabOffsetY[3], this.tabOffsetY[4]
-    ]
-    const dots1 = [
-      this.tabDotOpacity[0], this.tabDotOpacity[1], this.tabDotOpacity[2],
-      this.tabDotOpacity[3], this.tabDotOpacity[4]
-    ]
-    scales1[prevIndex] = 0.85
-    scales1[index] = 0.75
-    offsets1[index] = 4
-    dots1[prevIndex] = 0
+    const phase1 = TabAnimationHelper.calcPhase1States(
+      prevIndex, index,
+      this.tabScales, this.tabOffsetY, this.tabDotOpacity
+    )
 
-    this.getUIContext().animateTo({ duration: 100, curve: Curve.FastOutSlowIn }, () => {
-      this.tabScales = scales1
-      this.tabOffsetY = offsets1
-      this.tabDotOpacity = dots1
+    this.getUIContext().animateTo({
+      duration: TabAnimationHelper.ANIMATION_DURATION_FAST,
+      curve: Curve.FastOutSlowIn
+    }, () => {
+      this.tabScales = phase1.scales
+      this.tabOffsetY = phase1.offsets
+      this.tabDotOpacity = phase1.dots
     })
 
     // === 阶段 2：切换页面 + 图标弹出 ===
@@ -287,54 +357,45 @@ struct Index {
       this.currentIndex = index
       this.tabsController.changeIndex(index)
 
-      const scales2 = [
-        this.tabScales[0], this.tabScales[1], this.tabScales[2],
-        this.tabScales[3], this.tabScales[4]
-      ]
-      const offsets2 = [
-        this.tabOffsetY[0], this.tabOffsetY[1], this.tabOffsetY[2],
-        this.tabOffsetY[3], this.tabOffsetY[4]
-      ]
-      const glows2 = [
-        this.tabGlows[0], this.tabGlows[1], this.tabGlows[2],
-        this.tabGlows[3], this.tabGlows[4]
-      ]
-      const dots2 = [
-        this.tabDotOpacity[0], this.tabDotOpacity[1], this.tabDotOpacity[2],
-        this.tabDotOpacity[3], this.tabDotOpacity[4]
-      ]
-      scales2[index] = 1.12
-      offsets2[index] = -6
-      glows2[index] = 1
-      dots2[index] = 1
+      const phase2 = TabAnimationHelper.calcPhase2States(
+        index,
+        this.tabScales, this.tabOffsetY, this.tabGlows, this.tabDotOpacity
+      )
 
       // 图标弹跳弹出 + 光晕出现
-      this.getUIContext().animateTo({ duration: 280, curve: Curve.FastOutSlowIn }, () => {
-        this.tabScales = scales2
-        this.tabOffsetY = offsets2
-        this.tabGlows = glows2
-        this.tabDotOpacity = dots2
+      this.getUIContext().animateTo({
+        duration: TabAnimationHelper.ANIMATION_DURATION_SLOW,
+        curve: Curve.FastOutSlowIn
+      }, () => {
+        this.tabScales = phase2.scales
+        this.tabOffsetY = phase2.offsets
+        this.tabGlows = phase2.glows
+        this.tabDotOpacity = phase2.dots
       })
 
       // 页面内容淡入
-      this.getUIContext().animateTo({ duration: 250, curve: Curve.EaseOut }, () => {
+      this.getUIContext().animateTo({
+        duration: TabAnimationHelper.ANIMATION_DURATION_NORMAL,
+        curve: Curve.EaseOut
+      }, () => {
         this.contentOpacity = 1
         this.contentOffsetY = 0
       })
-    }, 100)
+    }, TabAnimationHelper.getPhase2Delay())
 
     // === 阶段 3：图标回弹到正常大小 ===
     setTimeout(() => {
-      const scales3 = [1.0, 1.0, 1.0, 1.0, 1.0]
-      const offsets3 = [0, 0, 0, 0, 0]
-      const glows3 = [0, 0, 0, 0, 0]
+      const phase3 = TabAnimationHelper.calcPhase3States()
 
-      this.getUIContext().animateTo({ duration: 220, curve: Curve.EaseOut }, () => {
-        this.tabScales = scales3
-        this.tabOffsetY = offsets3
-        this.tabGlows = glows3
+      this.getUIContext().animateTo({
+        duration: TabAnimationHelper.ANIMATION_DURATION_REBOUND,
+        curve: Curve.EaseOut
+      }, () => {
+        this.tabScales = phase3.scales
+        this.tabOffsetY = phase3.offsets
+        this.tabGlows = phase3.glows
       })
-    }, 380)
+    }, TabAnimationHelper.getPhase3Delay())
   }
 
   // ==================== 权限请求 + 扫描流程 ====================
@@ -343,7 +404,7 @@ struct Index {
 
   async requestPermissionsAndScan(context: common.UIAbilityContext): Promise<void> {
     hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] === requestPermissionsAndScan START ===')
-    this.abilityContext = context  // 保存 context 供后续使用
+    this.abilityContext = context // 保存 context 供后续使用
     try {
       const granted: boolean = await PermissionManager.requestPermissions(context)
       this.permissionGranted = granted
@@ -359,7 +420,7 @@ struct Index {
     } catch (e) {
       hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] Permission error:' + JSON.stringify(e))
       this.permissionGranted = false
-      this.showPermissionDeniedDialog = true  // 出错时也显示弹窗
+      this.showPermissionDeniedDialog = true // 出错时也显示弹窗
     }
   }
 
@@ -372,11 +433,82 @@ struct Index {
     this.showPermissionDeniedDialog = false
   }
 
-  // 退出应用
+  // 退出应用（仅保留入口，不再主动调用）
   private exitApp(): void {
-    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Exiting app...')
-    if (this.abilityContext) {
-      PermissionManager.terminateApp(this.abilityContext)
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] exitApp called - no longer terminates app')
+    this.showPermissionDeniedDialog = false
+  }
+
+  // ==================== 隐私政策前置流程（华为审核要求）====================
+
+  // DataPreferences 存储键名
+  private static readonly PRIVACY_STORE_NAME: string = 'privacy_agreement'
+  private static readonly PRIVACY_KEY_AGREED: string = 'user_agreed'
+
+  /**
+   * 检查用户是否已同意隐私政策
+   * - 已同意 → 直接请求权限 + 开始扫描
+   * - 未同意 → 弹出隐私政策弹窗（不请求任何权限）
+   */
+  private async checkPrivacyAgreement(context: common.UIAbilityContext): Promise<void> {
+    try {
+      const prefs: preferences.Preferences = await preferences.getPreferences(context, Index.PRIVACY_STORE_NAME)
+      const agreed: boolean = await prefs.get(Index.PRIVACY_KEY_AGREED, false) === true
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Privacy agreed=' + agreed)
+
+      if (agreed) {
+        // 已同意：直接走权限请求+扫描
+        this.privacyAgreed = true
+        this.requestPermissionsAndScan(context)
+      } else {
+        // 未同意：弹出隐私政策弹窗，不请求权限
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Show privacy agreement dialog')
+        this.showPrivacyDialog = true
+      }
+    } catch (e) {
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] Check privacy error:' + JSON.stringify(e))
+      // 出错时默认弹出隐私政策（安全侧）
+      this.showPrivacyDialog = true
+    }
+  }
+
+  /** 用户点击"同意并继续" */
+  private async onPrivacyAgree(): Promise<void> {
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] User agreed to privacy policy')
+
+    try {
+      if (this.abilityContextForPrivacy) {
+        const prefs: preferences.Preferences = await preferences.getPreferences(this.abilityContextForPrivacy, Index.PRIVACY_STORE_NAME)
+        await prefs.put(Index.PRIVACY_KEY_AGREED, true)
+        await prefs.flush()
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] Privacy agreed state saved')
+      }
+
+      this.privacyAgreed = true
+      this.showPrivacyDialog = false
+
+      // 同意后才开始请求权限
+      if (this.abilityContextForPrivacy) {
+        this.requestPermissionsAndScan(this.abilityContextForPrivacy)
+      }
+    } catch (e) {
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[Index] Save privacy agree error:' + JSON.stringify(e))
+      // 即使保存失败也继续（用户体验优先）
+      this.showPrivacyDialog = false
+      if (this.abilityContextForPrivacy) {
+        this.requestPermissionsAndScan(this.abilityContextForPrivacy)
+      }
+    }
+  }
+
+  /** 用户点击"不同意" — 退出应用 */
+  private onPrivacyDisagree(): void {
+    hilog.info(DOMAIN, 'testTag', '%{public}s', '[Index] User disagreed to privacy policy - exiting app')
+    this.showPrivacyDialog = false
+
+    if (this.abilityContextForPrivacy) {
+      // 不同意隐私政策 → 终止应用
+      this.abilityContextForPrivacy.terminateSelf()
     }
   }
 
@@ -385,8 +517,6 @@ struct Index {
       this.wifiState,
       (newState: SharedWifiState) => {
         this.wifiState = newState
-        // 同步到 AppStorage，让独立页面也能访问
-        AppStorage.setOrCreate('wifiState', newState)
       }
     )
   }
@@ -405,11 +535,41 @@ struct Index {
 
   build() {
     Stack() {
-      // 背景层 — Aurora 极光渐变（延伸到状态栏区域）
+      // 背景层 — Aurora 极光渐变（与 WiFi 页面统一）
       Column()
         .width('100%')
         .height('100%')
-        .backgroundColor(this.isDarkMode ? '#0A1628' : '#F0F8FF')
+        .linearGradient({
+          direction: GradientDirection.Bottom,
+          colors: adaptiveBackgroundList(this.isDarkMode)
+        })
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+
+      // 极光装饰光晕 1（左上角）
+      Circle()
+        .width(280)
+        .height(280)
+        .fill(adaptiveGlowLarge(this.isDarkMode))
+        .position({ x: -60, y: -60 })
+        .hitTestBehavior(HitTestMode.None)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+
+      // 极光装饰光晕 2（右中）
+      Circle()
+        .width(180)
+        .height(180)
+        .fill(adaptiveGlowMedium(this.isDarkMode))
+        .position({ x: '68%', y: '45%' })
+        .hitTestBehavior(HitTestMode.None)
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+
+      // 极光装饰光晕 3（右上）
+      Circle()
+        .width(120)
+        .height(120)
+        .fill(adaptiveGlowSmall(this.isDarkMode))
+        .position({ x: '80%', y: '10%' })
+        .hitTestBehavior(HitTestMode.None)
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
       // 内容层
@@ -419,84 +579,26 @@ struct Index {
         this.buildMainContent()
       }
 
+      // 隐私政策同意弹窗（权限请求之前，华为审核要求）
+      if (this.showPrivacyDialog) {
+        PrivacyDialog({
+          privacyAgreed: this.privacyAgreed,
+          onAgree: () => this.onPrivacyAgree(),
+          onDisagree: () => this.onPrivacyDisagree()
+        })
+      }
+
       // 权限拒绝弹窗
       if (this.showPermissionDeniedDialog) {
-        this.buildPermissionDeniedDialog()
+        PermissionDialog({
+          onOpenSettings: () => this.openAppSettings(),
+          onExit: () => this.exitApp()
+        })
       }
     }
     .width('100%')
     .height('100%')
-  }
-
-  // 权限拒绝弹窗
-  @Builder
-  buildPermissionDeniedDialog() {
-    Column() {
-      Column() {
-        // 标题
-        Text('权限申请')
-          .fontSize(18)
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.isDarkMode ? '#FFFFFF' : '#1E293B')
-          .margin({ bottom: 12 })
-
-        // 提示文字
-        Text('WlAN-分析仪需要位置权限才能扫描周围的WiFi网络。\n\n请到「设置 → 应用 → WlAN-分析仪 → 权限」中开启「位置信息」权限。')
-          .fontSize(14)
-          .fontColor(this.isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(30,41,59,0.7)')
-          .textAlign(TextAlign.Center)
-          .lineHeight(22)
-          .margin({ bottom: 24 })
-
-        // 按钮区域
-        Row() {
-          // 退出按钮
-          Button('退出')
-            .fontSize(15)
-            .fontColor('#FF3B30')
-            .backgroundColor(this.isDarkMode ? 'rgba(255,59,48,0.15)' : 'rgba(255,59,48,0.1)')
-            .borderRadius(12)
-            .height(44)
-            .layoutWeight(1)
-            .onClick(() => {
-              this.exitApp()
-            })
-
-          // 去设置按钮
-          Button('打开设置')
-            .fontSize(15)
-            .fontWeight(FontWeight.Medium)
-            .fontColor('#FFFFFF')
-            .backgroundColor('#007AFF')
-            .borderRadius(12)
-            .height(44)
-            .layoutWeight(1)
-            .margin({ left: 12 })
-            .onClick(() => {
-              this.openAppSettings()
-            })
-        }
-      }
-      .padding(24)
-      .backgroundColor(this.isDarkMode ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.95)')
-      .borderRadius(20)
-      .border({
-        width: 1,
-        color: this.isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'
-      })
-      .shadow({
-        radius: 24,
-        color: this.isDarkMode ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.15)',
-        offsetX: 0,
-        offsetY: 8
-      })
-      .width('85%')
-      .constraintSize({ maxWidth: 340 })
-    }
-    .width('100%')
-    .height('100%')
-    .backgroundColor('rgba(0,0,0,0.5)')
-    .justifyContent(FlexAlign.Center)
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
   }
 
   @Builder
@@ -515,31 +617,43 @@ struct Index {
         }
 
         TabContent() {
-          Column() {
-            WifiListSection()
+          Stack() {
+            AuroraBackground()
+            Column() {
+              WifiListSection()
+            }
+            .padding({ top: 32 })
           }
-          .padding({ top: 32 })
         }
 
         TabContent() {
-          Column() {
-            ChannelSection()
+          Stack() {
+            AuroraBackground()
+            Column() {
+              ChannelSection()
+            }
+            .padding({ top: 32 })
           }
-          .padding({ top: 32 })
         }
 
         TabContent() {
-          Column() {
-            SpeedTestSection()
+          Stack() {
+            AuroraBackground()
+            Column() {
+              SpeedTestSection()
+            }
+            .padding({ top: 32 })
           }
-          .padding({ top: 32 })
         }
 
         TabContent() {
-          Column() {
-            ToolsSection()
+          Stack() {
+            AuroraBackground()
+            Column() {
+              ToolsSection()
+            }
+            .padding({ top: 32 })
           }
-          .padding({ top: 32 })
         }
       }
       .barHeight(0)  // 隐藏原生 TabBar
@@ -567,7 +681,7 @@ struct Index {
       Column()
         .width('100%')
         .height('100%')
-        .backgroundColor('rgba(0,0,0,0.5)')
+        .backgroundColor(COLOR_OVERLAY)
         .opacity(this.overlayOpacity * 0.5)
         .onClick(() => {
           // 点击遮罩返回
@@ -653,7 +767,7 @@ struct Index {
                 Image(item.icon)
                   .width(26)
                   .height(26)
-                  .fillColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : '#8E8E93'))
+                  .fillColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_SECONDARY))
                   .scale({ x: this.tabScales[index], y: this.tabScales[index] })
                   .translate({ x: 0, y: this.tabOffsetY[index] })
               }
@@ -664,7 +778,7 @@ struct Index {
               Text(item.title)
                 .fontSize(11)
                 .fontWeight(this.currentIndex === index ? FontWeight.Medium : FontWeight.Normal)
-                .fontColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : '#8E8E93'))
+                .fontColor(this.currentIndex === index ? COLOR_AURORA_PRIMARY : (this.isDarkMode ? COLOR_TEXT_GLASS_TERTIARY : COLOR_TEXT_LIGHT_SECONDARY))
                 .margin({ top: 2 })
                 .scale({ x: this.tabScales[index], y: this.tabScales[index] })
 
@@ -690,7 +804,7 @@ struct Index {
         .height(80)
         .padding({ top: 10, bottom: 12 })
         // === 毛玻璃效果 ===
-        .backgroundColor(this.isDarkMode ? 'rgba(30,41,59,0.75)' : 'rgba(255,255,255,0.68)')
+        .backgroundColor(this.isDarkMode ? COLOR_GLASS_DARK_CARD : COLOR_GLASS_SURFACE_LIGHT)
         .backdropBlur(18)
         .linearGradient(this.isDarkMode
           ? { direction: GradientDirection.Top, colors: [['rgba(30,41,59,0.45)', 0], ['rgba(30,41,59,0.14)', 0.5], ['rgba(30,41,59,0.08)', 1]] }
@@ -699,13 +813,13 @@ struct Index {
         .border({
           width: { top: 0.5, bottom: 0 },
           color: {
-            top: this.isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.78)',
-            bottom: this.isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'
+            top: this.isDarkMode ? COLOR_GLASS_SURFACE_LIGHT : COLOR_GLASS_CARD,
+            bottom: this.isDarkMode ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER
           }
         })
         .shadow({
           radius: 24,
-          color: this.isDarkMode ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.12)',
+          color: this.isDarkMode ? COLOR_SHADOW_GLASS : COLOR_SHADOW_GLASS,
           offsetX: 0,
           offsetY: 6
         })
