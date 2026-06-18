@@ -1,4 +1,5 @@
 import { router } from '@kit.ArkUI';
+import { common } from '@kit.AbilityKit';
 import { PermissionManager, PermissionStatus } from 'wifi-base';
 
 @Entry
@@ -14,7 +15,7 @@ struct Launcher {
 
   async checkAndRequestPermissions(): Promise<void> {
     try {
-      const ctx = AppStorage.get<object>('abilityContext');
+      const ctx = AppStorage.get<object>('abilityContext') as common.UIAbilityContext;
       if (!ctx) {
         this.isLoading = false;
         this.showPermissionDenied = true;

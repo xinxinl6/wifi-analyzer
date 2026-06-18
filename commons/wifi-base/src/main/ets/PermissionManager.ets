@@ -24,8 +24,8 @@ export class PermissionManager {
   private context: common.UIAbilityContext;
   private atManager = abilityAccessCtrl.createAtManager();
 
-  constructor(context: common.UIAbilityContext) {
-    this.context = context;
+  constructor(ctx: common.UIAbilityContext) {
+    this.context = ctx;
   }
 
   /**
