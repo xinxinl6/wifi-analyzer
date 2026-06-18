@@ -1,7 +1,7 @@
 /**
  * WiFi分析仪 — 权限管理
  */
-import { abilityAccessCtrl, bundleManager, common, Permissions } from '@kit.AbilityKit';
+import { abilityAccessCtrl, bundleManager, common, Permissions, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 const DOMAIN = 0x0000;
@@ -93,7 +93,7 @@ export class PermissionManager {
    * 打开应用权限设置页面
    */
   openAppSettings(): void {
-    const want = {
+    const want: Want = {
       bundleName: 'com.huawei.harmonyos.settings',
       abilityName: 'com.huawei.harmonyos.settings.MainAbility',
       uri: 'application_info_entry',
@@ -105,7 +105,7 @@ export class PermissionManager {
       hilog.info(DOMAIN, 'WiFiAnalyzer', '已跳转到设置');
     }).catch(() => {
       hilog.warn(DOMAIN, 'WiFiAnalyzer', '跳转设置失败，尝试fallback');
-      const fallbackWant = {
+      const fallbackWant: Want = {
         bundleName: 'com.huawei.harmonyos.settings',
         abilityName: 'com.huawei.harmonyos.settings.MainAbility',
       };
