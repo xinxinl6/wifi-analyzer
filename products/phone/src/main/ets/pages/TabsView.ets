@@ -1,10 +1,12 @@
 import { WindowInfo } from 'wifi-base';
 import { HdsTabs, hdsMaterial } from '@kit.UIDesignKit';
+import { WifiScanner, WifiViewModel } from '@wifi-analyzer/wifi-scan';
 
 @ComponentV2
 export struct TabsView {
   @Param mainWindowInfo: WindowInfo = new WindowInfo();
   @Local currentBottomIndex: number = 0;
+  private wifiViewModel: WifiViewModel = new WifiViewModel();
 
   @Builder
   TabBuilder(label: ResourceStr, index: number) {
@@ -20,28 +22,74 @@ export struct TabsView {
 
   build() {
     HdsTabs() {
+      // Tab 0 — Dashboard
       TabContent() {
-        Text('Dashboard').fontSize(20).fontColor($r('sys.color.font_primary'))
+        Column() {
+          Text('网络概览').fontSize(20).fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.font_primary'))
+            .margin({ top: 40, bottom: 20 })
+
+          Text('设备: ' + (this.wifiViewModel.getStats().total > 0 ?
+            this.wifiViewModel.getStats().bestSsid : '未扫描'))
+            .fontSize(16).fontColor($r('sys.color.font_secondary'))
+
+          Text('信号强度: ' + this.wifiViewModel.getStats().avgRssi + ' dBm')
+            .fontSize(16).fontColor($r('sys.color.font_secondary')).margin({ top: 8 })
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .tabBar(this.TabBuilder($r('app.string.tab_home'), 0))
 
+      // Tab 1 — WiFi 列表
       TabContent() {
-        Text('WiFi').fontSize(20).fontColor($r('sys.color.font_primary'))
+        Column() {
+          Text('WiFi 扫描').fontSize(20).fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.font_primary')).margin({ top: 40, bottom: 20 })
+          Text('附近网络: ' + this.wifiViewModel.getScanner().scanResults.length + ' 个')
+            .fontSize(16).fontColor($r('sys.color.font_secondary'))
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .tabBar(this.TabBuilder($r('app.string.tab_wifi'), 1))
 
+      // Tab 2 — 信道
       TabContent() {
-        Text('信道').fontSize(20).fontColor($r('sys.color.font_primary'))
+        Column() {
+          Text('信道分析').fontSize(20).fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.font_primary')).margin({ top: 40, bottom: 20 })
+          Text('2.4GHz / 5GHz 信道占用').fontSize(16)
+            .fontColor($r('sys.color.font_secondary'))
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .tabBar(this.TabBuilder($r('app.string.tab_channel'), 2))
 
+      // Tab 3 — 测速
       TabContent() {
-        Text('测速').fontSize(20).fontColor($r('sys.color.font_primary'))
+        Column() {
+          Text('网络测速').fontSize(20).fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.font_primary')).margin({ top: 40, bottom: 20 })
+          Text('开始测试').fontSize(16)
+            .fontColor($r('sys.color.font_secondary'))
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .tabBar(this.TabBuilder($r('app.string.tab_speed'), 3))
 
+      // Tab 4 — 工具箱
       TabContent() {
-        Text('工具箱').fontSize(20).fontColor($r('sys.color.font_primary'))
+        Column() {
+          Text('网络工具箱').fontSize(20).fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.font_primary')).margin({ top: 40, bottom: 20 })
+          Text('11 种网络工具').fontSize(16)
+            .fontColor($r('sys.color.font_secondary'))
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .tabBar(this.TabBuilder($r('app.string.tab_tools'), 4))
     }

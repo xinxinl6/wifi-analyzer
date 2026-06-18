@@ -1,1 +1,24 @@
-{"string": []}
+{
+  "string": [
+    {
+      "name": "signal_excellent",
+      "value": "极强"
+    },
+    {
+      "name": "signal_good",
+      "value": "强"
+    },
+    {
+      "name": "signal_fair",
+      "value": "中等"
+    },
+    {
+      "name": "signal_weak",
+      "value": "弱"
+    },
+    {
+      "name": "signal_poor",
+      "value": "极弱"
+    }
+  ]
+}

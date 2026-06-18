@@ -6,6 +6,8 @@
   "dependencies": {
     "wifi-base": "file:../../commons/wifi-base",
     "native-ping": "file:../../commons/native-ping",
-    "@wifi-analyzer/design-system": "file:../../design-system"
+    "@wifi-analyzer/design-system": "file:../../design-system",
+    "@wifi-analyzer/wifi-scan": "file:../../features/wifi-scan",
+    "@wifi-analyzer/speed-test": "file:../../speed-test"
   }
 }

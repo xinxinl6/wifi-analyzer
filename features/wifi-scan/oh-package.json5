@@ -1,11 +1,11 @@
 {
   "name": "@wifi-analyzer/wifi-scan",
   "version": "1.0.0",
-  "description": "WiFi Analyzer 扫描模块 — WiFi网络扫描、信号检测、AP信息获取",
+  "description": "WiFi Analyzer 扫描模块",
   "main": "src/main/ets/Index.ets",
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@wifi-analyzer/core": "file:../../core"
+    "wifi-base": "file:../../commons/wifi-base"
   }
 }
