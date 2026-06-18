@@ -3,7 +3,6 @@
  */
 import { abilityAccessCtrl, common, Permissions } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { BusinessError } from '@kit.BasicServicesKit';
 
 const DOMAIN = 0x0000;
 
@@ -21,6 +20,11 @@ export enum PermissionStatus {
   PARTIAL = 'partial',
 }
 
+/** 扩展 UIAbilityContext 以访问 token 属性 */
+interface ContextWithToken extends common.UIAbilityContext {
+  token: number;
+}
+
 export class PermissionManager {
   private context: common.UIAbilityContext;
   private atManager = abilityAccessCtrl.createAtManager();
@@ -34,8 +38,8 @@ export class PermissionManager {
    */
   private getSelfTokenId(): number {
     try {
-      return this.atManager.getSelfTokenId();
-    } catch (e: BusinessError) {
+      return (this.context as ContextWithToken).token;
+    } catch {
       return 0;
     }
   }
@@ -81,8 +85,8 @@ export class PermissionManager {
 
       await this.atManager.requestPermissionsFromUser(this.context, needRequest);
       return this.checkPermissions() === PermissionStatus.GRANTED;
-    } catch (e: BusinessError) {
-      hilog.error(DOMAIN, 'WiFiAnalyzer', '权限请求失败: %{public}s', JSON.stringify(e));
+    } catch {
+      hilog.error(DOMAIN, 'WiFiAnalyzer', '权限请求失败');
       return false;
     }
   }
@@ -108,8 +112,8 @@ export class PermissionManager {
           hilog.warn(DOMAIN, 'WiFiAnalyzer', '无法打开设置页面');
         });
       });
-    } catch (e: BusinessError) {
-      hilog.error(DOMAIN, 'WiFiAnalyzer', 'openAppSettings 失败: %{public}s', JSON.stringify(e));
+    } catch {
+      hilog.error(DOMAIN, 'WiFiAnalyzer', 'openAppSettings 失败');
     }
   }
 }
