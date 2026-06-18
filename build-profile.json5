@@ -17,7 +17,7 @@
     ],
     "products": [
       {
-        "name": "phone",
+        "name": "default",
         "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
@@ -73,7 +73,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone"
+            "default"
           ]
         }
       ]
@@ -109,7 +109,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -123,7 +123,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -137,7 +137,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -151,7 +151,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -165,7 +165,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -179,7 +179,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
@@ -193,7 +193,7 @@
         {
           "name": "default",
           "applyToProducts": [
-            "phone",
+            "default",
             "tablet",
             "pc"
           ]
