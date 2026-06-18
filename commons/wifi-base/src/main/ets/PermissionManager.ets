@@ -23,11 +23,10 @@ export enum PermissionStatus {
 
 export class PermissionManager {
   private context: common.UIAbilityContext;
-  private atManager;
+  private atManager = abilityAccessCtrl.createAtManager();
 
   constructor(context: common.UIAbilityContext) {
     this.context = context;
-    this.atManager = abilityAccessCtrl.createAtManager();
   }
 
   /**
@@ -36,7 +35,7 @@ export class PermissionManager {
   private getSelfTokenId(): number {
     try {
       return this.atManager.getSelfTokenId();
-    } catch {
+    } catch (e: BusinessError) {
       return 0;
     }
   }
@@ -82,8 +81,8 @@ export class PermissionManager {
 
       await this.atManager.requestPermissionsFromUser(this.context, needRequest);
       return this.checkPermissions() === PermissionStatus.GRANTED;
-    } catch (err) {
-      hilog.error(DOMAIN, 'WiFiAnalyzer', '权限请求失败: %{public}s', JSON.stringify(err));
+    } catch (e: BusinessError) {
+      hilog.error(DOMAIN, 'WiFiAnalyzer', '权限请求失败: %{public}s', JSON.stringify(e));
       return false;
     }
   }
@@ -93,8 +92,7 @@ export class PermissionManager {
    */
   openAppSettings(): void {
     try {
-      // 从 context 自身获取 bundleName
-const bundleName: string = this.context.bundleName;
+      const bundleName: string = 'com.xinxin.analyzer';
       this.context.startAbility({
         bundleName: 'com.huawei.harmonyos.settings',
         abilityName: 'com.huawei.harmonyos.settings.MainAbility',
@@ -110,8 +108,8 @@ const bundleName: string = this.context.bundleName;
           hilog.warn(DOMAIN, 'WiFiAnalyzer', '无法打开设置页面');
         });
       });
-    } catch (err) {
-      hilog.error(DOMAIN, 'WiFiAnalyzer', 'openAppSettings 失败: %{public}s', JSON.stringify(err));
+    } catch (e: BusinessError) {
+      hilog.error(DOMAIN, 'WiFiAnalyzer', 'openAppSettings 失败: %{public}s', JSON.stringify(e));
     }
   }
 }
