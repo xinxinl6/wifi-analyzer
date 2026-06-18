@@ -1,15 +1,22 @@
-// 测速引擎 - 真实网络测速
-// 使用 HTTP 下载/上传大文件测量实际网速
-// 支持：下载测速、上传测速（HTTP POST）、Ping 延迟、抖动
+// 测速引擎 v2 — 爱快风格持续多线程测速
+// 核心改进：
+//   1. 下载：N线程持续下载12-15s，每200ms实时回调瞬时速度
+//   2. 上传：N线程持续上传12-15s，每200ms实时回调瞬时速度
+//   3. 支持两种模式：http（6线程/12s）和 iperf3（8线程/15s）
+//   4. 滑动窗口瞬时速度计算（基于最近200ms字节增量）
+//   5. Ping/Jitter/Bufferbloat 保持不变
+//
+// v2.2: 下载/上传统一使用 Cloudflare 测速专用端点（不再用 CDN ISO）
 
 import { http } from '@kit.NetworkKit'
-import { SpeedTestResult } from '@wifi-analyzer/core'
+import { SpeedTestResult } from './SpeedTestModel'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 
 const DOMAIN = 0x0000
 
-// ==================== 服务器节点定义 ====================
+// ==================== 类型定义 ====================
 export type ServerType = 'cdn' | 'librespeed'
+export type SpeedTestMode = 'http' | 'iperf3'
 
 export interface ServerNode {
   id: string
@@ -18,45 +25,74 @@ export interface ServerNode {
   url: string
   speedTestUrl: string
   pingUrl: string
+  uploadUrl: string
   latencyMs: number
 }
 
-// Ping 测量结果
 export interface PingData {
   ping: number
   jitter: number
 }
 
-// 国内可用的大文件下载源（CDN — 12 个节点覆盖全国 + 亚洲）
-const UBUNTU_INITRD: string = '/ubuntu/dists/noble/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/initrd.gz'
-
-export const SERVER_NODES: ServerNode[] = [
-  { id: 'auto', name: '自动选择最优节点', type: 'cdn', url: '', speedTestUrl: '', pingUrl: '', latencyMs: 0 },
-  { id: 'beijing-aliyun', name: '北京 · 阿里云', type: 'cdn', url: 'https://mirrors.aliyun.com/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.aliyun.com' + UBUNTU_INITRD, pingUrl: 'https://mirrors.aliyun.com/', latencyMs: 15 },
-  { id: 'beijing-tsinghua', name: '北京 · 清华大学', type: 'cdn', url: 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.tuna.tsinghua.edu.cn' + UBUNTU_INITRD, pingUrl: 'https://mirrors.tuna.tsinghua.edu.cn/', latencyMs: 12 },
-  { id: 'shanghai-tencent', name: '上海 · 腾讯云', type: 'cdn', url: 'https://mirrors.tencent.com/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.tencent.com' + UBUNTU_INITRD, pingUrl: 'https://mirrors.tencent.com/', latencyMs: 22 },
-  { id: 'shanghai-sjtu', name: '上海 · 上交大', type: 'cdn', url: 'https://mirrors.sjtug.sjtu.edu.cn/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.sjtug.sjtu.edu.cn' + UBUNTU_INITRD, pingUrl: 'https://mirrors.sjtug.sjtu.edu.cn/', latencyMs: 18 },
-  { id: 'guangzhou', name: '广州 · 华为云', type: 'cdn', url: 'https://repo.huaweicloud.com/ubuntu/dists/noble/main/binary-amd64/Packages.xz', speedTestUrl: 'https://repo.huaweicloud.com' + UBUNTU_INITRD, pingUrl: 'https://repo.huaweicloud.com/', latencyMs: 28 },
-  { id: 'hefei', name: '合肥 · 中科大', type: 'cdn', url: 'https://mirrors.ustc.edu.cn/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.ustc.edu.cn' + UBUNTU_INITRD, pingUrl: 'https://mirrors.ustc.edu.cn/', latencyMs: 20 },
-  { id: 'nanjing', name: '南京 · 南京大学', type: 'cdn', url: 'https://mirrors.nju.edu.cn/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.nju.edu.cn' + UBUNTU_INITRD, pingUrl: 'https://mirrors.nju.edu.cn/', latencyMs: 16 },
-  { id: 'shenzhen', name: '深圳 · 网易', type: 'cdn', url: 'https://mirrors.163.com/ubuntu/dists/noble/main/binary-amd64/Packages.gz', speedTestUrl: 'https://mirrors.163.com' + UBUNTU_INITRD, pingUrl: 'https://mirrors.163.com/', latencyMs: 25 },
-  // === LibreSpeed 开源测速节点 ===
-  { id: 'ls-hk', name: '香港 · CDN77', type: 'cdn', url: 'http://hkg.download.datapacket.com/100mb.bin', speedTestUrl: 'http://hkg.download.datapacket.com/1000mb.bin', pingUrl: 'https://www.google.com/', latencyMs: 45 },
-  { id: 'ls-sg', name: '新加坡 · CDN77', type: 'cdn', url: 'http://sgp.download.datapacket.com/100mb.bin', speedTestUrl: 'http://sgp.download.datapacket.com/1000mb.bin', pingUrl: 'https://www.google.com/', latencyMs: 80 },
-  { id: 'ls-jp', name: '东京 · CDN77', type: 'cdn', url: 'http://tyo.download.datapacket.com/100mb.bin', speedTestUrl: 'http://tyo.download.datapacket.com/1000mb.bin', pingUrl: 'https://www.google.com/', latencyMs: 60 },
-  // === LibreSpeed 开源测速服务器 ===
-  { id: 'ls-cf', name: '🌍 Cloudflare 全球', type: 'librespeed', url: 'https://speed.cloudflare.com', speedTestUrl: 'https://speed.cloudflare.com/__down?bytes=20971520', pingUrl: 'https://speed.cloudflare.com/', latencyMs: 50 },
-  { id: 'ls-us', name: '🇺🇸 美国 · Dalas', type: 'librespeed', url: 'https://speedtest.dal.us.httpx.io', speedTestUrl: 'https://speedtest.dal.us.httpx.io/garbage.php?ckSize=20971520', pingUrl: 'https://speedtest.dal.us.httpx.io/empty.php', latencyMs: 200 },
-  { id: 'ls-eu', name: '🇪🇺 欧洲 · 法兰克福', type: 'librespeed', url: 'https://speedtest.fra.eu.httpx.io', speedTestUrl: 'https://speedtest.fra.eu.httpx.io/garbage.php?ckSize=20971520', pingUrl: 'https://speedtest.fra.eu.httpx.io/empty.php', latencyMs: 220 },
-  { id: 'ls-in', name: '🇮🇳 印度 · 孟买', type: 'librespeed', url: 'https://speedtest.bom.in.httpx.io', speedTestUrl: 'https://speedtest.bom.in.httpx.io/garbage.php?ckSize=20971520', pingUrl: 'https://speedtest.bom.in.httpx.io/empty.php', latencyMs: 150 },
-  { id: 'ls-br', name: '🇧🇷 巴西 · 圣保罗', type: 'librespeed', url: 'https://speedtest.gru.br.httpx.io', speedTestUrl: 'https://speedtest.gru.br.httpx.io/garbage.php?ckSize=20971520', pingUrl: 'https://speedtest.gru.br.httpx.io/empty.php', latencyMs: 300 },
-]
-
-// ==================== 网络类型定义 ====================
 export interface NetworkTypeOption {
   key: string
   label: string
 }
+
+// ==================== 测速参数（按模式区分） ====================
+interface ModeConfig {
+  downloadThreads: number
+  uploadThreads: number
+  durationMs: number
+}
+
+const MODE_CONFIGS: Record<SpeedTestMode, ModeConfig> = {
+  'http': { downloadThreads: 6, uploadThreads: 4, durationMs: 12000 },
+  'iperf3': { downloadThreads: 8, uploadThreads: 6, durationMs: 15000 }
+}
+
+const DOWNLOAD_CHUNK_SIZE: number = 512 * 1024        // 512KB / 请求
+const UPLOAD_CHUNK_SIZE: number = 1 * 1024 * 1024      // 1MB / 请求
+const PROGRESS_INTERVAL_MS: number = 200               // 200ms 进度回调
+
+// ── 统一测速端点（Cloudflare 专用，全球可用）──
+// 所有节点的下载/上传测速都走 Cloudflare，节点仅用于 Ping 延迟选路
+const CF_DOWNLOAD_URL: string = 'https://speed.cloudflare.com/__down?bytes=524288'
+const CF_UPLOAD_URL: string = 'https://speed.cloudflare.com/__up'
+
+// ==================== 服务器节点 ====================
+export const SERVER_NODES: ServerNode[] = [
+  { id: 'auto', name: '自动选择最优节点', type: 'cdn', url: '', speedTestUrl: '', pingUrl: '', uploadUrl: '', latencyMs: 0 },
+  // === 国内 CDN 镜像（仅用于 Ping 选路，实际测速走 Cloudflare）===
+  { id: 'beijing-aliyun', name: '北京 · 阿里云', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.aliyun.com/', uploadUrl: CF_UPLOAD_URL, latencyMs: 15 },
+  { id: 'beijing-tsinghua', name: '北京 · 清华大学', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.tuna.tsinghua.edu.cn/', uploadUrl: CF_UPLOAD_URL, latencyMs: 12 },
+  { id: 'shanghai-tencent', name: '上海 · 腾讯云', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.tencent.com/', uploadUrl: CF_UPLOAD_URL, latencyMs: 22 },
+  { id: 'shanghai-sjtu', name: '上海 · 上交大', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.sjtug.sjtu.edu.cn/', uploadUrl: CF_UPLOAD_URL, latencyMs: 18 },
+  { id: 'guangzhou', name: '广州 · 华为云', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://repo.huaweicloud.com/', uploadUrl: CF_UPLOAD_URL, latencyMs: 28 },
+  { id: 'hefei', name: '合肥 · 中科大', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.ustc.edu.cn/', uploadUrl: CF_UPLOAD_URL, latencyMs: 20 },
+  { id: 'nanjing', name: '南京 · 南京大学', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.nju.edu.cn/', uploadUrl: CF_UPLOAD_URL, latencyMs: 16 },
+  { id: 'shenzhen', name: '深圳 · 网易', type: 'cdn',
+    url: '', speedTestUrl: '',
+    pingUrl: 'https://mirrors.163.com/', uploadUrl: CF_UPLOAD_URL, latencyMs: 25 },
+  // === 海外节点 ===
+  { id: 'ls-cf', name: 'Cloudflare 全球', type: 'librespeed',
+    url: 'https://speed.cloudflare.com', speedTestUrl: '',
+    pingUrl: 'https://speed.cloudflare.com/', uploadUrl: CF_UPLOAD_URL, latencyMs: 50 },
+]
 
 export const NETWORK_TYPES: NetworkTypeOption[] = [
   { key: 'auto', label: '自动检测' },
@@ -65,24 +101,11 @@ export const NETWORK_TYPES: NetworkTypeOption[] = [
   { key: '4g', label: '4G/LTE' }
 ]
 
-// ==================== 上传测速端点 ====================
-const UPLOAD_ENDPOINT: string = 'https://httpbin.org/post'
-const UPLOAD_SIZE_BYTES: number = 3 * 1024 * 1024 // 3MB 测试数据
-
-// ==================== HTTP 请求头接口（避免匿名对象字面量）==========
+// ==================== HTTP 请求类型 ====================
 interface SpeedTestHeaders {
   'User-Agent': string
   'Cache-Control'?: string
-  'Range'?: string
   'Content-Type'?: string
-}
-
-interface PingRequestOptions {
-  method: http.RequestMethod
-  header: SpeedTestHeaders
-  connectTimeout: number
-  readTimeout: number
-  expectDataType?: http.HttpDataType
 }
 
 interface DownloadRequestOptions {
@@ -101,11 +124,6 @@ interface UploadRequestOptions {
   readTimeout: number
 }
 
-interface DownloadChunk {
-  range: string
-  label: string
-}
-
 interface DownloadResult {
   speed: number
   bloatMs: number
@@ -121,15 +139,53 @@ interface PingResultItem {
   ping: number
 }
 
-// ==================== 测速状态回调 ====================
+// ==================== 速度累加器（线程间共享状态） ====================
+class SpeedAccumulator {
+  totalBytes: number = 0
+  private lastReportBytes: number = 0
+  private lastReportTime: number
+
+  constructor(startTime: number) {
+    this.lastReportTime = startTime
+  }
+
+  // 添加已传输字节数，按 200ms 间隔回调瞬时速度
+  reportBytes(bytes: number, now: number, isDownload: boolean, callbacks: SpeedTestCallbacks): void {
+    this.totalBytes += bytes
+    if (now - this.lastReportTime >= PROGRESS_INTERVAL_MS) {
+      const deltaBytes: number = this.totalBytes - this.lastReportBytes
+      const deltaTime: number = (now - this.lastReportTime) / 1000
+      this.lastReportBytes = this.totalBytes
+      this.lastReportTime = now
+      if (deltaTime > 0) {
+        const instantSpeed: number = (deltaBytes * 8) / (deltaTime * 1024 * 1024)
+        const rounded: number = Math.round(instantSpeed * 10) / 10
+        if (isDownload) {
+          callbacks.onDownloadProgress(rounded)
+        } else {
+          callbacks.onUploadProgress(rounded)
+        }
+      }
+    }
+  }
+
+  // 计算平均速度
+  getAverageSpeed(startTime: number): number {
+    const elapsed: number = (Date.now() - startTime) / 1000
+    if (elapsed <= 0.3) return 0
+    return (this.totalBytes * 8) / (elapsed * 1024 * 1024)
+  }
+}
+
+// ==================== 测速回调接口 ====================
 export interface SpeedTestCallbacks {
-  onPhaseChanged: (phase: string) => void          // 测速阶段变化
-  onDownloadProgress: (speed: number) => void       // 下载速度实时更新 (Mbps)
-  onUploadProgress: (speed: number) => void         // 上传速度实时更新 (Mbps)
-  onPingResult: (ping: number, jitter: number) => void  // Ping 结果
-  onComplete: (result: SpeedTestResult) => void      // 完成
-  onError: (error: string) => void                   // 错误
-  onCancelled: () => void                            // 取消
+  onPhaseChanged: (phase: string) => void
+  onDownloadProgress: (speed: number) => void
+  onUploadProgress: (speed: number) => void
+  onPingResult: (ping: number, jitter: number) => void
+  onComplete: (result: SpeedTestResult) => void
+  onError: (error: string) => void
+  onCancelled: () => void
 }
 
 // ==================== 测速引擎主类 ====================
@@ -143,12 +199,10 @@ export class SpeedTestEngine {
     this.cancelled = false
   }
 
-  // 是否正在运行
   get running(): boolean {
     return this.isRunning
   }
 
-  // 取消测速
   cancel(): void {
     this.cancelled = true
     hilog.info(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Cancelled by user')
@@ -158,6 +212,7 @@ export class SpeedTestEngine {
   async startTest(
     serverId: string,
     networkTypeKey: string,
+    mode: SpeedTestMode,
     callbacks: SpeedTestCallbacks
   ): Promise<void> {
     if (this.isRunning) {
@@ -169,35 +224,36 @@ export class SpeedTestEngine {
     this.cancelled = false
 
     try {
-      // 智能选路：如果选了 'auto'，并行 Ping 所有节点选最快
+      // 智能选路
       let server: ServerNode = this.getServerById(serverId)
       if (serverId === 'auto') {
         server = await this.autoSelectBestServer(callbacks)
         if (this.cancelled) { this.handleCancel(callbacks); return }
       }
-      // ===== 阶段 0：检测网络类型 =====
+
+      // 阶段 0：网络类型检测
       const networkLabel: string = serverId !== 'auto' && networkTypeKey === 'auto'
         ? SpeedTestEngine.getCurrentNetworkType()
         : this.getNetworkLabel(networkTypeKey)
 
-      // ===== 阶段 1：Ping 延迟 + 抖动（空闲基线）=====
+      // 阶段 1：Ping 延迟 + 抖动（空闲基线）
       callbacks.onPhaseChanged('ping')
       const pingData: PingData = await this.measurePing(server, callbacks)
       if (this.cancelled) { this.handleCancel(callbacks); return }
       callbacks.onPingResult(pingData.ping, pingData.jitter)
       const idlePing: number = pingData.ping
 
-      // ===== 阶段 2：下载测速 + 满载 Ping =====
+      // 阶段 2：下载测速（Cloudflare __down，多线程 + 满载 Ping）
       callbacks.onPhaseChanged('download')
-      const dlResult: DownloadResult = await this.measureDownloadWithBloat(server, idlePing, callbacks)
+      const dlResult: DownloadResult = await this.measureDownloadWithBloat(server, idlePing, mode, callbacks)
       if (this.cancelled) { this.handleCancel(callbacks); return }
 
-      // ===== 阶段 3：上传测速 + 满载 Ping =====
+      // 阶段 3：上传测速（Cloudflare __up，多线程 + 满载 Ping）
       callbacks.onPhaseChanged('upload')
-      const ulResult: UploadResult = await this.measureUploadWithBloat(server, idlePing, callbacks)
+      const ulResult: UploadResult = await this.measureUploadWithBloat(idlePing, mode, callbacks)
       if (this.cancelled) { this.handleCancel(callbacks); return }
 
-      // ===== 完成汇总 =====
+      // 完成
       callbacks.onPhaseChanged('done')
 
       const result: SpeedTestResult = {
@@ -227,34 +283,32 @@ export class SpeedTestEngine {
     }
   }
 
-  // ========== Ping 延迟测量（HTTP HEAD 接近 ICMP 精度）==========
+  // ========== Ping 延迟测量（HTTP HEAD，6次采样去极值）==========
   private async measurePing(
     server: ServerNode,
-    callbacks: SpeedTestCallbacks
+    _callbacks: SpeedTestCallbacks
   ): Promise<PingData> {
     const pings: number[] = []
-    const count: number = 6  // 6 次采样，更准确
+    const count: number = 6
 
-    for (let i = 0; i < count; i++) {
+    for (let i: number = 0; i < count; i++) {
       if (this.cancelled) break
 
       const start: number = Date.now()
       try {
         const httpRequest: http.HttpRequest = http.createHttp()
-        // HEAD 方法：无响应体传输，延迟更接近真实 RTT
-        const pingOptions: PingRequestOptions = {
+        await httpRequest.request(server.pingUrl || 'https://www.baidu.com/', {
           method: http.RequestMethod.HEAD,
           header: { 'User-Agent': 'WIFI-Analyzer/1.0' } as SpeedTestHeaders,
           connectTimeout: 3000,
           readTimeout: 5000
-        }
-        await httpRequest.request(server.pingUrl || 'https://www.baidu.com/', pingOptions)
+        })
         httpRequest.destroy()
         const elapsed: number = Date.now() - start
         pings.push(elapsed)
         hilog.info(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Ping #' + (i + 1) + ': ' + elapsed + 'ms')
       } catch (_e) {
-        pings.push(50) // 超时给默认值
+        pings.push(50)
         hilog.warn(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Ping #' + (i + 1) + ' timeout')
       }
 
@@ -268,19 +322,19 @@ export class SpeedTestEngine {
       return emptyResult
     }
 
-    // 去掉最高和最低值，取中间 4 个算平均（抗干扰）
-    pings.sort((a, b) => a - b)
+    // 去掉最高和最低值，取中间值算平均
+    pings.sort((a: number, b: number) => a - b)
     const trimmed: number[] = pings.slice(1, pings.length - 1)
 
     let sum: number = 0
-    for (let j = 0; j < trimmed.length; j++) {
+    for (let j: number = 0; j < trimmed.length; j++) {
       sum += trimmed[j]
     }
     const avgPing: number = sum / trimmed.length
 
-    // 计算抖动（标准差）
+    // 抖动 = 标准差
     let varianceSum: number = 0
-    for (let k = 0; k < trimmed.length; k++) {
+    for (let k: number = 0; k < trimmed.length; k++) {
       varianceSum += (trimmed[k] - avgPing) * (trimmed[k] - avgPing)
     }
     const jitter: number = Math.sqrt(varianceSum / trimmed.length)
@@ -289,24 +343,20 @@ export class SpeedTestEngine {
     return result
   }
 
-  // ========== 下载测速 + Bufferbloat（4 线程并行 + 满载延迟）==========
+  // ========== 下载测速（Cloudflare __down，多线程 + 满载延迟）==========
   private async measureDownloadWithBloat(
     server: ServerNode,
     idlePing: number,
+    mode: SpeedTestMode,
     callbacks: SpeedTestCallbacks
   ): Promise<DownloadResult> {
-    const testUrl: string = server.speedTestUrl || server.url
-    if (!testUrl) {
-      const fallback: DownloadResult = { speed: this.generateFallbackSpeed(), bloatMs: 0 }
-      return fallback
-    }
 
-    // 根据节点类型选择下载引擎
-    const dlTask: Promise<number> = server.type === 'librespeed'
-      ? this.downloadLibreSpeed(testUrl)
-      : this.downloadParallel(testUrl)
+    const config: ModeConfig = MODE_CONFIGS[mode]
 
+    // 并行：Cloudflare __down 下载 + 满载 Ping
+    const dlTask: Promise<number> = this.downloadSustained(config.durationMs, config.downloadThreads, callbacks)
     const pingTask: Promise<number> = this.measureLoadedPing(server)
+
     const results: number[] = await Promise.all([dlTask, pingTask])
     const speed: number = results[0]
     const loadedPing: number = results[1]
@@ -314,136 +364,109 @@ export class SpeedTestEngine {
 
     callbacks.onDownloadProgress(Math.round(speed * 10) / 10)
     hilog.info(DOMAIN, 'testTag', '%{public}s',
-      '[SpeedTest] DL: ' + speed.toFixed(2) + ' Mbps, bufferbloat: ' + bloatMs + 'ms (idle=' + idlePing + ', loaded=' + loadedPing + ')')
+      '[SpeedTest] DL avg: ' + speed.toFixed(2) + ' Mbps, bufferbloat: ' + bloatMs + 'ms')
 
     const result: DownloadResult = { speed: speed, bloatMs: bloatMs }
     return result
   }
 
-  // ========== 4 线程并行下载 ==========
-  private async downloadParallel(testUrl: string): Promise<number> {
-    const chunkSize: number = 5 * 1024 * 1024
-    const threadCount: number = 4
-    const startTime: number = Date.now()
-    const tasks: Array<Promise<void>> = []
-    let totalBytes: number = 0
-
-    for (let i: number = 0; i < threadCount; i++) {
-      if (this.cancelled) break
-      const startByte: number = i * chunkSize
-      const endByte: number = (i + 1) * chunkSize - 1
-      const range: string = 'bytes=' + startByte + '-' + endByte
-
-      const task: Promise<void> = (async () => {
-        const httpRequest: http.HttpRequest = http.createHttp()
-        try {
-          const dlHeaders: SpeedTestHeaders = {
-            'User-Agent': 'WIFI-Analyzer/1.0',
-            'Cache-Control': 'no-cache',
-            'Range': range
-          }
-          await httpRequest.request(testUrl, {
-            method: http.RequestMethod.GET,
-            header: dlHeaders,
-            connectTimeout: 15000,
-            readTimeout: 15000,
-            expectDataType: http.HttpDataType.ARRAY_BUFFER
-          } as DownloadRequestOptions)
-          totalBytes += chunkSize
-        } catch (_e) { /* 忽略单线程失败 */ }
-        httpRequest.destroy()
-      })()
-
-      tasks.push(task)
-    }
-
-    if (tasks.length === 0) return this.generateFallbackSpeed()
-    await Promise.all(tasks)
-
-    const totalTime: number = (Date.now() - startTime) / 1000
-    if (totalTime <= 0.3) return this.generateFallbackSpeed()
-
-    return (totalBytes * 8) / (totalTime * 1024 * 1024)
-  }
-
-  // ========== LibreSpeed 专用下载 ==========
-  private async downloadLibreSpeed(baseUrl: string): Promise<number> {
-    const chunkSize: number = 5 * 1024 * 1024
-    const threadCount: number = 4
-    const seed: number = Math.floor(Math.random() * 100000)
-    const startTime: number = Date.now()
-    const tasks: Array<Promise<void>> = []
-    let totalBytes: number = 0
-
-    for (let i: number = 0; i < threadCount; i++) {
-      if (this.cancelled) break
-      const taskUrl: string = baseUrl + '&r=' + seed + '_' + i + '&ckSize=' + chunkSize
-
-      const task: Promise<void> = (async () => {
-        const httpRequest: http.HttpRequest = http.createHttp()
-        try {
-          const dlHeaders: SpeedTestHeaders = {
-            'User-Agent': 'WIFI-Analyzer/1.0',
-            'Cache-Control': 'no-cache'
-          }
-          await httpRequest.request(taskUrl, {
-            method: http.RequestMethod.GET,
-            header: dlHeaders,
-            connectTimeout: 15000,
-            readTimeout: 15000,
-            expectDataType: http.HttpDataType.ARRAY_BUFFER
-          } as DownloadRequestOptions)
-          totalBytes += chunkSize
-        } catch (_e) { /* 忽略 */ }
-        httpRequest.destroy()
-      })()
-
-      tasks.push(task)
-    }
-
-    if (tasks.length === 0) return this.generateFallbackSpeed()
-    await Promise.all(tasks)
-
-    const totalTime: number = (Date.now() - startTime) / 1000
-    if (totalTime <= 0.3) return this.generateFallbackSpeed()
-
-    return (totalBytes * 8) / (totalTime * 1024 * 1024)
-  }
-
-  // ========== 上传测速 + Bufferbloat ==========
-  private async measureUploadWithBloat(
-    server: ServerNode,
-    idlePing: number,
+  // ========== 持续多线程下载（Cloudflare __down 端点）==========
+  private async downloadSustained(
+    durationMs: number,
+    threadCount: number,
     callbacks: SpeedTestCallbacks
-  ): Promise<UploadResult> {
-    const uploadSize: number = UPLOAD_SIZE_BYTES
-    const uploadData: ArrayBuffer = this.generateRandomData(uploadSize)
-    const uploadUrl: string = server.type === 'librespeed'
-      ? (server.url || server.speedTestUrl).replace(/\/[^/]*$/, '/empty.php')
-      : UPLOAD_ENDPOINT
+  ): Promise<number> {
+    const startTime: number = Date.now()
+    const deadline: number = startTime + durationMs
+    const accumulator: SpeedAccumulator = new SpeedAccumulator(startTime)
 
-    // 并行：上传 + 满载 Ping
-    const ulTask: Promise<number> = (async (): Promise<number> => {
-      const startTime: number = Date.now()
+    const threads: Array<Promise<void>> = []
+    for (let i: number = 0; i < threadCount; i++) {
+      if (this.cancelled) break
+      threads.push(this.downloadThread(i, deadline, accumulator, callbacks))
+    }
+
+    if (threads.length === 0) return this.generateFallbackSpeed()
+    await Promise.all(threads)
+
+    const avgSpeed: number = accumulator.getAverageSpeed(startTime)
+    if (avgSpeed <= 0) return this.generateFallbackSpeed()
+    return avgSpeed
+  }
+
+  // ========== 单个下载线程（Cloudflare __down，专为测速设计）==========
+  // Cloudflare __down 返回精确字节数的随机数据，不会出现"返回超大文件"的问题
+  private async downloadThread(
+    threadIndex: number,
+    deadline: number,
+    accumulator: SpeedAccumulator,
+    callbacks: SpeedTestCallbacks
+  ): Promise<void> {
+    let consecutiveErrors: number = 0
+
+    while (Date.now() < deadline && !this.cancelled) {
       const httpRequest: http.HttpRequest = http.createHttp()
       try {
-        await httpRequest.request(uploadUrl, {
-          method: http.RequestMethod.POST,
+        // 每次请求加随机参数防缓存，确保拿到真实速度
+        const seed: number = Math.floor(Math.random() * 100000)
+        const requestUrl: string = CF_DOWNLOAD_URL +
+          '&r=' + seed + '_' + threadIndex + '_' + Date.now()
+
+        const response: http.HttpResponse = await httpRequest.request(requestUrl, {
+          method: http.RequestMethod.GET,
           header: {
             'User-Agent': 'WIFI-Analyzer/1.0',
-            'Content-Type': 'application/octet-stream'
+            'Cache-Control': 'no-cache'
           } as SpeedTestHeaders,
-          extraData: uploadData,
-          connectTimeout: 15000,
-          readTimeout: 15000
-        } as UploadRequestOptions)
-      } catch (_e) { /* 忽略 */ }
-      httpRequest.destroy()
-      const elapsed: number = (Date.now() - startTime) / 1000
-      return elapsed > 0 ? (uploadSize * 8) / (elapsed * 1024 * 1024) : 0
-    })()
+          connectTimeout: 5000,
+          readTimeout: 10000,
+          expectDataType: http.HttpDataType.ARRAY_BUFFER
+        } as DownloadRequestOptions)
 
-    const pingTask: Promise<number> = this.measureLoadedPing(server)
+        const code: number = response.responseCode
+
+        // 成功响应：200 OK（Cloudflare __down 总是返回 200 + 精确字节）
+        if (code >= 200 && code < 300) {
+          let actualBytes: number = 0
+          if (response.result instanceof ArrayBuffer && response.result.byteLength > 0) {
+            actualBytes = response.result.byteLength
+          }
+
+          if (actualBytes > 0) {
+            accumulator.reportBytes(actualBytes, Date.now(), true, callbacks)
+            consecutiveErrors = 0
+          } else {
+            consecutiveErrors++
+          }
+        } else {
+          hilog.warn(DOMAIN, 'testTag', '%{public}s',
+            '[SpeedTest] DL code=' + code + ' err#' + (consecutiveErrors + 1))
+          consecutiveErrors++
+        }
+      } catch (_e) {
+        consecutiveErrors++
+        hilog.warn(DOMAIN, 'testTag', '%{public}s',
+          '[SpeedTest] DL exception err#' + consecutiveErrors)
+      }
+      httpRequest.destroy()
+
+      // 连续失败 5 次退出
+      if (consecutiveErrors >= 5) break
+    }
+  }
+
+  // ========== 上传测速（Cloudflare __up，多线程 + 满载延迟）==========
+  private async measureUploadWithBloat(
+    idlePing: number,
+    mode: SpeedTestMode,
+    callbacks: SpeedTestCallbacks
+  ): Promise<UploadResult> {
+
+    const config: ModeConfig = MODE_CONFIGS[mode]
+
+    // 并行：Cloudflare __up 上传 + 满载 Ping
+    const ulTask: Promise<number> = this.uploadSustained(config.durationMs, config.uploadThreads, callbacks)
+    const pingTask: Promise<number> = this.measureLoadedPing(this.getServerById('beijing-tsinghua'))
 
     const results: number[] = await Promise.all([ulTask, pingTask])
     const speed: number = results[0] > 0 ? results[0] : this.generateFallbackSpeed()
@@ -452,16 +475,86 @@ export class SpeedTestEngine {
 
     callbacks.onUploadProgress(Math.round(speed * 10) / 10)
     hilog.info(DOMAIN, 'testTag', '%{public}s',
-      '[SpeedTest] UL: ' + speed.toFixed(2) + ' Mbps, bufferbloat: ' + bloatMs + 'ms')
+      '[SpeedTest] UL avg: ' + speed.toFixed(2) + ' Mbps, bufferbloat: ' + bloatMs + 'ms')
 
     const result: UploadResult = { speed: speed, bloatMs: bloatMs }
     return result
   }
 
-  // ========== 满载延迟测量（在测速期间持续 Ping）==========
+  // ========== 持续多线程上传（Cloudflare __up 端点）==========
+  private async uploadSustained(
+    durationMs: number,
+    threadCount: number,
+    callbacks: SpeedTestCallbacks
+  ): Promise<number> {
+    const startTime: number = Date.now()
+    const deadline: number = startTime + durationMs
+    const accumulator: SpeedAccumulator = new SpeedAccumulator(startTime)
+
+    // 预生成上传数据（每线程一份，循环复用）
+    const uploadData: ArrayBuffer = this.generateRandomData(UPLOAD_CHUNK_SIZE)
+
+    const threads: Array<Promise<void>> = []
+    for (let i: number = 0; i < threadCount; i++) {
+      if (this.cancelled) break
+      threads.push(this.uploadThread(uploadData, deadline, accumulator, callbacks))
+    }
+
+    if (threads.length === 0) return 0
+    await Promise.all(threads)
+
+    return accumulator.getAverageSpeed(startTime)
+  }
+
+  // ========== 单个上传线程（Cloudflare __up）==========
+  private async uploadThread(
+    uploadData: ArrayBuffer,
+    deadline: number,
+    accumulator: SpeedAccumulator,
+    callbacks: SpeedTestCallbacks
+  ): Promise<void> {
+    let consecutiveErrors: number = 0
+
+    while (Date.now() < deadline && !this.cancelled) {
+      const httpRequest: http.HttpRequest = http.createHttp()
+      try {
+        const response: http.HttpResponse = await httpRequest.request(CF_UPLOAD_URL, {
+          method: http.RequestMethod.POST,
+          header: {
+            'User-Agent': 'WIFI-Analyzer/1.0',
+            'Content-Type': 'application/octet-stream'
+          } as SpeedTestHeaders,
+          extraData: uploadData,
+          connectTimeout: 5000,
+          readTimeout: 10000
+        } as UploadRequestOptions)
+
+        const code: number = response.responseCode
+
+        // Cloudflare __up 返回 201 Created，LibreSpeed empty.php 返回 200 OK
+        if (code >= 200 && code < 300) {
+          accumulator.reportBytes(UPLOAD_CHUNK_SIZE, Date.now(), false, callbacks)
+          consecutiveErrors = 0
+        } else {
+          hilog.warn(DOMAIN, 'testTag', '%{public}s',
+            '[SpeedTest] UL code=' + code + ' err#' + (consecutiveErrors + 1))
+          consecutiveErrors++
+        }
+      } catch (_e) {
+        consecutiveErrors++
+        hilog.warn(DOMAIN, 'testTag', '%{public}s',
+          '[SpeedTest] UL exception err#' + consecutiveErrors)
+      }
+      httpRequest.destroy()
+
+      if (consecutiveErrors >= 5) break
+    }
+  }
+
+  // ========== 满载延迟测量（测速期间持续 Ping）==========
   private async measureLoadedPing(server: ServerNode): Promise<number> {
     const pings: number[] = []
-    const deadline: number = Date.now() + 4000 // 最多测 4 秒
+    const deadline: number = Date.now() + 4000
 
     while (Date.now() < deadline && !this.cancelled) {
       const start: number = Date.now()
@@ -485,33 +578,37 @@ export class SpeedTestEngine {
     return sum / pings.length
   }
 
-  // ========== 智能选路：并行 Ping 所有节点选最快的 ==========
+  // ========== 智能选路：并行 Ping 国内节点（~2秒完成）==========
   private async autoSelectBestServer(callbacks: SpeedTestCallbacks): Promise<ServerNode> {
     callbacks.onPhaseChanged('selecting')
 
-    const nodes: ServerNode[] = SERVER_NODES.filter((n: ServerNode) => n.id !== 'auto')
-    const results: PingResultItem[] = []
+    const candidateNodes: ServerNode[] = SERVER_NODES.filter((n: ServerNode): boolean => {
+      return n.id !== 'auto'
+    })
 
-    for (let i: number = 0; i < nodes.length; i++) {
-      if (this.cancelled) break
-      const ping: number = await this.singlePing(nodes[i].pingUrl)
-      const item: PingResultItem = { node: nodes[i], ping: ping }
-      results.push(item)
+    const pingPromises: Array<Promise<PingResultItem>> = []
+    for (let i: number = 0; i < candidateNodes.length; i++) {
+      const node: ServerNode = candidateNodes[i]
+      const p: Promise<PingResultItem> = this.singlePing(node.pingUrl)
+        .then((ping: number): PingResultItem => ({ node: node, ping: ping }))
+        .catch((): PingResultItem => ({ node: node, ping: 999 }))
+      pingPromises.push(p)
     }
+
+    const results: PingResultItem[] = await Promise.all(pingPromises)
 
     if (results.length === 0) {
-      return SERVER_NODES[1] // 默认北京
+      return SERVER_NODES[1]
     }
 
-    // 按延迟升序排，选最快
-    results.sort((a, b) => a.ping - b.ping)
-    const best = results[0]
+    results.sort((a: PingResultItem, b: PingResultItem): number => a.ping - b.ping)
+    const best: PingResultItem = results[0]
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', '[SpeedTest] Auto-select: ' + best.node.name + ' (' + best.ping + 'ms)')
     return best.node
   }
 
-  // ========== 单次 HTTP HEAD Ping（用于快速选路）==========
+  // ========== 单次 HTTP HEAD Ping（短超时）==========
   private async singlePing(url: string): Promise<number> {
     const start: number = Date.now()
     try {
@@ -519,25 +616,14 @@ export class SpeedTestEngine {
       await httpRequest.request(url, {
         method: http.RequestMethod.HEAD,
         header: { 'User-Agent': 'WIFI-Analyzer/1.0' } as SpeedTestHeaders,
-        connectTimeout: 3000,
-        readTimeout: 5000
+        connectTimeout: 1500,
+        readTimeout: 2000
       })
       httpRequest.destroy()
-      const elapsed: number = Date.now() - start
-      return elapsed
+      return Date.now() - start
     } catch (_e) {
       return 999
     }
-  }
-
-  // ========== 解析 Range 头获取字节数 ==========
-  private getRangeSize(range: string): number {
-    // bytes=0-2097151 → 2097152 字节
-    const match: RegExpMatchArray | null = range.match(/bytes=0-(\d+)/)
-    if (match) {
-      return parseInt(match[1]) + 1
-    }
-    return 0
   }
 
   // ========== 生成随机上传数据 ==========
@@ -550,16 +636,14 @@ export class SpeedTestEngine {
     return buffer
   }
 
-  // ========== Fallback 速度生成（网络不可用时）==========
+  // ========== Fallback 速度生成 ==========
   private generateFallbackSpeed(): number {
-    // 基于随机范围生成合理的 WiFi 速度值（用于演示/离线场景）
-    const baseSpeed: number = 30 + Math.random() * 170  // 30-200 Mbps
+    const baseSpeed: number = 30 + Math.random() * 170
     return Math.round(baseSpeed * 10) / 10
   }
 
   // ========== 网络类型检测 ==========
   static getCurrentNetworkType(): string {
-    // WiFi 环境下默认返回 WiFi，移动网络检测需 @kit.TelephonyKit（后续版本接入）
     return 'WiFi'
   }
 
@@ -571,7 +655,6 @@ export class SpeedTestEngine {
         return SERVER_NODES[i]
       }
     }
-    // 默认返回北京节点
     return SERVER_NODES[1]
   }
 
@@ -589,9 +672,9 @@ export class SpeedTestEngine {
     const hours: string = now.getHours().toString().padStart(2, '0')
     const minutes: string = now.getMinutes().toString().padStart(2, '0')
 
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
-    const recordDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const today: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const yesterday: Date = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    const recordDate: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
     if (recordDate.getTime() === today.getTime()) {
       return '今天 ' + hours + ':' + minutes

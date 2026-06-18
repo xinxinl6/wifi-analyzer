@@ -5,7 +5,5 @@
   "main": "src/main/ets/Index.ets",
   "author": "",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@wifi-analyzer/core": "file:../core"
-  }
+  "dependencies": {}
 }
