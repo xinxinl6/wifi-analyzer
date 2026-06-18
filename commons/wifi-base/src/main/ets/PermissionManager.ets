@@ -1,7 +1,7 @@
 /**
  * WiFi分析仪 — 权限管理
  */
-import { abilityAccessCtrl, AbilityConstant, common, Permissions } from '@kit.AbilityKit';
+import { abilityAccessCtrl, common, Permissions } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 
@@ -23,21 +23,34 @@ export enum PermissionStatus {
 
 export class PermissionManager {
   private context: common.UIAbilityContext;
+  private atManager;
 
   constructor(context: common.UIAbilityContext) {
     this.context = context;
+    this.atManager = abilityAccessCtrl.createAtManager();
+  }
+
+  /**
+   * 获取当前应用的 access token ID
+   */
+  private getSelfTokenId(): number {
+    try {
+      return this.atManager.getSelfTokenId();
+    } catch {
+      return 0;
+    }
   }
 
   /**
    * 检查所有必需权限是否已授权
    */
   checkPermissions(): PermissionStatus {
-    const atManager = abilityAccessCtrl.createAtManager();
+    const tokenId = this.getSelfTokenId();
     let allGranted = true;
     let anyGranted = false;
 
     for (const perm of REQUIRED_PERMISSIONS) {
-      const result = atManager.checkAccessTokenSync(this.context.token, perm);
+      const result = this.atManager.checkAccessTokenSync(tokenId, perm);
       if (result === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
         anyGranted = true;
       } else {
@@ -55,11 +68,11 @@ export class PermissionManager {
    */
   async requestPermissions(): Promise<boolean> {
     try {
-      const atManager = abilityAccessCtrl.createAtManager();
+      const tokenId = this.getSelfTokenId();
       const needRequest: Permissions[] = [];
 
       for (const perm of REQUIRED_PERMISSIONS) {
-        const result = atManager.checkAccessTokenSync(this.context.token, perm);
+        const result = this.atManager.checkAccessTokenSync(tokenId, perm);
         if (result !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
           needRequest.push(perm);
         }
@@ -67,7 +80,7 @@ export class PermissionManager {
 
       if (needRequest.length === 0) return true;
 
-      await atManager.requestPermissionsFromUser(this.context, needRequest);
+      await this.atManager.requestPermissionsFromUser(this.context, needRequest);
       return this.checkPermissions() === PermissionStatus.GRANTED;
     } catch (err) {
       hilog.error(DOMAIN, 'WiFiAnalyzer', '权限请求失败: %{public}s', JSON.stringify(err));
@@ -80,7 +93,8 @@ export class PermissionManager {
    */
   openAppSettings(): void {
     try {
-      const bundleName = this.context.applicationInfo.bundleName;
+      // 从 context 自身获取 bundleName
+const bundleName: string = this.context.bundleName;
       this.context.startAbility({
         bundleName: 'com.huawei.harmonyos.settings',
         abilityName: 'com.huawei.harmonyos.settings.MainAbility',
@@ -89,7 +103,6 @@ export class PermissionManager {
           pushParams: bundleName,
         },
       }).catch(() => {
-        // fallback: 通用设置入口
         this.context.startAbility({
           bundleName: 'com.huawei.harmonyos.settings',
           abilityName: 'com.huawei.harmonyos.settings.MainAbility',

@@ -1,5 +1,5 @@
 import { WindowInfo } from 'wifi-base';
-import { hdsMaterial } from '@kit.UIDesignKit';
+import { HdsTabs, hdsMaterial } from '@kit.UIDesignKit';
 
 @ComponentV2
 export struct TabsView {
