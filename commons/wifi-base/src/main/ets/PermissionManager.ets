@@ -93,25 +93,25 @@ export class PermissionManager {
    * 打开应用权限设置页面
    */
   openAppSettings(): void {
-    try {
-      const bundleName: string = 'com.xinxin.analyzer';
-      this.context.startAbility({
+    const want = {
+      bundleName: 'com.huawei.harmonyos.settings',
+      abilityName: 'com.huawei.harmonyos.settings.MainAbility',
+      uri: 'application_info_entry',
+      parameters: {
+        pushParams: 'com.xinxin.analyzer',
+      },
+    };
+    this.context.startAbility(want).then(() => {
+      hilog.info(DOMAIN, 'WiFiAnalyzer', '已跳转到设置');
+    }).catch(() => {
+      hilog.warn(DOMAIN, 'WiFiAnalyzer', '跳转设置失败，尝试fallback');
+      const fallbackWant = {
         bundleName: 'com.huawei.harmonyos.settings',
         abilityName: 'com.huawei.harmonyos.settings.MainAbility',
-        uri: 'application_info_entry',
-        parameters: {
-          pushParams: bundleName,
-        },
-      }).catch(() => {
-        this.context.startAbility({
-          bundleName: 'com.huawei.harmonyos.settings',
-          abilityName: 'com.huawei.harmonyos.settings.MainAbility',
-        }).catch(() => {
-          hilog.warn(DOMAIN, 'WiFiAnalyzer', '无法打开设置页面');
-        });
+      };
+      this.context.startAbility(fallbackWant).catch(() => {
+        hilog.warn(DOMAIN, 'WiFiAnalyzer', '无法打开设置页面');
       });
-    } catch {
-      hilog.error(DOMAIN, 'WiFiAnalyzer', 'openAppSettings 失败');
-    }
+    });
   }
 }
