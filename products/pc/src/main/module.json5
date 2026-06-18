@@ -21,7 +21,7 @@
         "description": "$string:PcAbility_desc",
         "icon": "$media:layered_image",
         "label": "$string:PcAbility_label",
-        "startWindowIcon": "$media:startIcon",
+        "startWindowIcon": "$media:layered_image",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
         "skills": [

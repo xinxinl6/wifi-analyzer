@@ -20,7 +20,7 @@
       "description": "$string:TabletAbility_desc",
       "icon": "$media:layered_image",
       "label": "$string:TabletAbility_label",
-      "startWindowIcon": "$media:startIcon",
+      "startWindowIcon": "$media:layered_image",
       "startWindowBackground": "$color:start_window_background",
       "exported": true,
       "skills": [{"entities": ["entity.system.home"], "actions": ["ohos.want.action.home"]}]
