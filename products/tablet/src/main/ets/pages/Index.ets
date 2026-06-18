@@ -1,12 +1,13 @@
+import { AppStorageV2 } from '@kit.ArkUI';
 import { HdsNavigation, HdsNavigationTitleMode } from '@kit.UIDesignKit';
 import { WindowUtil, WINDOW_UTIL_KEY } from 'wifi-base';
+import { TabsView } from './TabsView';
 
 @Entry
 @ComponentV2
 struct Index {
   @Provider('pageStack') pageStack: NavPathStack = new NavPathStack();
   @Local windowUtil: WindowUtil = AppStorageV2.connect(WindowUtil, WINDOW_UTIL_KEY)!;
-  @Local bottomNavi: number = 0;
 
   @Builder
   PagesMap(name: string) {

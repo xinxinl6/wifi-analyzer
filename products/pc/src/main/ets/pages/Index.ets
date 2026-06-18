@@ -1,5 +1,7 @@
+import { AppStorageV2 } from '@kit.ArkUI';
 import { HdsNavigation, HdsNavigationTitleMode } from '@kit.UIDesignKit';
 import { WindowUtil, WINDOW_UTIL_KEY } from 'wifi-base';
+import { TabsView } from './TabsView';
 
 @Entry
 @ComponentV2

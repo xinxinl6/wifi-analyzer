@@ -3,12 +3,12 @@
  */
 
 // 工具类
-export { BreakpointType, getWidthBpByWidth, ResponsiveSpacing } from './utils/BreakpointType';
-export { Logger } from './utils/Logger';
-export { WindowUtil, WindowInfo, WINDOW_UTIL_KEY } from './utils/WindowUtil';
+export { BreakpointType, getWidthBpByWidth, ResponsiveSpacing } from './src/main/ets/utils/BreakpointType';
+export { Logger } from './src/main/ets/utils/Logger';
+export { WindowUtil, WindowInfo, WINDOW_UTIL_KEY } from './src/main/ets/utils/WindowUtil';
 
 // 常量
-export { CommonConstants } from './constants/CommonConstants';
+export { CommonConstants } from './src/main/ets/constants/CommonConstants';
 
 // 权限
-export { PermissionManager, PermissionStatus } from './PermissionManager';
+export { PermissionManager, PermissionStatus } from './src/main/ets/PermissionManager';
