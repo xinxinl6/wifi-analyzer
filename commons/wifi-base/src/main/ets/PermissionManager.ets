@@ -36,7 +36,7 @@ export class PermissionManager {
       const bundleInfo = bundleManager.getBundleInfoForSelfSync(
         bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION
       );
-      return bundleInfo.accessTokenId;
+      return bundleInfo.appInfo.accessTokenId;
     } catch {
       return 0;
     }
