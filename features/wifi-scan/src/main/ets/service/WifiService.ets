@@ -6,11 +6,10 @@ const DOMAIN = 0x0000;
 const TAG = 'WifiService';
 
 export class WifiService {
-  static isWifiEnabled(): boolean {
+  static async isWifiEnabled(): Promise<boolean> {
     try {
-      return wifiManager.isWifiActiveSync();
+      return await wifiManager.isWifiActive();
     } catch (e) {
-      hilog.error(DOMAIN, TAG, '%{public}s', 'isWifiActiveSync error: ' + JSON.stringify(e));
       return false;
     }
   }
@@ -52,7 +51,7 @@ export class WifiService {
   }
 
   private static delay(ms: number): Promise<void> {
-    return new Promise<void>(function (resolve: () => void) {
+    return new Promise<void>((resolve: () => void) => {
       setTimeout(resolve, ms);
     });
   }

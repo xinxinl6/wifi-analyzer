@@ -18,9 +18,8 @@ export class WifiScanner {
     }
     this.isScanning = true;
     this.scanOnce();
-    let self = this;
-    this.timerId = setInterval(function () {
-      self.scanOnce();
+    this.timerId = setInterval(() => {
+      this.scanOnce();
     }, intervalMs);
     hilog.info(DOMAIN, TAG, '%{public}s', 'startScanning interval: ' + intervalMs + 'ms');
   }
