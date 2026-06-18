@@ -1,24 +1,9 @@
 {
   "app": {
-    "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "",
-          "keyAlias": "",
-          "keyPassword": "",
-          "profile": "",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "",
-          "storePassword": ""
-        }
-      }
-    ],
+    "signingConfigs": [],
     "products": [
       {
         "name": "default",
-        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
         "runtimeOS": "HarmonyOS",
@@ -31,7 +16,6 @@
       },
       {
         "name": "tablet",
-        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
         "runtimeOS": "HarmonyOS",
@@ -44,7 +28,6 @@
       },
       {
         "name": "pc",
-        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
         "runtimeOS": "HarmonyOS",
