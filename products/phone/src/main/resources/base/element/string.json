@@ -1,0 +1,52 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "PhoneAbility_desc",
+      "value": "WiFi Network Analyzer"
+    },
+    {
+      "name": "PhoneAbility_label",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi扫描需要获取WiFi信息权限以显示附近无线网络列表和信号强度"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "WiFi扫描需要定位权限以获取准确的信号强度信息（系统要求）"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "测速功能需要网络权限以进行网络速度测试"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "显示本机IP、网关等网络信息需要获取网络状态权限"
+    },
+    {
+      "name": "tab_home",
+      "value": "首页"
+    },
+    {
+      "name": "tab_wifi",
+      "value": "WiFi"
+    },
+    {
+      "name": "tab_channel",
+      "value": "信道"
+    },
+    {
+      "name": "tab_speed",
+      "value": "测速"
+    },
+    {
+      "name": "tab_tools",
+      "value": "工具箱"
+    }
+  ]
+}

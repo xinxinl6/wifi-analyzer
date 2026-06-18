@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "settings_feature",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "wifi_scan",
+    "type": "har",
+    "deviceTypes": ["default"],
+    "deliveryWithInstall": true,
+    "installationFree": false
+  }
+}

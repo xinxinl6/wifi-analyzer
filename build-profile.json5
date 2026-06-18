@@ -5,19 +5,45 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "storeFile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release.p12",
-          "storePassword": "0000001A95A0988BEE9FC696B295A9738EE15DB79EE2384E3D50165E9FCCE45C3A94A65397474452C9AC",
-          "keyAlias": "releaseKey",
-          "keyPassword": "0000001A971F4976CA0B536AFD26635FD1CE109C512EF55958779C4638A254667763E7906C157F8CED9F",
+          "certpath": "",
+          "keyAlias": "",
+          "keyPassword": "",
+          "profile": "",
           "signAlg": "SHA256withECDSA",
-          "profile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-profileRelease.p7b",
-          "certpath": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release.cer"
+          "storeFile": "",
+          "storePassword": ""
         }
       }
     ],
     "products": [
       {
-        "name": "default",
+        "name": "phone",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.1.0(23)",
+        "compatibleSdkVersion": "5.0.2(14)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      },
+      {
+        "name": "tablet",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.1.0(23)",
+        "compatibleSdkVersion": "5.0.2(14)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      },
+      {
+        "name": "pc",
         "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
@@ -37,68 +63,97 @@
       {
         "name": "release"
       }
-    ],
-    "capabilities": [
-      {
-        "bundleName": "com.xinxin.analyzer",
-        "config": [
-          {
-            "name": "webAccessServiceForAIQA",
-            "capability": "webAccessServiceForAIQA"
-          },
-          {
-            "name": "Push Kit",
-            "capability": "com.huawei.service.push.base_service"
-          },
-          {
-            "name": "Device status detection",
-            "capability": "com.huawei.service.device_security.device_verify"
-          },
-          {
-            "name": "Map Kit",
-            "capability": "com.huawei.service.mapkit"
-          },
-          {
-            "name": "Safety Detect",
-            "capability": "com.huawei.service.device_security.safety_detect"
-          }
-        ]
-      }
     ]
   },
   "modules": [
     {
-      "name": "entry",
-      "srcPath": "./entry",
+      "name": "phone",
+      "srcPath": "./products/phone",
       "targets": [
         {
           "name": "default",
           "applyToProducts": [
-            "default"
+            "phone"
           ]
         }
       ]
     },
     {
-      "name": "design_system",
-      "srcPath": "./design-system",
+      "name": "tablet",
+      "srcPath": "./products/tablet",
       "targets": [
         {
           "name": "default",
           "applyToProducts": [
-            "default"
+            "tablet"
           ]
         }
       ]
     },
     {
-      "name": "core",
-      "srcPath": "./core",
+      "name": "pc",
+      "srcPath": "./products/pc",
       "targets": [
         {
           "name": "default",
           "applyToProducts": [
-            "default"
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wifi_base",
+      "srcPath": "./commons/wifi-base",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "phone",
+            "tablet",
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "native_ping",
+      "srcPath": "./commons/native-ping",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "phone",
+            "tablet",
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wifi_scan",
+      "srcPath": "./features/wifi-scan",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "phone",
+            "tablet",
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "network_tools",
+      "srcPath": "./features/network-tools",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "phone",
+            "tablet",
+            "pc"
           ]
         }
       ]
@@ -110,19 +165,37 @@
         {
           "name": "default",
           "applyToProducts": [
-            "default"
+            "phone",
+            "tablet",
+            "pc"
           ]
         }
       ]
     },
     {
-      "name": "tools",
-      "srcPath": "./tools",
+      "name": "settings_feature",
+      "srcPath": "./features/settings",
       "targets": [
         {
           "name": "default",
           "applyToProducts": [
-            "default"
+            "phone",
+            "tablet",
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "design_system",
+      "srcPath": "./design-system",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "phone",
+            "tablet",
+            "pc"
           ]
         }
       ]

@@ -1,0 +1,11 @@
+{
+  "name": "@wifi-analyzer/settings",
+  "version": "1.0.0",
+  "description": "WiFi Analyzer 设置模块 — 应用偏好、主题、语言、通知配置",
+  "main": "src/main/ets/Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@wifi-analyzer/core": "file:../../core"
+  }
+}

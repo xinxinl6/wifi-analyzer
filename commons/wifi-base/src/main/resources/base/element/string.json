@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi分析仪需要获取WiFi信息以扫描和分析附近的无线网络"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "系统要求位置权限以扫描WiFi网络"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "网络测速和工具箱需要访问互联网"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "需要获取网络状态信息以分析网络连接质量"
+    }
+  ]
+}

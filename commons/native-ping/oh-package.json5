@@ -1,0 +1,8 @@
+{
+  "name": "native-ping",
+  "version": "1.0.0",
+  "description": "Native ICMP Ping 封装 — 类型定义 + TCP 回退方案",
+  "main": "Index.ets",
+  "types": "Index.ets",
+  "dependencies": {}
+}

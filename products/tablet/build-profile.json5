@@ -1,0 +1,27 @@
+{
+  "apiType": "stageMode",
+  "buildOption": {
+    "arkOptions": {
+      "strictMode": {
+        "caseSensitiveCheck": true,
+        "useNormalizedOHMUrl": true
+      }
+    }
+  },
+  "buildOptionSet": [
+    {
+      "name": "debug"
+    },
+    {
+      "name": "release"
+    }
+  ],
+  "targets": [
+    {
+      "name": "default",
+      "applyToProducts": [
+        "tablet"
+      ]
+    }
+  ]
+}

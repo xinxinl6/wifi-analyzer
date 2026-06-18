@@ -1,0 +1,8 @@
+{
+  "name": "wifi-base",
+  "version": "1.0.0",
+  "description": "WiFi分析仪公共能力层 — 断点适配、窗口工具、日志、常量、权限管理",
+  "main": "Index.ets",
+  "types": "Index.ets",
+  "dependencies": {}
+}

@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "native_ping",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false
+  }
+}

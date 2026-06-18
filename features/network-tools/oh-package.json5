@@ -1,0 +1,11 @@
+{
+  "name": "@wifi-analyzer/network-tools",
+  "version": "1.0.0",
+  "description": "WiFi Analyzer 网络工具模块 — Ping/TraceRoute/DNS查询/IP信息",
+  "main": "src/main/ets/Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@wifi-analyzer/core": "file:../../core"
+  }
+}

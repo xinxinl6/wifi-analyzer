@@ -1,0 +1,11 @@
+{
+  "name": "phone",
+  "version": "1.0.0",
+  "description": "WiFi分析仪 - 手机端",
+  "main": "",
+  "dependencies": {
+    "wifi-base": "file:../../commons/wifi-base",
+    "native-ping": "file:../../commons/native-ping",
+    "@wifi-analyzer/design-system": "file:../../design-system"
+  }
+}

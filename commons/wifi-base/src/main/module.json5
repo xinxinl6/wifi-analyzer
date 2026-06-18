@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "wifi_base",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WlAN-分析仪 - 平板版"
+    },
+    {
+      "name": "TabletAbility_desc",
+      "value": "WiFi Network Analyzer for Tablet"
+    },
+    {
+      "name": "TabletAbility_label",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi扫描需要获取WiFi信息权限以显示附近无线网络列表和信号强度"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "WiFi扫描需要定位权限以获取准确的信号强度信息（系统要求）"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "测速功能需要网络权限以进行网络速度测试"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "显示本机IP、网关等网络信息需要获取网络状态权限"
+    }
+  ]
+}

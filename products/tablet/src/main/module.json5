@@ -1,0 +1,29 @@
+{
+  "module": {
+    "name": "tablet",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "TabletAbility",
+    "deviceTypes": ["tablet"],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "requestPermissions": [
+      {"name": "ohos.permission.GET_WIFI_INFO", "reason": "$string:wifi_permission_reason"},
+      {"name": "ohos.permission.APPROXIMATELY_LOCATION", "reason": "$string:location_permission_reason", "usedScene": {"abilities": ["TabletAbility"], "when": "inuse"}},
+      {"name": "ohos.permission.INTERNET", "reason": "$string:internet_permission_reason"},
+      {"name": "ohos.permission.GET_NETWORK_INFO", "reason": "$string:network_info_permission_reason"}
+    ],
+    "abilities": [{
+      "name": "TabletAbility",
+      "srcEntry": "./ets/entryability/TabletAbility.ets",
+      "description": "$string:TabletAbility_desc",
+      "icon": "$media:layered_image",
+      "label": "$string:TabletAbility_label",
+      "startWindowIcon": "$media:startIcon",
+      "startWindowBackground": "$color:start_window_background",
+      "exported": true,
+      "skills": [{"entities": ["entity.system.home"], "actions": ["ohos.want.action.home"]}]
+    }]
+  }
+}
