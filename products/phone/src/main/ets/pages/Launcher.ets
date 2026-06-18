@@ -1,45 +1,63 @@
 import { router } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
-import { PermissionManager, PermissionStatus } from 'wifi-base';
+import { abilityAccessCtrl, Permissions } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+
+const DOMAIN = 0x0000;
+const TAG = 'Launcher';
+
+// 所需权限列表
+const REQUIRED_PERMISSIONS: Permissions[] = [
+  'ohos.permission.GET_WIFI_INFO',
+  'ohos.permission.APPROXIMATELY_LOCATION',
+  'ohos.permission.INTERNET',
+  'ohos.permission.GET_NETWORK_INFO',
+];
 
 @Entry
 @ComponentV2
 struct Launcher {
-  @Local isLoading: boolean = true;
-  @Local showPermissionDenied: boolean = false;
-  private permissionManager: PermissionManager | null = null;
+  @Local isRequesting: boolean = true;
+  @Local showDeniedTip: boolean = false;
 
   aboutToAppear(): void {
-    this.checkAndRequestPermissions();
+    this.requestSystemPermissions();
   }
 
-  async checkAndRequestPermissions(): Promise<void> {
+  async requestSystemPermissions(): Promise<void> {
     try {
-      const ctx = AppStorage.get<object>('abilityContext') as common.UIAbilityContext;
+      const ctx = AppStorage.get<common.UIAbilityContext>('abilityContext');
       if (!ctx) {
-        this.isLoading = false;
-        this.showPermissionDenied = true;
+        hilog.error(DOMAIN, TAG, '无法获取 context');
+        this.isRequesting = false;
+        this.showDeniedTip = true;
         return;
       }
 
-      this.permissionManager = new PermissionManager(ctx);
-      const status = this.permissionManager.checkPermissions();
+      const atManager = abilityAccessCtrl.createAtManager();
+      const result = await atManager.requestPermissionsFromUser(ctx, REQUIRED_PERMISSIONS);
 
-      if (status === PermissionStatus.GRANTED) {
-        this.navigateToHome();
-        return;
+      // 检查授权结果
+      let allGranted = true;
+      for (let i = 0; i < result.authResults.length; i++) {
+        if (result.authResults[i] !== 0) {
+          allGranted = false;
+          break;
+        }
       }
 
-      const granted = await this.permissionManager.requestPermissions();
-      if (granted) {
+      if (allGranted) {
+        hilog.info(DOMAIN, TAG, '权限已全部授权，进入首页');
         this.navigateToHome();
       } else {
-        this.isLoading = false;
-        this.showPermissionDenied = true;
+        hilog.warn(DOMAIN, TAG, '部分或全部权限被拒绝');
+        this.isRequesting = false;
+        this.showDeniedTip = true;
       }
     } catch {
-      this.isLoading = false;
-      this.showPermissionDenied = true;
+      hilog.error(DOMAIN, TAG, '权限请求异常');
+      this.isRequesting = false;
+      this.showDeniedTip = true;
     }
   }
 
@@ -47,16 +65,24 @@ struct Launcher {
     router.replaceUrl({ url: 'pages/Index' });
   }
 
-  openSettings(): void {
-    if (this.permissionManager) {
-      this.permissionManager.openAppSettings();
+  openSystemSettings(): void {
+    try {
+      const ctx = AppStorage.get<common.UIAbilityContext>('abilityContext');
+      if (ctx) {
+        ctx.startAbility({
+          bundleName: 'com.huawei.harmonyos.settings',
+          abilityName: 'com.huawei.harmonyos.settings.MainAbility',
+        });
+      }
+    } catch {
+      hilog.warn(DOMAIN, TAG, '无法打开设置');
     }
   }
 
-  retryRequest(): void {
-    this.isLoading = true;
-    this.showPermissionDenied = false;
-    this.checkAndRequestPermissions();
+  retry(): void {
+    this.isRequesting = true;
+    this.showDeniedTip = false;
+    this.requestSystemPermissions();
   }
 
   build() {
@@ -69,7 +95,8 @@ struct Launcher {
           colors: [['#1a2a6c', 0.0], ['#4A90D9', 0.5], ['#87CEEB', 1.0]]
         })
 
-      if (this.isLoading) {
+      if (this.isRequesting) {
+        // 正在请求权限 — 显示加载
         Column({ space: 16 }) {
           Text('WlAN-分析仪')
             .fontSize(28)
@@ -83,32 +110,31 @@ struct Launcher {
         .width('100%')
         .height('100%')
         .justifyContent(FlexAlign.Center)
-      } else {
+      } else if (this.showDeniedTip) {
+        // 权限被拒绝 — 提示去设置
         Column({ space: 24 }) {
-          Text('需要权限才能继续')
+          Text('需要权限才能使用')
             .fontSize(20)
             .fontWeight(FontWeight.Bold)
             .fontColor(Color.White)
 
-          Text('WiFi 分析仪需要以下权限：\nWiFi 信息 · 大致位置 · 网络访问')
+          Text('请前往系统设置中允许应用权限')
             .fontSize(14)
             .fontColor('#BBBBBB')
-            .textAlign(TextAlign.Center)
-            .padding({ left: 32, right: 32 })
 
-          Button('前往设置授权')
+          Button('打开系统设置')
             .fontSize(16)
             .fontColor(Color.White)
             .backgroundColor('#4A90D9')
             .borderRadius(24)
             .padding({ left: 24, right: 24, top: 12, bottom: 12 })
-            .onClick(() => this.openSettings())
+            .onClick(() => this.openSystemSettings())
 
-          Button('重新检测')
+          Button('重试')
             .fontSize(14)
             .fontColor('#87CEEB')
             .backgroundColor(Color.Transparent)
-            .onClick(() => this.retryRequest())
+            .onClick(() => this.retry())
         }
         .width('100%')
         .height('100%')
