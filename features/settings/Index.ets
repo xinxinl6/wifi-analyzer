@@ -1,2 +1,2 @@
 // WiFi分析仪 v2 — Settings
-// TODO: 实现模块导出
+export { AboutPage } from './src/main/ets/pages/AboutPage'

@@ -1,4 +1,4 @@
 // @wifi-analyzer/settings
 // 设置模块统一导出
 
-export { }
+export { AboutPage } from './pages/AboutPage'

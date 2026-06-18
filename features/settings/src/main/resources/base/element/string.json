@@ -3,6 +3,46 @@
     {
       "name": "module_desc",
       "value": "设置模块"
+    },
+    {
+      "name": "about_title",
+      "value": "关于"
+    },
+    {
+      "name": "app_name",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "app_version",
+      "value": "版本 2.0.0"
+    },
+    {
+      "name": "app_description",
+      "value": "专业的WiFi网络分析与诊断工具"
+    },
+    {
+      "name": "app_features",
+      "value": "核心功能"
+    },
+    {
+      "name": "feature_wifi_scan",
+      "value": "WiFi扫描"
+    },
+    {
+      "name": "feature_channel",
+      "value": "信道分析"
+    },
+    {
+      "name": "feature_speed",
+      "value": "网络测速"
+    },
+    {
+      "name": "feature_tools",
+      "value": "11种网络工具"
+    },
+    {
+      "name": "app_copyright",
+      "value": "© 2026 WiFi Analyzer"
     }
   ]
 }
