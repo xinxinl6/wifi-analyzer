@@ -7,6 +7,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "wifi-base": "file:../../commons/wifi-base",
-    "design-system": "file:../../design-system"
+    "@wifi-analyzer/design-system": "file:../../design-system"
   }
 }
