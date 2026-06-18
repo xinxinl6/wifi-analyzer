@@ -2,10 +2,6 @@
   "apiType": "stageMode",
   "buildOption": {
     "arkOptions": {
-      "strictMode": {
-        "caseSensitiveCheck": true,
-        "useNormalizedOHMUrl": true
-      }
     }
   },
   "buildOptionSet": [

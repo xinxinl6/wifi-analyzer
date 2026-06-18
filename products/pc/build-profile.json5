@@ -2,10 +2,6 @@
   "apiType": "stageMode",
   "buildOption": {
     "arkOptions": {
-      "strictMode": {
-        "caseSensitiveCheck": true,
-        "useNormalizedOHMUrl": true
-      }
     }
   },
   "buildOptionSet": [
@@ -18,10 +14,7 @@
   ],
   "targets": [
     {
-      "name": "default",
-      "applyToProducts": [
-        "pc"
-      ]
+      "name": "default"
     }
   ]
 }
