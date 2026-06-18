@@ -1,11 +1,15 @@
 {
   "name": "@wifi-analyzer/network-tools",
   "version": "1.0.0",
-  "description": "WiFi Analyzer 网络工具模块 — Ping/TraceRoute/DNS查询/IP信息",
+  "description": "WiFi Analyzer 网络工具模块 — Ping/Traceroute/DNS查询/端口扫描/子网计算/IP归属/PoE计算/MAC查询/WOL/局域网扫描/漫游测试",
   "main": "src/main/ets/Index.ets",
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@wifi-analyzer/core": "file:../../core"
+    "@wifi-analyzer/core": "file:../../core",
+    "@kit.NetworkKit": "*",
+    "@kit.BasicServicesKit": "*",
+    "@kit.ConnectivityKit": "*",
+    "@kit.AbilityKit": "*"
   }
 }
