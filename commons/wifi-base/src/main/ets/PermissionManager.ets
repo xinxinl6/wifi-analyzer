@@ -1,7 +1,7 @@
 /**
  * WiFi分析仪 — 权限管理
  */
-import { abilityAccessCtrl, common, Permissions } from '@kit.AbilityKit';
+import { abilityAccessCtrl, bundleManager, common, Permissions } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 const DOMAIN = 0x0000;
@@ -20,11 +20,6 @@ export enum PermissionStatus {
   PARTIAL = 'partial',
 }
 
-/** 扩展 UIAbilityContext 以访问 token 属性 */
-interface ContextWithToken extends common.UIAbilityContext {
-  token: number;
-}
-
 export class PermissionManager {
   private context: common.UIAbilityContext;
   private atManager = abilityAccessCtrl.createAtManager();
@@ -34,11 +29,14 @@ export class PermissionManager {
   }
 
   /**
-   * 获取当前应用的 access token ID
+   * 获取当前应用的 access token ID（通过 bundleManager）
    */
   private getSelfTokenId(): number {
     try {
-      return (this.context as ContextWithToken).token;
+      const bundleInfo = bundleManager.getBundleInfoForSelfSync(
+        bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION
+      );
+      return bundleInfo.accessTokenId;
     } catch {
       return 0;
     }
