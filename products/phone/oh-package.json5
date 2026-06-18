@@ -8,6 +8,8 @@
     "native-ping": "file:../../commons/native-ping",
     "@wifi-analyzer/design-system": "file:../../design-system",
     "@wifi-analyzer/wifi-scan": "file:../../features/wifi-scan",
-    "@wifi-analyzer/speed-test": "file:../../speed-test"
+    "@wifi-analyzer/speed-test": "file:../../speed-test",
+    "@wifi-analyzer/network-tools": "file:../../features/network-tools",
+    "@wifi-analyzer/settings": "file:../../features/settings"
   }
 }
