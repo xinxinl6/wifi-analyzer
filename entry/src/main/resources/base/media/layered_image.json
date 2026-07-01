@@ -1,8 +1,0 @@
-{
-  "layered-image": {
-    "background": "$media:background",
-    "foreground": "$media:foreground",
-    "foreground-adaptive-icon": "$media:foreground",
-    "monochrome": "$media:monochrome"
-  }
-}

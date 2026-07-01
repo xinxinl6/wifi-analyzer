@@ -1,10 +1,14 @@
 // Ping 引擎 — 网络连通性检测
-// 使用 TCP 连接实现类似 Ping 的延迟检测
-// 适配 @kit.NetworkKit API
+// 优先使用原生 ICMP Ping（native-ping），回退到 TCP 连接
 
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { http, socket, connection } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { NativePing, NativeProbeResult, PingMode } from 'native-ping'
 import { PingResult, PingStats, PingConfig, PingCallbacks } from '../models/ToolModels'
+import { NetworkTimeout, NetworkPort } from '@wifi-analyzer/core'
+
+const TAG = '[PingEngine]'
 
 // 内部接口
 interface TcpPingResult {
@@ -21,7 +25,7 @@ export class PingEngine {
     const config: PingConfig = {
       host: host,
       count: 4,
-      timeout: 3000,
+      timeout: NetworkTimeout.PING_MS,
       interval: 1000
     }
     return config
@@ -148,7 +152,7 @@ export class PingEngine {
         resolved = true
         try {
           tcpSocket.close((): void => {})
-        } catch (e) {}
+        } catch (e) { hilog.warn(0x0000, TAG, 'tcpSocket close(443) error: %{public}s', JSON.stringify(e)) }
         const timeoutResult: TcpPingResult = { success: false, error: 'timeout' }
         resolve(timeoutResult)
       }, timeout)
@@ -156,7 +160,7 @@ export class PingEngine {
       tcpSocket.connect({
         address: {
           address: address,
-          port: 443
+          port: NetworkPort.HTTPS
         },
         timeout: timeout
       }, (err: BusinessError): void => {
@@ -167,9 +171,10 @@ export class PingEngine {
           tcpSocket.close((): void => {})
           const successResult: TcpPingResult = { success: true, error: '' }
           resolve(successResult)
-        } else {
-          this.tryPort80(address, timeout, resolved, resolve)
-        }
+      } else {
+        tcpSocket.close((): void => {})
+        this.tryPort80(address, timeout, resolved, resolve)
+      }
       })
     })
   }
@@ -191,15 +196,15 @@ export class PingEngine {
       resolved = true
       try {
         tcpSocket.close((): void => {})
-      } catch (e) {}
+      } catch (e) { hilog.warn(0x0000, TAG, 'tcpSocket close(80) error: %{public}s', JSON.stringify(e)) }
       const timeoutResult: TcpPingResult = { success: false, error: 'port_closed' }
       resolve(timeoutResult)
     }, timeout)
 
     tcpSocket.connect({
-      address: {
+        address: {
         address: address,
-        port: 80
+        port: NetworkPort.HTTP
       },
       timeout: timeout
     }, (err: BusinessError): void => {
@@ -218,15 +223,69 @@ export class PingEngine {
     })
   }
 
-  // 开始 Ping
+  // 检查是否原生 ICMP 可用
+  static isNativeAvailable(): boolean {
+    return NativePing.isNative()
+  }
+
+  // 开始 Ping（优先原生 ICMP，回退 TCP）
   async startPing(config: PingConfig, callbacks?: PingCallbacks): Promise<void> {
     if (this.isRunning) {
-      if (callbacks && callbacks.onError) {
-        callbacks.onError('Ping already running')
-      }
+      callbacks?.onError?.('Ping already running')
       return
     }
 
+    // 优先原生 ICMP
+    if (NativePing.isNative()) {
+      return this.startNativePing(config, callbacks)
+    }
+    return this.startTcpPing(config, callbacks)
+  }
+
+  // ========== 原生 ICMP Ping ==========
+
+  private async startNativePing(config: PingConfig, callbacks?: PingCallbacks): Promise<void> {
+    this.isRunning = true
+    this.results = []
+    const host: string = config.host
+    const count: number = config.count
+
+    try {
+      callbacks?.onProgress?.(0, 0)
+
+      const probe: NativeProbeResult = await NativePing.probe(
+        host, count > 4 ? PingMode.ACCURATE : PingMode.FAST
+      )
+
+      const received: number = count - Math.round(count * probe.lossRate / 100)
+      const avgMs: number = probe.avgRtt > 0 ? Math.round(probe.avgRtt / 1000) : 0
+
+      for (let i = 0; i < count; i++) {
+        if (!this.isRunning) break
+        const ok: boolean = i < received
+        const r: PingResult = {
+          index: i + 1, host: config.host, address: host,
+          time: ok ? avgMs : -1, ttl: ok ? 64 : 0,
+          status: ok ? 'success' : 'timeout',
+          errorMessage: ''
+        }
+        this.results.push(r)
+        callbacks?.onResult?.(r)
+        callbacks?.onProgress?.(i + 1, ok ? 1 : 0)
+      }
+
+      const stats: PingStats = PingEngine.calcStats(this.results)
+      callbacks?.onComplete?.(this.results, stats)
+    } catch (_e) {
+      callbacks?.onError?.('Native ping failed')
+    } finally {
+      this.isRunning = false
+    }
+  }
+
+  // ========== TCP 回退 ==========
+
+  private async startTcpPing(config: PingConfig, callbacks?: PingCallbacks): Promise<void> {
     this.isRunning = true
     this.results = []
 
@@ -240,10 +299,13 @@ export class PingEngine {
         callbacks.onProgress(0, 0)
       }
 
+      // 提前解析 DNS，避免循环内重复解析
+      const resolvedHost: string = await this.resolveHost(host)
+
       for (let i = 0; i < count; i++) {
         if (!this.isRunning) break
 
-        const result: PingResult = await this.pingOnce(i + 1, host, timeout)
+        const result: PingResult = await this.pingOnce(i + 1, resolvedHost, timeout)
         this.results.push(result)
 
         if (callbacks && callbacks.onResult) {

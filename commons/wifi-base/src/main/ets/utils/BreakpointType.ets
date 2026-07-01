@@ -1,6 +1,6 @@
 /**
  * WiFi分析仪 — 断点适配泛型工具类
- * 借鉴 MultiFinancialManagement 项目的 BreakpointType 模式
+ * 升级为 Spatialization 项目的对象参数模式
  *
  * 断点定义:
  *   SM: < 520vp   — 手机竖屏
@@ -9,40 +9,43 @@
  *   XL: > 1200vp  — 平板横屏/PC/2合1
  */
 
+export interface BreakpointTypeOptions<T> {
+  xs?: T;
+  sm: T;
+  md: T;
+  lg: T;
+  xl?: T;
+}
+
 export class BreakpointType<T> {
+  private xs: T;
   private sm: T;
   private md: T;
   private lg: T;
   private xl: T;
 
-  constructor(sm: T, md: T, lg: T, xl: T) {
-    this.sm = sm;
-    this.md = md;
-    this.lg = lg;
-    this.xl = xl;
+  constructor(param: BreakpointTypeOptions<T>) {
+    this.xs = param.xs ?? param.sm;
+    this.sm = param.sm;
+    this.md = param.md;
+    this.lg = param.lg;
+    this.xl = param.xl ?? param.lg;
   }
 
   getValue(widthBp: WidthBreakpoint): T {
-    let value: T;
-    switch (widthBp) {
-      case WidthBreakpoint.WIDTH_XS:
-      case WidthBreakpoint.WIDTH_SM:
-        value = this.sm;
-        break;
-      case WidthBreakpoint.WIDTH_MD:
-        value = this.md;
-        break;
-      case WidthBreakpoint.WIDTH_LG:
-        value = this.lg;
-        break;
-      case WidthBreakpoint.WIDTH_XL:
-        value = this.xl;
-        break;
-      default:
-        value = this.sm;
-        break;
+    if (widthBp === WidthBreakpoint.WIDTH_XS) {
+      return this.xs;
     }
-    return value;
+    if (widthBp === WidthBreakpoint.WIDTH_SM) {
+      return this.sm;
+    }
+    if (widthBp === WidthBreakpoint.WIDTH_MD) {
+      return this.md;
+    }
+    if (widthBp === WidthBreakpoint.WIDTH_XL) {
+      return this.xl;
+    }
+    return this.lg;
   }
 }
 
@@ -66,17 +69,17 @@ export function getWidthBpByWidth(width: number): WidthBreakpoint {
  */
 export class ResponsiveSpacing {
   static readonly PAGE_PADDING: BreakpointType<number>[] = [
-    new BreakpointType(16, 16, 24, 24),   // 页面左右间距
-    new BreakpointType(16, 20, 24, 32),   // 卡片内部 padding
-    new BreakpointType(8, 12, 16, 16),    // 列表项间距
-    new BreakpointType(12, 16, 24, 24),   // Section 间距
+    new BreakpointType({ sm: 16, md: 16, lg: 24, xl: 24 }),   // 页面左右间距
+    new BreakpointType({ sm: 16, md: 20, lg: 24, xl: 32 }),   // 卡片内部 padding
+    new BreakpointType({ sm: 8, md: 12, lg: 16, xl: 16 }),    // 列表项间距
+    new BreakpointType({ sm: 12, md: 16, lg: 24, xl: 24 }),   // Section 间距
   ];
 
-  static readonly CARD_COLUMNS: BreakpointType<number> = new BreakpointType(1, 2, 3, 4);
+  static readonly CARD_COLUMNS: BreakpointType<number> = new BreakpointType({ sm: 1, md: 2, lg: 3, xl: 4 });
 
-  static readonly TOOL_GRID_COLUMNS: BreakpointType<number> = new BreakpointType(2, 3, 4, 6);
+  static readonly TOOL_GRID_COLUMNS: BreakpointType<number> = new BreakpointType({ sm: 2, md: 3, lg: 4, xl: 6 });
 
-  static readonly FONT_SIZE_TITLE: BreakpointType<number> = new BreakpointType(20, 22, 24, 28);
+  static readonly FONT_SIZE_TITLE: BreakpointType<number> = new BreakpointType({ sm: 20, md: 22, lg: 24, xl: 28 });
 
-  static readonly FONT_SIZE_BODY: BreakpointType<number> = new BreakpointType(14, 15, 16, 18);
+  static readonly FONT_SIZE_BODY: BreakpointType<number> = new BreakpointType({ sm: 14, md: 15, lg: 16, xl: 18 });
 }

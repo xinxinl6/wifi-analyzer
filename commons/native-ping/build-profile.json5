@@ -1,20 +1,43 @@
 {
   "apiType": "stageMode",
   "buildOption": {
+    "externalNativeOptions": {
+      "path": "./src/main/cpp/CMakeLists.txt",
+      "arguments": "",
+      "cppFlags": ""
+    },
     "arkOptions": {
+    },
+    "nativeLib": {
+      "filter": {
+        "excludes": []
+      }
     }
   },
   "buildOptionSet": [
     {
-      "name": "debug"
+      "name": "debug",
+      "nativeLib": {
+        "debugSymbol": {
+          "strip": false
+        }
+      }
     },
     {
-      "name": "release"
+      "name": "release",
+      "nativeLib": {
+        "debugSymbol": {
+          "strip": true
+        }
+      }
     }
   ],
   "targets": [
     {
       "name": "default"
+    },
+    {
+      "name": "ohosTest"
     }
   ]
 }

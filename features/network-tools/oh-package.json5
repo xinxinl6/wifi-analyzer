@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "wifi-base": "file:../../commons/wifi-base",
-    "native-ping": "file:../../commons/native-ping"
+    "native-ping": "file:../../commons/native-ping",
+    "@wifi-analyzer/core": "file:../../core"
   }
 }

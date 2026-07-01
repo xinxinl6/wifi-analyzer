@@ -1,0 +1,24 @@
+{
+  "string": [
+    {
+      "name": "signal_excellent",
+      "value": "Excellent"
+    },
+    {
+      "name": "signal_good",
+      "value": "Strong"
+    },
+    {
+      "name": "signal_fair",
+      "value": "Moderate"
+    },
+    {
+      "name": "signal_weak",
+      "value": "Weak"
+    },
+    {
+      "name": "signal_poor",
+      "value": "Very Weak"
+    }
+  ]
+}

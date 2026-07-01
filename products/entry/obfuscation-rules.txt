@@ -1,0 +1,12 @@
+# Obfuscation rules for entry module
+-enable-property-obfuscation
+-enable-string-property-obfuscation
+-enable-toplevel-obfuscation
+-compact
+-remove-log
+
+# Keep entry classes
+-keep-file-name
+entryability
+entrybackupability
+pages

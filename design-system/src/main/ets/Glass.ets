@@ -1,6 +1,11 @@
 // ============================================
-// Aurora WiFi V2 — 毛玻璃效果组件库
-// API Level: 23+
+// HM7 沉浸光感 — 5级材质组件库（systemMaterial 就绪）
+// API Level: 23+ (systemMaterial 需 API 26)
+// 暗色材质：rgba(255,255,255,X) 光从下方透上
+// 亮色材质：rgba(0,0,0,X) 反相逻辑
+// 暗色模式不用阴影，靠材质 blur 景深
+// 详见项目根目录 DESIGN.md
+// ⚠️ systemMaterial 会接管 backgroundColor/borderColor，注意 Blend Conflict
 // ============================================
 
 import {
@@ -34,10 +39,23 @@ import {
 } from './Color'
 
 // ============================================
-// 显式接口类型定义（ArkTS禁止交集类型）
+// 显式接口类型定义
 // ============================================
 
-// 阴影配置
+export class Shadow {
+  radius: number = 0
+  color: string = 'rgba(0,0,0,0.06)'
+  offsetX: number = 0
+  offsetY: number = 2
+
+  constructor(radius: number, color: string, offsetX: number, offsetY: number) {
+    this.radius = radius
+    this.color = color
+    this.offsetX = offsetX
+    this.offsetY = offsetY
+  }
+}
+
 interface GlassShadowStyle {
   radius: number
   color: string
@@ -45,7 +63,6 @@ interface GlassShadowStyle {
   offsetY: number
 }
 
-// TabBar + 边框 + 阴影
 interface GlassTabBarStyleType {
   backgroundColor: string
   borderColor: string
@@ -54,7 +71,6 @@ interface GlassTabBarStyleType {
   shadow: GlassShadowStyle
 }
 
-// 卡片 + 边框 + 阴影
 interface GlassCardStyleType {
   backgroundColor: string
   borderColor: string
@@ -63,7 +79,6 @@ interface GlassCardStyleType {
   shadow: GlassShadowStyle
 }
 
-// 强调卡片 + 边框 + 阴影
 interface GlassAuroraCardStyleType {
   backgroundColor: string
   borderColor: string
@@ -72,7 +87,6 @@ interface GlassAuroraCardStyleType {
   shadow: GlassShadowStyle
 }
 
-// 按钮 + 边框
 interface GlassButtonStyleType {
   backgroundColor: string
   borderColor: string
@@ -80,14 +94,12 @@ interface GlassButtonStyleType {
   borderRadius: number
 }
 
-// FAB + 阴影
 interface GlassFabStyleType {
   backgroundColor: string
   borderRadius: number
   shadow: GlassShadowStyle
 }
 
-// 对话气泡 + 边框
 interface GlassBubbleStyleType {
   backgroundColor: string
   borderColor: string
@@ -95,7 +107,6 @@ interface GlassBubbleStyleType {
   borderRadius: number
 }
 
-// 输入框 + 边框
 interface GlassInputStyleType {
   backgroundColor: string
   borderColor: string
@@ -103,13 +114,11 @@ interface GlassInputStyleType {
   borderRadius: number
 }
 
-// 动效曲线类型
 interface AnimationConfigType {
   duration: number
   curve: Curve
 }
 
-// 信号颜色类型
 interface SignalColorMap {
   excellent: string
   good: string
@@ -118,7 +127,7 @@ interface SignalColorMap {
   none: string
 }
 
-// AuroraStyleConfig 内嵌对象接口
+// AuroraStyleConfig 内嵌接口
 interface AuroraGlassColors {
   surface: string
   surfaceLight: string
@@ -168,7 +177,6 @@ interface AuroraRadiusValues {
   modal: number
 }
 
-// AuroraStyleConfig 类型（使用分离的接口引用）
 interface AuroraStyleConfigType {
   glass: AuroraGlassColors
   border: AuroraBorderColors
@@ -179,128 +187,143 @@ interface AuroraStyleConfigType {
   radius: AuroraRadiusValues
 }
 
-// 毛玻璃模糊半径常量
-export const BLUR_RADIUS_LIGHT = 12
-export const BLUR_RADIUS_MEDIUM = 20
-export const BLUR_RADIUS_HIGH = 30
+// ============================================
+// HM7 5级材质 blur 半径
+// ============================================
+// Level 0: 4px (Ultra Thin)  — StatusBar, NavigationBar
+// Level 1: 8px (Thin)        — TabBar, WiFi list items, tool cards
+// Level 2: 16px (Medium)     — Metric cards, search bar, channel cards
+// Level 3: 24px (Thick)      — Dialogs, settings cards
+// Level 4: 32px (Ultra Thick) — Connection card, semi-modal panels
 
-// 圆角常量
-export const RADIUS_TAB_BAR = 24
-export const RADIUS_CARD = 20
-export const RADIUS_BUTTON = 16
-export const RADIUS_MODAL = 28
+export const BLUR_RADIUS_LIGHT = 8
+export const BLUR_RADIUS_MEDIUM = 16
+export const BLUR_RADIUS_HIGH = 24
 
 // ============================================
-// 基础毛玻璃样式构建器
+// 圆角常量（HM7 规范）
+// ============================================
+export const RADIUS_TAB_BAR = 24
+export const RADIUS_CARD = 16
+export const RADIUS_BUTTON = 24
+export const RADIUS_MODAL = 20
+
+// ============================================
+// 基础材质样式构建器
 // ============================================
 
 /**
- * 获取毛玻璃背景色彩（根据主题）
+ * 获取材质背景色（根据主题 + 级别）
+ * 暗色：rgba(255,255,255,X)
+ * 亮色：rgba(0,0,0,X)
  */
 export function getGlassBackground(isDark: boolean, level: 'light' | 'medium' | 'high' = 'medium'): string {
   if (isDark) {
     switch (level) {
-      case 'light': return COLOR_GLASS_DARK_SURFACE
-      case 'medium': return 'rgba(26,39,68,0.80)'
-      case 'high': return COLOR_GLASS_DARK_CARD
+      case 'light': return 'rgba(255,255,255,0.06)'   // Level 1 Thin
+      case 'medium': return 'rgba(255,255,255,0.10)'   // Level 2 Medium
+      case 'high': return 'rgba(255,255,255,0.16)'     // Level 3 Thick
     }
   }
+  // 亮色
   switch (level) {
-    case 'light': return COLOR_GLASS_SURFACE_LIGHT
-    case 'medium': return COLOR_GLASS_SURFACE_MEDIUM
-    case 'high': return COLOR_GLASS_SURFACE_HIGH
+    case 'light': return 'rgba(0,0,0,0.04)'
+    case 'medium': return 'rgba(0,0,0,0.06)'
+    case 'high': return 'rgba(0,0,0,0.10)'
   }
 }
 
 /**
- * 获取毛玻璃边框色彩（根据主题）
+ * 获取材质边框色（根据主题）
  */
 export function getGlassBorder(isDark: boolean): string {
-  return isDark ? COLOR_GLASS_DARK_BORDER : COLOR_GLASS_BORDER_MEDIUM
+  return isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.10)'
 }
 
 /**
- * 获取毛玻璃阴影（根据主题）
+ * 获取材质阴影（HM7 暗色不用阴影）
  */
 export function getGlassShadow(isDark: boolean): string {
   if (isDark) {
-    return `0 8px 32px ${COLOR_SHADOW_GLASS_STRONG}, 0 2px 8px ${COLOR_SHADOW_GLASS}`
+    return 'none'
   }
-  return `0 8px 32px ${COLOR_SHADOW_GLASS}, 0 2px 8px rgba(0,0,0,0.05)`
+  return `0 1px 4px rgba(0,0,0,0.04)`
 }
 
 // ============================================
-// 预置毛玻璃样式对象
+// 预置材质样式对象（HM7）
 // ============================================
 
 /**
- * TabBar 毛玻璃样式
- * 悬浮高度 + 圆角 + 光晕边框
+ * TabBar 材质样式 — Level 0 Ultra Thin
+ * 底部悬浮 + 全圆角 + 极淡边框
  */
 export const GlassTabBarStyle: GlassTabBarStyleType = {
-  backgroundColor: COLOR_GLASS_SURFACE_MEDIUM,
-  borderColor: COLOR_GLASS_BORDER_LIGHT,
+  backgroundColor: 'rgba(255,255,255,0.02)',
+  borderColor: 'rgba(255,255,255,0.04)',
   borderWidth: 1,
   borderRadius: RADIUS_TAB_BAR,
   shadow: {
-    radius: 20,
-    color: COLOR_SHADOW_GLASS_STRONG,
+    radius: 0,
+    color: 'transparent',
     offsetX: 0,
-    offsetY: -4
+    offsetY: 0
   }
 }
 
 /**
- * 卡片毛玻璃样式
+ * 卡片材质样式 — Level 2 Medium
+ * 16px 圆角 + 材质模糊 + 不投影
  */
 export const GlassCardStyle: GlassCardStyleType = {
-  backgroundColor: COLOR_GLASS_CARD,
-  borderColor: COLOR_GLASS_BORDER_MEDIUM,
+  backgroundColor: 'rgba(255,255,255,0.10)',
+  borderColor: 'rgba(255,255,255,0.08)',
   borderWidth: 1,
   borderRadius: RADIUS_CARD,
   shadow: {
-    radius: SHADOW_GLASS_BLUR,
-    color: COLOR_SHADOW_GLASS,
+    radius: 0,
+    color: 'transparent',
     offsetX: 0,
-    offsetY: 4
+    offsetY: 0
   }
 }
 
 /**
- * Aurora 强调卡片样式
+ * Aurora 强调卡片 — Level 3 Thick + 品牌调
  */
 export const GlassAuroraCardStyle: GlassAuroraCardStyleType = {
-  backgroundColor: COLOR_GLASS_AURORA,
-  borderColor: COLOR_GLASS_AURORA_BORDER,
+  backgroundColor: 'rgba(49,122,247,0.12)',
+  borderColor: 'rgba(49,122,247,0.18)',
   borderWidth: 1,
   borderRadius: RADIUS_CARD,
   shadow: {
-    radius: 16,
-    color: COLOR_SHADOW_AURORA,
+    radius: 0,
+    color: 'transparent',
     offsetX: 0,
-    offsetY: 4
+    offsetY: 0
   }
 }
 
 /**
- * 按钮毛玻璃样式
+ * 按钮材质样式 — Level 1 Thin
  */
 export const GlassButtonStyle: GlassButtonStyleType = {
-  backgroundColor: COLOR_GLASS_SURFACE,
-  borderColor: COLOR_GLASS_BORDER_LIGHT,
+  backgroundColor: 'rgba(255,255,255,0.06)',
+  borderColor: 'rgba(255,255,255,0.06)',
   borderWidth: 1,
   borderRadius: RADIUS_BUTTON
 }
 
 /**
  * 悬浮按钮（FAB）样式
+ * 品牌色实色 + 微光晕
  */
 export const GlassFabStyle: GlassFabStyleType = {
   backgroundColor: COLOR_AURORA_PRIMARY,
   borderRadius: 28,
   shadow: {
-    radius: 16,
-    color: COLOR_GLOW_PRIMARY,
+    radius: 12,
+    color: 'rgba(49,122,247,0.20)',
     offsetX: 0,
     offsetY: 4
   }
@@ -310,56 +333,43 @@ export const GlassFabStyle: GlassFabStyleType = {
 // AI 助手按钮样式
 // ============================================
 
-/**
- * AI助手悬浮按钮样式
- * 渐变背景 + 脉冲光晕动画
- */
 export const GlassAIStyle: GlassFabStyleType = {
   backgroundColor: COLOR_AURORA_PRIMARY,
   borderRadius: 28,
   shadow: {
-    radius: 20,
-    color: COLOR_GLOW_PRIMARY,
+    radius: 16,
+    color: 'rgba(49,122,247,0.25)',
     offsetX: 0,
     offsetY: 4
   }
 }
 
-/**
- * AI对话气泡样式
- */
 export const GlassBubbleStyle: GlassBubbleStyleType = {
-  backgroundColor: COLOR_GLASS_SURFACE_MEDIUM,
-  borderColor: COLOR_GLASS_BORDER_LIGHT,
+  backgroundColor: 'rgba(255,255,255,0.10)',
+  borderColor: 'rgba(255,255,255,0.06)',
   borderWidth: 1,
   borderRadius: 20
 }
 
-/**
- * AI输入框样式
- */
 export const GlassInputStyle: GlassInputStyleType = {
-  backgroundColor: COLOR_GLASS_SURFACE_LIGHT,
-  borderColor: COLOR_GLASS_BORDER_LIGHT,
+  backgroundColor: 'rgba(255,255,255,0.08)',
+  borderColor: 'rgba(255,255,255,0.08)',
   borderWidth: 1,
-  borderRadius: 24
+  borderRadius: RADIUS_BUTTON
 }
 
 // ============================================
-// 动效配置
+// 动效配置 — 与 Animations.ets 保持同步
 // ============================================
 
-// 动效时长常量（毫秒）
 export const DURATION_FAST = 150
 export const DURATION_NORMAL = 300
 export const DURATION_SLOW = 400
 
-// 缓动曲线
-export const CURVE_EASE_OUT = Curve.EaseOut
-export const CURVE_EASE_IN_OUT = Curve.EaseInOut
-export const CURVE_SPRING = Curve.FastOutSlowIn
+export const CURVE_EASE_OUT: Curve = Curve.EaseOut
+export const CURVE_EASE_IN_OUT: Curve = Curve.EaseInOut
+export const CURVE_SPRING: Curve = Curve.FastOutSlowIn
 
-// 点击反馈动画配置
 export const AnimationTapScale: AnimationConfigType = {
   duration: DURATION_FAST,
   curve: CURVE_EASE_OUT
@@ -376,73 +386,66 @@ export const AnimationPressOut: AnimationConfigType = {
 }
 
 // ============================================
-// 信号强度颜色（适配 Aurora 主题）
+// 信号强度颜色（HM7 降饱和）
 // ============================================
 
 export const SIGNAL_COLORS_AURORA: SignalColorMap = {
-  excellent: '#00D97E',
-  good: '#4ADE80',
-  fair: '#FBBF24',
-  poor: '#F87171',
-  none: '#94A3B8'
+  excellent: '#5BA854',
+  good: '#5EA1FF',
+  fair: '#DB6B42',
+  poor: '#D94838',
+  none: 'rgba(255,255,255,0.40)'
 }
 
 export const SIGNAL_COLORS_AURORA_BG: SignalColorMap = {
-  excellent: 'rgba(0,217,126,0.15)',
-  good: 'rgba(74,222,128,0.15)',
-  fair: 'rgba(251,191,36,0.15)',
-  poor: 'rgba(248,113,113,0.15)',
-  none: 'rgba(148,163,184,0.15)'
+  excellent: 'rgba(91,168,84,0.15)',
+  good: 'rgba(94,161,255,0.15)',
+  fair: 'rgba(219,107,66,0.15)',
+  poor: 'rgba(217,72,56,0.15)',
+  none: 'rgba(255,255,255,0.06)'
 }
 
 // ============================================
-// 导出完整样式配置对象
+// 导出完整样式配置对象（HM7 映射）
 // ============================================
 
 export const AuroraStyleConfig: AuroraStyleConfigType = {
-  // 毛玻璃
   glass: {
-    surface: COLOR_GLASS_SURFACE,
-    surfaceLight: COLOR_GLASS_SURFACE_LIGHT,
-    surfaceMedium: COLOR_GLASS_SURFACE_MEDIUM,
-    surfaceHigh: COLOR_GLASS_SURFACE_HIGH,
-    card: COLOR_GLASS_CARD,
-    aurora: COLOR_GLASS_AURORA,
-    auroraLight: COLOR_GLASS_AURORA_LIGHT,
+    surface: 'rgba(255,255,255,0.06)',
+    surfaceLight: 'rgba(255,255,255,0.04)',
+    surfaceMedium: 'rgba(255,255,255,0.10)',
+    surfaceHigh: 'rgba(255,255,255,0.16)',
+    card: 'rgba(255,255,255,0.10)',
+    aurora: 'rgba(49,122,247,0.10)',
+    auroraLight: 'rgba(49,122,247,0.06)',
     darkSurface: COLOR_GLASS_DARK_SURFACE,
     darkCard: COLOR_GLASS_DARK_CARD
   } as AuroraGlassColors,
-  // 边框
   border: {
-    light: COLOR_GLASS_BORDER_LIGHT,
-    medium: COLOR_GLASS_BORDER_MEDIUM,
-    strong: COLOR_GLASS_BORDER_STRONG,
-    aurora: COLOR_GLASS_AURORA_BORDER,
+    light: 'rgba(255,255,255,0.06)',
+    medium: 'rgba(255,255,255,0.08)',
+    strong: 'rgba(255,255,255,0.12)',
+    aurora: 'rgba(49,122,247,0.15)',
     dark: COLOR_GLASS_DARK_BORDER
   } as AuroraBorderColors,
-  // 阴影
   shadow: {
-    glass: COLOR_SHADOW_GLASS,
-    glassStrong: COLOR_SHADOW_GLASS_STRONG,
-    aurora: COLOR_SHADOW_AURORA
+    glass: 'rgba(0,0,0,0.02)',
+    glassStrong: 'rgba(0,0,0,0.04)',
+    aurora: 'rgba(49,122,247,0.08)'
   } as AuroraShadowColors,
-  // 光晕
   glow: {
-    primary: COLOR_GLOW_PRIMARY,
-    inner: COLOR_GLOW_INNER
+    primary: 'rgba(49,122,247,0.15)',
+    inner: 'rgba(255,255,255,0.08)'
   } as AuroraGlowColors,
-  // 文字
   text: {
-    primary: COLOR_TEXT_GLASS_PRIMARY,
-    secondary: COLOR_TEXT_GLASS_SECONDARY,
-    tertiary: COLOR_TEXT_GLASS_TERTIARY
+    primary: 'rgba(255,255,255,0.90)',
+    secondary: 'rgba(255,255,255,0.60)',
+    tertiary: 'rgba(255,255,255,0.40)'
   } as AuroraTextColors,
-  // Aurora主色
   aurora: {
     primary: COLOR_AURORA_PRIMARY,
     glow: COLOR_AURORA_GLOW
   } as AuroraAccentColors,
-  // 半径
   radius: {
     tabBar: RADIUS_TAB_BAR,
     card: RADIUS_CARD,

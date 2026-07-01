@@ -1,0 +1,1356 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "WLAN Network Analyzer"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "WlAN-分析仪"
+    },
+    {
+      "name": "tab_home",
+      "value": "首页"
+    },
+    {
+      "name": "tab_wifi",
+      "value": "WiFi"
+    },
+    {
+      "name": "tab_channel",
+      "value": "信道"
+    },
+    {
+      "name": "tab_speed",
+      "value": "测速"
+    },
+    {
+      "name": "tab_tools",
+      "value": "工具箱"
+    },
+    {
+      "name": "wifi_permission_reason",
+      "value": "需要WiFi权限以扫描附近网络"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "需要位置权限以获取WiFi信号强度"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "需要网络权限以进行测速"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "需要网络信息权限以获取连接状态"
+    },
+    {
+      "name": "settings",
+      "value": "设置"
+    },
+    {
+      "name": "general",
+      "value": "通用"
+    },
+    {
+      "name": "language",
+      "value": "语言"
+    },
+    {
+      "name": "check_update",
+      "value": "检查更新"
+    },
+    {
+      "name": "about",
+      "value": "关于"
+    },
+    {
+      "name": "about_us",
+      "value": "关于我们"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "隐私政策"
+    },
+    {
+      "name": "user_agreement",
+      "value": "用户协议"
+    },
+    {
+      "name": "feedback",
+      "value": "意见反馈"
+    },
+    {
+      "name": "app_website",
+      "value": "应用官网"
+    },
+    {
+      "name": "developer",
+      "value": "开发者"
+    },
+    {
+      "name": "close",
+      "value": "关闭"
+    },
+    {
+      "name": "checking_update",
+      "value": "正在检查更新..."
+    },
+    {
+      "name": "already_latest",
+      "value": "已是最新版本 v"
+    },
+    {
+      "name": "new_version_found",
+      "value": "发现新版本 "
+    },
+    {
+      "name": "update_content",
+      "value": "更新内容"
+    },
+    {
+      "name": "download_now",
+      "value": "立即更新"
+    },
+    {
+      "name": "later",
+      "value": "稍后"
+    },
+    {
+      "name": "download_url",
+      "value": "下载地址"
+    },
+    {
+      "name": "no_update_info",
+      "value": "暂无更新说明"
+    },
+    {
+      "name": "network_overview",
+      "value": "网络概览"
+    },
+    {
+      "name": "local_ip",
+      "value": "本地 IP"
+    },
+    {
+      "name": "recommended_tools",
+      "value": "推荐工具"
+    },
+    {
+      "name": "network_analyzer",
+      "value": "网络分析仪"
+    },
+    {
+      "name": "about_app",
+      "value": "WlAN-分析仪 v2.0"
+    },
+    {
+      "name": "about_app_desc",
+      "value": "网络诊断工具箱，全面的WiFi分析与网络诊断工具"
+    },
+    {
+      "name": "privacy_desc",
+      "value": "了解我们如何保护您的数据"
+    },
+    {
+      "name": "agreement_desc",
+      "value": "使用条款与条件"
+    },
+    {
+      "name": "feedback_desc",
+      "value": "告诉我们您的想法"
+    },
+    {
+      "name": "website_url",
+      "value": "www.xinnxin.cn"
+    },
+    {
+      "name": "no_network_error",
+      "value": "无法连接服务器，请检查网络"
+    },
+    {
+      "name": "update_exception",
+      "value": "检查更新时发生异常"
+    },
+    {
+      "name": "version_label",
+      "value": "版本"
+    },
+    {
+      "name": "dns",
+      "value": "DNS"
+    },
+    {
+      "name": "port",
+      "value": "端口"
+    },
+    {
+      "name": "brand_title",
+      "value": "WLAN 分析仪"
+    },
+    {
+      "name": "version_tag",
+      "value": "v2.0 · HM7"
+    },
+    {
+      "name": "brand_second",
+      "value": "分析仪"
+    },
+    {
+      "name": "connected",
+      "value": "已连接"
+    },
+    {
+      "name": "disconnected",
+      "value": "未连接"
+    },
+    {
+      "name": "fetching",
+      "value": "获取中..."
+    },
+    {
+      "name": "section_network_status",
+      "value": "网络状态"
+    },
+    {
+      "name": "section_quick_tools",
+      "value": "快捷工具"
+    },
+    {
+      "name": "ip_address",
+      "value": "IP 地址"
+    },
+    {
+      "name": "signal_strength",
+      "value": "信号强度"
+    },
+    {
+      "name": "current_band",
+      "value": "当前频段"
+    },
+    {
+      "name": "dbm_unit",
+      "value": "dBm"
+    },
+    {
+      "name": "signal_excellent",
+      "value": "极佳"
+    },
+    {
+      "name": "signal_good",
+      "value": "良好"
+    },
+    {
+      "name": "signal_average",
+      "value": "一般"
+    },
+    {
+      "name": "signal_weak",
+      "value": "弱"
+    },
+    {
+      "name": "tools_title",
+      "value": "工具箱"
+    },
+    {
+      "name": "tools_subtitle",
+      "value": "网络诊断与安全工具"
+    },
+    {
+      "name": "section_diag",
+      "value": "诊断"
+    },
+    {
+      "name": "section_security",
+      "value": "安全"
+    },
+    {
+      "name": "section_network",
+      "value": "网络"
+    },
+    {
+      "name": "section_other",
+      "value": "其他"
+    },
+    {
+      "name": "tool_ping",
+      "value": "监测"
+    },
+    {
+      "name": "tool_traceroute",
+      "value": "路由追踪"
+    },
+    {
+      "name": "tool_dns",
+      "value": "DNS 查询"
+    },
+    {
+      "name": "tool_portscan",
+      "value": "端口扫描"
+    },
+    {
+      "name": "tool_lan",
+      "value": "局域网"
+    },
+    {
+      "name": "tool_subnet",
+      "value": "子网计算"
+    },
+    {
+      "name": "tool_ipgeo",
+      "value": "IP 定位"
+    },
+    {
+      "name": "tool_settings",
+      "value": "设置"
+    },
+    {
+      "name": "desc_monitor",
+      "value": "持续监测"
+    },
+    {
+      "name": "desc_path",
+      "value": "路径分析"
+    },
+    {
+      "name": "desc_dns_resolve",
+      "value": "域名解析"
+    },
+    {
+      "name": "desc_port",
+      "value": "开放检测"
+    },
+    {
+      "name": "desc_lan",
+      "value": "设备发现"
+    },
+    {
+      "name": "desc_cidr",
+      "value": "CIDR 换算"
+    },
+    {
+      "name": "desc_geo",
+      "value": "归属查询"
+    },
+    {
+      "name": "desc_settings",
+      "value": "应用配置"
+    },
+    {
+      "name": "filter_all",
+      "value": "全部"
+    },
+    {
+      "name": "nearby",
+      "value": "附近WiFi"
+    },
+    {
+      "name": "scanning",
+      "value": "扫描中"
+    },
+    {
+      "name": "scan_btn",
+      "value": "扫描"
+    },
+    {
+      "name": "networks_count",
+      "value": "个网络"
+    },
+    {
+      "name": "hidden_network",
+      "value": "隐藏网络"
+    },
+    {
+      "name": "no_networks",
+      "value": "暂无可用网络"
+    },
+    {
+      "name": "scan_hint",
+      "value": "点击右上角扫描按钮刷新"
+    },
+    {
+      "name": "network_monitor",
+      "value": "网络监测"
+    },
+    {
+      "name": "monitor_config",
+      "value": "监测配置"
+    },
+    {
+      "name": "ping_count",
+      "value": "PING 次数"
+    },
+    {
+      "name": "infinite_hint",
+      "value": "(0为无限)"
+    },
+    {
+      "name": "addr_gateway",
+      "value": "地址 1 (公网)"
+    },
+    {
+      "name": "auto_detect",
+      "value": "推荐"
+    },
+    {
+      "name": "addr_custom",
+      "value": "地址 2 (自定义)"
+    },
+    {
+      "name": "recommend_baidu",
+      "value": "推荐 baidu.com"
+    },
+    {
+      "name": "input_domain_or_ip",
+      "value": "输入域名或 IP"
+    },
+    {
+      "name": "detecting",
+      "value": "检测中..."
+    },
+    {
+      "name": "detect_gateway",
+      "value": "检测网关..."
+    },
+    {
+      "name": "stop_monitor",
+      "value": "停止监测"
+    },
+    {
+      "name": "start_monitor",
+      "value": "开始监测"
+    },
+    {
+      "name": "monitoring",
+      "value": "监测中"
+    },
+    {
+      "name": "standby",
+      "value": "待机中"
+    },
+    {
+      "name": "elapsed_time",
+      "value": "累计时长:"
+    },
+    {
+      "name": "sent",
+      "value": "已发送"
+    },
+    {
+      "name": "lost_count",
+      "value": "丢包数"
+    },
+    {
+      "name": "loss_rate",
+      "value": "丢包率"
+    },
+    {
+      "name": "fastest",
+      "value": "最快"
+    },
+    {
+      "name": "slowest",
+      "value": "最慢"
+    },
+    {
+      "name": "average",
+      "value": "平均"
+    },
+    {
+      "name": "history",
+      "value": "历史记录"
+    },
+    {
+      "name": "clear",
+      "value": "清除"
+    },
+    {
+      "name": "packet_loss",
+      "value": "丢包"
+    },
+    {
+      "name": "stability",
+      "value": "稳定"
+    },
+    {
+      "name": "monitor_detail",
+      "value": "监测详情"
+    },
+    {
+      "name": "packet_data",
+      "value": "逐包数据"
+    },
+    {
+      "name": "timeout",
+      "value": "超时"
+    },
+    {
+      "name": "enter_address_hint",
+      "value": "请至少填写一个监测地址"
+    },
+    {
+      "name": "history_tab",
+      "value": "历史"
+    },
+    {
+      "name": "input_domain_placeholder",
+      "value": "输入域名（如 github.com）"
+    },
+    {
+      "name": "query_btn",
+      "value": "查询"
+    },
+    {
+      "name": "dns_server_list",
+      "value": "DNS 服务器"
+    },
+    {
+      "name": "common_domains_title",
+      "value": "常用域名"
+    },
+    {
+      "name": "feature_guide",
+      "value": "功能说明"
+    },
+    {
+      "name": "dns_real_query",
+      "value": "真实 DNS 查询"
+    },
+    {
+      "name": "dns_real_query_desc",
+      "value": "通过 DoH 或系统 DNS 实时解析"
+    },
+    {
+      "name": "dns_multi_server_title",
+      "value": "多种 DNS 服务器"
+    },
+    {
+      "name": "dns_server_list_desc",
+      "value": "阿里 / 腾讯 / 百度 / Google / Cloudflare"
+    },
+    {
+      "name": "dns_system_default",
+      "value": "系统默认"
+    },
+    {
+      "name": "dns_alibaba",
+      "value": "阿里 DNS"
+    },
+    {
+      "name": "dns_tencent",
+      "value": "腾讯 DNS"
+    },
+    {
+      "name": "dns_baidu",
+      "value": "百度 DNS"
+    },
+    {
+      "name": "dns_google",
+      "value": "Google DNS"
+    },
+    {
+      "name": "dns_cloudflare",
+      "value": "Cloudflare"
+    },
+    {
+      "name": "dns_all_types",
+      "value": "全记录类型"
+    },
+    {
+      "name": "dns_all_types_desc",
+      "value": "A / AAAA / CNAME / MX / NS / TXT"
+    },
+    {
+      "name": "querying",
+      "value": "正在查询..."
+    },
+    {
+      "name": "querying_with",
+      "value": "使用"
+    },
+    {
+      "name": "query_suffix",
+      "value": "查询中"
+    },
+    {
+      "name": "system_default",
+      "value": "系统默认"
+    },
+    {
+      "name": "query_failed",
+      "value": "查询失败"
+    },
+    {
+      "name": "back_btn",
+      "value": "← 返回"
+    },
+    {
+      "name": "re_query",
+      "value": "重新查询"
+    },
+    {
+      "name": "query_history",
+      "value": "查询历史"
+    },
+    {
+      "name": "records_suffix",
+      "value": "条"
+    },
+    {
+      "name": "no_history",
+      "value": "暂无历史记录"
+    },
+    {
+      "name": "ttl_label",
+      "value": "TTL"
+    },
+    {
+      "name": "band_5g",
+      "value": "5GHz"
+    },
+    {
+      "name": "band_24g",
+      "value": "2.4GHz"
+    },
+    {
+      "name": "rec_type_a",
+      "value": "A"
+    },
+    {
+      "name": "rec_type_aaaa",
+      "value": "AAAA"
+    },
+    {
+      "name": "rec_type_cname",
+      "value": "CNAME"
+    },
+    {
+      "name": "rec_type_mx",
+      "value": "MX"
+    },
+    {
+      "name": "rec_type_ns",
+      "value": "NS"
+    },
+    {
+      "name": "rec_type_txt",
+      "value": "TXT"
+    },
+    {
+      "name": "ch_analysis",
+      "value": "信道推荐"
+    },
+    {
+      "name": "ch_idle",
+      "value": "空闲"
+    },
+    {
+      "name": "ch_normal",
+      "value": "正常"
+    },
+    {
+      "name": "ch_busy",
+      "value": "繁忙"
+    },
+    {
+      "name": "ch_congested",
+      "value": "拥堵"
+    },
+    {
+      "name": "ch_severe_congested",
+      "value": "严重拥堵"
+    },
+    {
+      "name": "ch_recommended",
+      "value": "推荐信道"
+    },
+    {
+      "name": "ch_congested_title",
+      "value": "拥堵信道"
+    },
+    {
+      "name": "ch_detail",
+      "value": "信道详情"
+    },
+    {
+      "name": "ch_count",
+      "value": "信道数量"
+    },
+    {
+      "name": "ch_avg_usage",
+      "value": "平均占用"
+    },
+    {
+      "name": "ch_band",
+      "value": "频段"
+    },
+    {
+      "name": "ch_fetching",
+      "value": "获取信道数据..."
+    },
+    {
+      "name": "ch_best_idle",
+      "value": "当前最空闲"
+    },
+    {
+      "name": "ch_per_channel",
+      "value": "个信道"
+    },
+    {
+      "name": "speed_network",
+      "value": "网络测速"
+    },
+    {
+      "name": "speed_test",
+      "value": "测试"
+    },
+    {
+      "name": "speed_download",
+      "value": "下载"
+    },
+    {
+      "name": "speed_upload",
+      "value": "上传"
+    },
+    {
+      "name": "speed_latency",
+      "value": "延迟"
+    },
+    {
+      "name": "speed_complete",
+      "value": "测试完成"
+    },
+    {
+      "name": "speed_start_hint",
+      "value": "点击开始测试"
+    },
+    {
+      "name": "speed_testing",
+      "value": "测试中..."
+    },
+    {
+      "name": "speed_start",
+      "value": "开始测试"
+    },
+    {
+      "name": "speed_grade",
+      "value": "等级:"
+    },
+    {
+      "name": "speed_download_speed",
+      "value": "下载速度"
+    },
+    {
+      "name": "speed_upload_speed",
+      "value": "上传速度"
+    },
+    {
+      "name": "speed_network_latency",
+      "value": "网络延迟"
+    },
+    {
+      "name": "speed_jitter",
+      "value": "抖动"
+    },
+    {
+      "name": "speed_download_full_latency",
+      "value": "下载满载延迟"
+    },
+    {
+      "name": "speed_upload_full_latency",
+      "value": "上传满载延迟"
+    },
+    {
+      "name": "speed_server",
+      "value": "测速服务器"
+    },
+    {
+      "name": "speed_guide",
+      "value": "测试说明"
+    },
+    {
+      "name": "speed_guide_desc",
+      "value": "网速测试将测量您当前网络的下载速度、上传速度和延迟。测试期间请保持设备处于当前 WiFi 网络。"
+    },
+    {
+      "name": "speed_select_node",
+      "value": "选择最优节点..."
+    },
+    {
+      "name": "speed_test_latency",
+      "value": "测试延迟..."
+    },
+    {
+      "name": "speed_test_download",
+      "value": "测试下载速度..."
+    },
+    {
+      "name": "speed_test_upload",
+      "value": "测试上传速度..."
+    },
+    {
+      "name": "speed_failed",
+      "value": "测速失败"
+    },
+    {
+      "name": "speed_cancelled",
+      "value": "已取消"
+    },
+    {
+      "name": "speed_ready",
+      "value": "准备就绪"
+    },
+    {
+      "name": "speed_grade_extreme",
+      "value": "极速"
+    },
+    {
+      "name": "speed_grade_fast",
+      "value": "快速"
+    },
+    {
+      "name": "speed_grade_normal",
+      "value": "一般"
+    },
+    {
+      "name": "speed_grade_slow",
+      "value": "偏慢"
+    },
+    {
+      "name": "trace_route",
+      "value": "路由追踪"
+    },
+    {
+      "name": "trace_stop",
+      "value": "停止"
+    },
+    {
+      "name": "trace_target_input",
+      "value": "域名或 IP 地址"
+    },
+    {
+      "name": "trace_quick_target",
+      "value": "快速目标"
+    },
+    {
+      "name": "trace_enter_target",
+      "value": "请输入目标地址"
+    },
+    {
+      "name": "trace_dns_resolving",
+      "value": "正在 DNS 解析…"
+    },
+    {
+      "name": "trace_icmp_scanning",
+      "value": "ICMP 探针扫描中…"
+    },
+    {
+      "name": "trace_tcp_probing",
+      "value": "TCP 时序探测中…"
+    },
+    {
+      "name": "trace_stopped",
+      "value": "已停止"
+    },
+    {
+      "name": "trace_no_path",
+      "value": "未探测到路由路径，请检查目标地址"
+    },
+    {
+      "name": "trace_tcp_fallback_hint",
+      "value": "⚠ 系统限制，已启用 TCP 时序回退（不显示中间路由 IP）"
+    },
+    {
+      "name": "trace_total_hops",
+      "value": "总跳"
+    },
+    {
+      "name": "trace_success",
+      "value": "成功"
+    },
+    {
+      "name": "trace_avg",
+      "value": "平均"
+    },
+    {
+      "name": "trace_slowest",
+      "value": "最慢"
+    },
+    {
+      "name": "trace_fastest",
+      "value": "最快"
+    },
+    {
+      "name": "trace_route_path",
+      "value": "路由路径"
+    },
+    {
+      "name": "trace_timeout",
+      "value": "请求超时"
+    },
+    {
+      "name": "trace_no_response",
+      "value": "无响应"
+    },
+    {
+      "name": "trace_excellent",
+      "value": "优秀"
+    },
+    {
+      "name": "trace_high_latency",
+      "value": "延迟偏高"
+    },
+    {
+      "name": "trace_click_stop",
+      "value": "点击停止"
+    },
+    {
+      "name": "trace_path_discovery",
+      "value": "路径发现"
+    },
+    {
+      "name": "trace_latency_analysis",
+      "value": "时延分析"
+    },
+    {
+      "name": "trace_fault_location",
+      "value": "故障定位"
+    },
+    {
+      "name": "trace_gateway",
+      "value": "网关"
+    },
+    {
+      "name": "trace_preferred_dns",
+      "value": "首选 DNS"
+    },
+    {
+      "name": "trace_alternate_dns",
+      "value": "备用 DNS"
+    },
+    {
+      "name": "trace_github",
+      "value": "GitHub"
+    },
+    {
+      "name": "trace_baidu",
+      "value": "百度"
+    },
+    {
+      "name": "netstat_link_speed",
+      "value": "连接速度"
+    },
+    {
+      "name": "netstat_network_latency",
+      "value": "网络延迟"
+    },
+    {
+      "name": "unit_mbps",
+      "value": "Mbps"
+    },
+    {
+      "name": "unit_ms",
+      "value": "ms"
+    },
+    {
+      "name": "port_web_admin",
+      "value": "Web管理"
+    },
+    {
+      "name": "scanning_ports_status",
+      "value": "扫描中…"
+    },
+    {
+      "name": "port_open_status",
+      "value": "开放"
+    },
+    {
+      "name": "port_scan_progress",
+      "value": "已扫描"
+    },
+    {
+      "name": "port_scan_open_label",
+      "value": "开放"
+    },
+    {
+      "name": "port_scan_unit",
+      "value": "个"
+    },
+    {
+      "name": "scan_mode_full",
+      "value": "完整"
+    },
+    {
+      "name": "scan_mode_common",
+      "value": "常用"
+    },
+    {
+      "name": "scan_common_ports",
+      "value": "扫描"
+    },
+    {
+      "name": "scan_range_all",
+      "value": "扫描 1–1024 端口"
+    },
+    {
+      "name": "open_ports_label",
+      "value": "开放端口"
+    },
+    {
+      "name": "no_open_ports",
+      "value": "未发现开放端口"
+    },
+    {
+      "name": "calculate_action",
+      "value": "计算"
+    },
+    {
+      "name": "network_addr",
+      "value": "网络地址"
+    },
+    {
+      "name": "broadcast_addr",
+      "value": "广播地址"
+    },
+    {
+      "name": "cidr_label",
+      "value": "CIDR"
+    },
+    {
+      "name": "subnet_input_hint",
+      "value": "IP/前缀（如 192.168.1.1/24）"
+    },
+    {
+      "name": "host_range_title",
+      "value": "主机范围"
+    },
+    {
+      "name": "start_label",
+      "value": "起始"
+    },
+    {
+      "name": "end_label",
+      "value": "结束"
+    },
+    {
+      "name": "usable_hosts_label",
+      "value": "可用主机"
+    },
+    {
+      "name": "detail_info_label",
+      "value": "详细信息"
+    },
+    {
+      "name": "subnet_mask_label",
+      "value": "子网掩码"
+    },
+    {
+      "name": "wildcard_mask_label",
+      "value": "通配符掩码"
+    },
+    {
+      "name": "ip_class_label",
+      "value": "IP 类别"
+    },
+    {
+      "name": "ip_type_label",
+      "value": "IP 类型"
+    },
+    {
+      "name": "is_private_label",
+      "value": "是否为私有"
+    },
+    {
+      "name": "input_error_label",
+      "value": "输入有误"
+    },
+    {
+      "name": "geo_placeholder",
+      "value": "IP 地址（留空查本机）"
+    },
+    {
+      "name": "geo_network_error",
+      "value": "网络错误，请重试"
+    },
+    {
+      "name": "geo_empty_hint",
+      "value": "输入 IP 地址或点击 🔍 查询本机位置"
+    },
+    {
+      "name": "geo_loading",
+      "value": "查询中..."
+    },
+    {
+      "name": "geo_query_failed",
+      "value": "查询失败"
+    },
+    {
+      "name": "geo_location_section",
+      "value": "📍 地理位置"
+    },
+    {
+      "name": "geo_city_label",
+      "value": "城市"
+    },
+    {
+      "name": "geo_region_label",
+      "value": "区域"
+    },
+    {
+      "name": "geo_zip_label",
+      "value": "邮政编码"
+    },
+    {
+      "name": "geo_coords_label",
+      "value": "坐标"
+    },
+    {
+      "name": "geo_network_section",
+      "value": "🌐 网络信息"
+    },
+    {
+      "name": "geo_isp_label",
+      "value": "运营商 (ISP)"
+    },
+    {
+      "name": "geo_org_label",
+      "value": "组织"
+    },
+    {
+      "name": "geo_asn_label",
+      "value": "AS 编号"
+    },
+    {
+      "name": "geo_additional_section",
+      "value": "📋 附加信息"
+    },
+    {
+      "name": "geo_timezone_label",
+      "value": "时区"
+    },
+    {
+      "name": "geo_country_code_label",
+      "value": "国家代码"
+    },
+    {
+      "name": "badge_mobile",
+      "value": "📱 移动网络"
+    },
+    {
+      "name": "badge_proxy",
+      "value": "🔒 代理/VPN"
+    },
+    {
+      "name": "badge_hosting",
+      "value": "☁️ 托管服务器"
+    },
+    {
+      "name": "badge_normal",
+      "value": "✅ 普通家庭宽带"
+    },
+    {
+      "name": "lan_scanning_status",
+      "value": "ARP 扫描中…"
+    },
+    {
+      "name": "lan_unknown_device",
+      "value": "未知设备"
+    },
+    {
+      "name": "lan_online",
+      "value": "在线"
+    },
+    {
+      "name": "lan_offline",
+      "value": "离线"
+    },
+    {
+      "name": "lan_arp_found",
+      "value": "ARP 发现 "
+    },
+    {
+      "name": "lan_device_unit",
+      "value": " 台设备"
+    },
+    {
+      "name": "lan_arp_unavailable",
+      "value": "ARP 不可用，TCP 扫描中…"
+    },
+    {
+      "name": "lan_tcp_probing",
+      "value": "TCP 探测中…"
+    },
+    {
+      "name": "lan_web_service",
+      "value": "Web 服务"
+    },
+    {
+      "name": "lan_devices_found",
+      "value": "共发现 "
+    },
+    {
+      "name": "lan_no_devices",
+      "value": "未发现设备"
+    },
+    {
+      "name": "lan_stopped_label",
+      "value": "已停止"
+    },
+    {
+      "name": "lan_subnet_placeholder",
+      "value": "子网 (192.168.1.0/24)"
+    },
+    {
+      "name": "lan_device_count",
+      "value": "发现设备"
+    },
+    {
+      "name": "lan_scan_hint",
+      "value": "点击 ▶ 开始扫描局域网设备"
+    },
+    {
+      "name": "about_content",
+      "value": "WlAN Analyzer v2.0\nAurora Build 2026\n\n开发者：xinxin\n\n网络诊断工具箱\n全面的 WiFi 分析与网络诊断工具"
+    },
+    {
+      "name": "privacy_content",
+      "value": "隐私政策\n\n更新时间：2026年5月\n\nWlAN-分析仪尊重并保护用户隐私。本隐私政策将说明我们如何收集、使用和保护您的个人信息。\n\n1. 信息收集\n本应用仅在您主动授权的情况下收集以下信息：\n• 位置信息：用于扫描附近的WiFi网络（HarmonyOS系统要求）\n• WiFi信息：用于显示网络状态、信号强度、信道分析\n\n2. 信息使用\n收集的信息仅用于本应用内的功能展示，不会上传至任何服务器。\n\n3. 数据存储\n所有数据仅存储在您的设备本地，不会传输到外部。\n\n4. 第三方服务\n本应用不集成任何第三方分析或广告SDK。\n\n5. 联系我们\n如有隐私相关问题，请联系：1218478630@qq.com"
+    },
+    {
+      "name": "agreement_content",
+      "value": "用户协议\n\n更新时间：2026年5月\n\n欢迎使用WlAN-分析仪。使用本应用即表示您同意以下条款。\n\n1. 服务说明\n本应用提供WiFi扫描、网络诊断、信号分析等功能。功能仅限个人学习研究使用。\n\n2. 使用规范\n• 不得将本应用用于任何非法目的\n• 不得破解、反编译或修改本应用\n• 不得利用本应用进行网络攻击或侵犯他人权益\n\n3. 免责声明\n本应用按\"现状\"提供，不保证功能完全无间断或错误。在法律允许的范围内，开发者不承担任何间接损失责任。\n\n4. 知识产权\n本应用及其所有内容的知识产权归开发者所有。\n\n5. 协议变更\n我们可能适时修改本协议，修改后的协议一经发布即生效。"
+    },
+    {
+      "name": "feedback_content",
+      "value": "意见反馈\n\n感谢您使用WlAN-分析仪！\n\n联系方式\n• 邮箱：1218478630@qq.com\n• 官网：www.xinnxin.cn\n\n功能建议\n如您有新功能想法或改进建议，欢迎通过以上方式联系我们。我们非常重视每个用户的反馈意见。\n\n问题反馈\n如果遇到Bug或异常情况，请提供以下信息：\n• 设备型号与系统版本\n• 问题发生的具体操作步骤\n• 错误截图（如有）"
+    },
+    {
+      "name": "ip_type_private_a",
+      "value": "私有 (A 类)"
+    },
+    {
+      "name": "ip_type_private_b",
+      "value": "私有 (B 类)"
+    },
+    {
+      "name": "ip_type_private_c",
+      "value": "私有 (C 类)"
+    },
+    {
+      "name": "ip_type_loopback",
+      "value": "回环"
+    },
+    {
+      "name": "ip_type_link_local",
+      "value": "链路本地"
+    },
+    {
+      "name": "ip_type_multicast",
+      "value": "多播"
+    },
+    {
+      "name": "ip_type_reserved",
+      "value": "保留"
+    },
+    {
+      "name": "ip_type_public",
+      "value": "公网"
+    },
+    {
+      "name": "yes",
+      "value": "是"
+    },
+    {
+      "name": "no",
+      "value": "否"
+    },
+    {
+      "name": "update_checking",
+      "value": "正在检查更新..."
+    },
+    {
+      "name": "update_latest",
+      "value": "已是最新版本"
+    },
+    {
+      "name": "update_new_found",
+      "value": "发现新版本"
+    },
+    {
+      "name": "update_no_info",
+      "value": "暂无更新信息"
+    },
+    {
+      "name": "update_now",
+      "value": "立即更新"
+    },
+    {
+      "name": "update_later",
+      "value": "稍后"
+    },
+    {
+      "name": "update_download",
+      "value": "下载链接"
+    },
+    {
+      "name": "update_network_error",
+      "value": "无法连接服务器，请检查网络"
+    },
+    {
+      "name": "update_error",
+      "value": "检测更新时发生错误"
+    },
+    {
+      "name": "feature_not_ready",
+      "value": "此功能暂未开发"
+    },
+    {
+      "name": "language_switch_zh",
+      "value": "请在系统设置中切换至中文"
+    },
+    {
+      "name": "language_switch_en",
+      "value": "请在系统设置中切换至英文"
+    },
+    {
+      "name": "tool_poe",
+      "value": "PoE 计算"
+    },
+    {
+      "name": "tool_mac",
+      "value": "MAC 查询"
+    },
+    {
+      "name": "tool_wol",
+      "value": "WOL 唤醒"
+    },
+    {
+      "name": "tool_roam",
+      "value": "漫游测试"
+    },
+    {
+      "name": "desc_poe",
+      "value": "功率预算"
+    },
+    {
+      "name": "desc_mac",
+      "value": "厂商识别"
+    },
+    {
+      "name": "desc_wol",
+      "value": "远程唤醒"
+    },
+    {
+      "name": "desc_roam",
+      "value": "信号漫游"
+    }
+  ]
+}
+
+
+
+

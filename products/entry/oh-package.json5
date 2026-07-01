@@ -1,0 +1,15 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "WiFi分析仪 - 三端统一入口",
+  "main": "",
+  "dependencies": {
+    "wifi-base": "file:../../commons/wifi-base",
+    "native-ping": "file:../../commons/native-ping",
+    "@wifi-analyzer/core": "file:../../core",
+    "@wifi-analyzer/design-system": "file:../../design-system",
+    "@wifi-analyzer/speed-test": "file:../../speed-test",
+    "@wifi-analyzer/network-tools": "file:../../features/network-tools",
+    "@wifi-analyzer/settings": "file:../../features/settings"
+  }
+}

@@ -69,6 +69,7 @@ export interface DnsLookupConfig {
 
 export interface DnsServerPreset {
   name: string
+  resKey: string
   address: string
   color: string
   apiUrl: string
@@ -81,6 +82,9 @@ export interface DnsHistoryEntry {
   recordCount: number
   queryTime: number
 }
+
+// DnsLookupResult 是 DnsResult 的别名（兼容旧版导入名）
+export type DnsLookupResult = DnsResult
 
 // ==================== Traceroute 模型 ====================
 

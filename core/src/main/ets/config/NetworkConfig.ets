@@ -20,6 +20,12 @@ export class PublicIpConfig {
   // 第三备选 - 搜狐
   static readonly THIRD_API: string = 'https://pv.sohu.com/ipimsg'
 
+  // 第四备选 - ipify（国际通用）
+  static readonly FOURTH_API: string = 'https://api.ipify.org'
+
+  // 第五备选 - Amazon AWS
+  static readonly FIFTH_API: string = 'https://checkip.amazonaws.com'
+
   // 请求超时时间（毫秒）
   static readonly TIMEOUT_MS: number = 5000
 
@@ -80,6 +86,15 @@ export class DiagnosticsConfig {
 
   // 无法获取时的占位符
   static readonly UNAVAILABLE_PLACEHOLDER: string = '--'
+}
+
+/**
+ * IP地理定位API配置
+ */
+export class IpGeoConfig {
+  // ip-api.com（免费、无需API Key）
+  static readonly GET_MY_IP: string = 'https://ip-api.com/json/?fields=query'
+  static readonly LOOKUP_FIELDS: string = 'status,message,country,countryCode,region,regionName,city,zip,lat,lon,isp,org,as,timezone,query,mobile,proxy,hosting'
 }
 
 /**
@@ -225,6 +240,76 @@ export class ValidationPatterns {
 
     return false
   }
+}
+
+/**
+ * 网络超时常量 — 集中管理所有网络操作的超时值
+ */
+export class NetworkTimeout {
+  // 延迟探测超时 — NetworkStats 测量网络延迟 (ms)
+  static readonly LATENCY_PROBE_MS: number = 2000
+
+  // DNS 查询超时 (ms)
+  static readonly DNS_QUERY_MS: number = 5000
+
+  // Ping 默认超时 (ms)
+  static readonly PING_MS: number = 3000
+
+  // Traceroute 默认超时 (ms)
+  static readonly TRACEROUTE_MS: number = 3000
+
+  // LAN TCP 探测超时偏移 — tcpConnect 的安全边界 (ms)
+  static readonly LAN_TCP_OFFSET_MS: number = 200
+
+  // NetBIOS 广播等待时间 (ms)
+  static readonly NETBIOS_WAIT_MS: number = 3000
+
+  // LAN TCP 默认超时 — scan() 批量扫描 (ms)
+  static readonly LAN_TCP_DEFAULT_MS: number = 500
+
+  // LAN 网关探针超时 (ms)
+  static readonly LAN_GATEWAY_PROBE_MS: number = 1000
+
+  // LAN 主机探测超时 — LanScanPage TCP 探测 (ms)
+  static readonly LAN_HOST_PROBE_MS: number = 150
+
+  // LAN 主机探测 setTimeout 值 (ms)
+  static readonly LAN_HOST_SETTIMEOUT_MS: number = 200
+
+  // 端口扫描探测超时偏移 — probePort 安全边界 (ms)
+  static readonly PORT_SCAN_OFFSET_MS: number = 100
+
+  // SpeedTest 启动延迟延迟 (ms) — Launcher 页面跳转
+  static readonly LAUNCHER_DELAY_MS: number = 1000
+}
+
+/**
+ * 并发/批量控制常量
+ */
+export class ScanConcurrency {
+  // LAN 扫描批次大小 — LanEngine.scan()
+  static readonly LAN_BATCH: number = 30
+
+  // LAN 主机数量上限
+  static readonly LAN_HOST_COUNT: number = 254
+
+  // LAN 扫描 TCP 探测批次 — LanScanPage
+  static readonly LAN_TCP_BATCH: number = 10
+
+  // 端口扫描批次大小 — PortScanPage
+  static readonly PORT_SCAN_BATCH: number = 20
+}
+
+/**
+ * 常用网络端口常量
+ */
+export class NetworkPort {
+  static readonly HTTP: number = 80
+  static readonly HTTPS: number = 443
+  static readonly DNS: number = 53
+  static readonly SSH: number = 22
+  static readonly SMB: number = 445
+  static readonly NETBIOS_NS: number = 137
 }
 
 /**

@@ -296,8 +296,15 @@ export class WifiScanner {
 
       // 保护机制：如果扫描结果中没有标记任何已连接网络，但 getLinkedInfo 返回了 SSID
       // 说明扫描结果可能被隐私保护过滤，添加一个虚拟的已连接网络条目
+      // 注意：排除 VirtWifi（虚拟WiFi，实际无连接）和低频信号（-200 表示无效信号）
       const hasConnectedItem: boolean = result.wifiList.some((item: WifiItem) => item.isConnected)
-      if (!hasConnectedItem && result.connectedSsid !== '' && result.connectedSsid !== '--') {
+      const isRealConnected: boolean = result.connectedSsid !== ''
+        && result.connectedSsid !== '--'
+        && !result.connectedSsid.includes('VirtWifi')
+        && !result.connectedSsid.includes('virtwifi')
+        && result.connectedSignal > -200
+        && result.connectedSignal !== 0
+      if (!hasConnectedItem && isRealConnected) {
         hilog.warn(DOMAIN, 'testTag', '%{public}s', '[WifiScanner] No connected item found in scan results, adding fallback connected entry')
         result.wifiList.unshift({
           ssid: result.connectedSsid,
@@ -325,26 +332,33 @@ export class WifiScanner {
   private getFallbackData(result: WifiScanResult): WifiScanResult {
     // 保存原始获取到的连接信息（即使为空）
     const originalConnectedSsid: string = result.connectedSsid
+    const hadRealConnection: boolean = result.connectedSsid !== '' && result.connectedSsid !== '--'
+      && !result.connectedSsid.includes('VirtWifi') && !result.connectedSsid.includes('virtwifi')
+      && result.connectedSignal > -200 && result.connectedSignal !== 0
 
-    // 如果没有已连接信息，设置为占位符用于显示
-    if (result.connectedSsid === '') {
+    // 如果没有真实连接，保持 connectedSsid 为空（不伪造已连接）
+    if (!hadRealConnection) {
+      result.connectedSsid = ''
+      result.connectedBssid = ''
+      result.connectedSignal = -100
+    } else if (result.connectedSsid === '') {
       result.connectedSsid = 'Wi-Fi'
       result.connectedBssid = ''
-      result.connectedSignal = -50  // 模拟信号强度
+      result.connectedSignal = -50
     }
 
     // 构建模拟WiFi列表
     const fallbackList: WifiItem[] = []
 
-    // 把当前连接的网络放在第一位（优先使用真实数据，否则用默认值）
+    // 有真实连接才在首位放"已连接"的网络，否则只是一个普通样本
     fallbackList.push({
-      ssid: originalConnectedSsid !== '' ? originalConnectedSsid : result.connectedSsid,
+      ssid: hadRealConnection ? (originalConnectedSsid || result.connectedSsid) : 'Wi-Fi',
       bssid: result.connectedBssid || '',
       signal: result.connectedSignal > -100 ? result.connectedSignal : -40,
-      freq: 5.0,       // 默认 5GHz（现代设备优先连接）
-      channel: 149,    // 常见 5GHz 信道
-      security: 'EAP', // 企业级加密
-      isConnected: true,
+      freq: 5.0,
+      channel: 149,
+      security: 'EAP',
+      isConnected: hadRealConnection,
       bandwidth: '40MHz'
     })
 

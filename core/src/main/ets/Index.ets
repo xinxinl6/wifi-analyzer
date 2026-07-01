@@ -23,9 +23,13 @@ export {
   DnsConfig,
   DiagnosticsConfig,
   PortScanConfig,
+  IpGeoConfig,
   ValidationPatterns,
   LoggerConfig,
-  LogLevel
+  LogLevel,
+  NetworkTimeout,
+  ScanConcurrency,
+  NetworkPort
 } from './config/NetworkConfig'
 
 // 依赖注入容器
@@ -33,3 +37,6 @@ export { ServiceContainer, container, IServiceContainer } from './ServiceContain
 
 // 路由管理器（供所有模块共享）
 export { RouterManager, RouteName } from './router/RouterManager'
+
+// API版本兼容性工具
+export { ApiCompat } from './utils/ApiCompat'

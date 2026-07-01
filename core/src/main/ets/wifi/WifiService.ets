@@ -3,6 +3,7 @@
 
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { wifiManager } from '@kit.ConnectivityKit'
+import { connection } from '@kit.NetworkKit'
 
 const DOMAIN = 0x0000
 
@@ -89,7 +90,21 @@ export class ModernWifiService implements IWifiService {
 
   async getLinkedInfo(): Promise<WifiLinkedInfo | null> {
     try {
-      // 使用 getLinkedInfoSync (API 18+) 替代已废弃的 getLinkedInfo
+      // 用 connection.getDefaultNet() 验证是否有真实网络连接
+      // netId === 0 表示没有任何网络（解决 getLinkedInfoSync 返回缓存的问题）
+      let isConnectedToNetwork = false
+      try {
+        const netHandle: connection.NetHandle = await connection.getDefaultNet()
+        isConnectedToNetwork = netHandle !== null && netHandle.netId !== 0
+      } catch (_e) {
+        // 获取网络句柄失败 → 无网络
+        return null
+      }
+
+      if (!isConnectedToNetwork) {
+        return null
+      }
+
       const linkedInfo = wifiManager.getLinkedInfoSync()
       if (!linkedInfo) {
         return null
@@ -110,7 +125,7 @@ export class ModernWifiService implements IWifiService {
         rssi: rssiValue
       }
     } catch (error) {
-      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiService] getLinkedInfoSync error:' + JSON.stringify(error))
+      hilog.error(DOMAIN, 'testTag', '%{public}s', '[WifiService] getLinkedInfo error:' + JSON.stringify(error))
       return null
     }
   }

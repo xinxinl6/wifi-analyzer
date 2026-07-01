@@ -4,6 +4,7 @@
 
 import { http, connection } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { NetworkTimeout } from '@wifi-analyzer/core'
 import {
   TracerouteHop, TracerouteConfig, TracerouteStats, TracerouteCallbacks,
   DnsResolveResult
@@ -87,7 +88,7 @@ export class TracerouteEngine {
     const config: TracerouteConfig = {
       targetHost: targetHost,
       maxHops: 30,
-      timeout: 3000,
+      timeout: NetworkTimeout.TRACEROUTE_MS,
       probesPerHop: 3,
       intervalMs: 100
     }

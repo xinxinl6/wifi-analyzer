@@ -1,11 +1,39 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release2.p12",
+          "storePassword": "0000001A2EF4103829DC108FF31243D69E9284B2E1DA36DCC607D03B03A758C52C0C3AEC3115D9CEEBD1",
+          "keyAlias": "releaseKey2",
+          "keyPassword": "0000001A86A2CD61B2C84F721CFC1D533F946BC4950064342C346075FD17AE8E229BBF7F885AB22CF8F6",
+          "signAlg": "SHA256withECDSA",
+          "profile": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-profile2Release.p7b",
+          "certpath": "C:/Users/xinxin/WlAN-02/Key/wifi-analyzer-release2.cer"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
+        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
-        "compatibleSdkVersion": "5.0.2(14)",
+        "compatibleSdkVersion": "6.0.0(20)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      },
+      {
+        "name": "phone",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.1.0(23)",
+        "compatibleSdkVersion": "6.0.0(20)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
@@ -16,6 +44,7 @@
       },
       {
         "name": "tablet",
+        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
         "runtimeOS": "HarmonyOS",
@@ -28,6 +57,7 @@
       },
       {
         "name": "pc",
+        "signingConfig": "default",
         "targetSdkVersion": "6.1.0(23)",
         "compatibleSdkVersion": "5.0.2(14)",
         "runtimeOS": "HarmonyOS",
@@ -46,40 +76,46 @@
       {
         "name": "release"
       }
+    ],
+    "capabilities": [
+      {
+        "bundleName": "com.xinxin.analyzer",
+        "config": [
+          {
+            "capability": "webAccessServiceForAIQA",
+            "name": "webAccessServiceForAIQA"
+          },
+          {
+            "capability": "com.huawei.service.push.base_service",
+            "name": "Push Kit"
+          },
+          {
+            "capability": "com.huawei.service.device_security.device_verify",
+            "name": "Device status detection"
+          },
+          {
+            "capability": "com.huawei.service.mapkit",
+            "name": "Map Kit"
+          },
+          {
+            "capability": "com.huawei.service.device_security.safety_detect",
+            "name": "Safety Detect"
+          }
+        ]
+      }
     ]
   },
   "modules": [
     {
-      "name": "phone",
-      "srcPath": "./products/phone",
+      "name": "entry",
+      "srcPath": "./products/entry",
       "targets": [
         {
           "name": "default",
           "applyToProducts": [
-            "default"
-          ]
-        }
-      ]
-    },
-    {
-      "name": "tablet",
-      "srcPath": "./products/tablet",
-      "targets": [
-        {
-          "name": "default",
-          "applyToProducts": [
-            "tablet"
-          ]
-        }
-      ]
-    },
-    {
-      "name": "pc",
-      "srcPath": "./products/pc",
-      "targets": [
-        {
-          "name": "default",
-          "applyToProducts": [
+            "default",
+            "phone",
+            "tablet",
             "pc"
           ]
         }
@@ -93,6 +129,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -107,6 +144,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -121,6 +159,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -135,6 +174,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -149,6 +189,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -163,6 +204,22 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
+            "tablet",
+            "pc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "core",
+      "srcPath": "./core",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default",
+            "phone",
             "tablet",
             "pc"
           ]
@@ -177,6 +234,7 @@
           "name": "default",
           "applyToProducts": [
             "default",
+            "phone",
             "tablet",
             "pc"
           ]

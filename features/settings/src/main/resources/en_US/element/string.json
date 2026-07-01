@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Settings Module"
+    },
+    {
+      "name": "about_title",
+      "value": "About"
+    },
+    {
+      "name": "app_name",
+      "value": "WlAN Analyzer"
+    },
+    {
+      "name": "app_version",
+      "value": "Version 2.0.0"
+    },
+    {
+      "name": "app_description",
+      "value": "Professional WiFi Network Analysis & Diagnostics Tool"
+    },
+    {
+      "name": "app_features",
+      "value": "Core Features"
+    },
+    {
+      "name": "feature_wifi_scan",
+      "value": "WiFi Scan"
+    },
+    {
+      "name": "feature_channel",
+      "value": "Channel Analysis"
+    },
+    {
+      "name": "feature_speed",
+      "value": "Speed Test"
+    },
+    {
+      "name": "feature_tools",
+      "value": "11 Network Tools"
+    },
+    {
+      "name": "app_copyright",
+      "value": "© 2026 WiFi Analyzer"
+    }
+  ]
+}

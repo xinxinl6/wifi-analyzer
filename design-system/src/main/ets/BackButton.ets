@@ -1,15 +1,18 @@
 // ============================================
-// 华为标准返回按钮组件
-// 根据 HarmonyOS 设计规范，返回按钮只显示箭头图标，不显示文字
+// HM7 返回按钮组件 — 沉浸光感风格
+// 品牌色实心胶囊（暗色） / 毛玻璃风格（亮色）
+// 详见项目根目录 DESIGN.md
 // ============================================
 
 import {
-  COLOR_TEXT_SECONDARY,
-  COLOR_SURFACE,
-  COLOR_BORDER,
-  COLOR_SKY_BLUE,
-  COLOR_GLASS_SKY_TAG_BG,
-  COLOR_GLASS_BORDER,
+  COLOR_AURORA_PRIMARY,
+  COLOR_AURORA_LIGHT,
+  adaptivePrimary,
+  adaptivePrimaryBg,
+  adaptiveTextPrimary,
+  adaptiveTextSecondary,
+  adaptiveBtnBg,
+  adaptiveBtnBorder,
 } from './Color'
 import {
   SAFE_AREA_TOP,
@@ -22,68 +25,80 @@ import {
   FONT_WEIGHT_MEDIUM,
 } from './Typography'
 
-// 底部胶囊返回按钮（用于 ActionButtons）
-@Component
+// 底部胶囊返回按钮（暗色模式用品牌色，亮色用材质）
+@ComponentV2
 export struct BackButtonCapsule {
-  onBack: () => void = () => {}
+  @Param isDark: boolean = true
+  @Param onBack: () => void = () => {}
 
   build() {
     Row() {
-      Text('←')
-        .fontSize(FONT_SIZE_MD)
-        .fontColor(COLOR_TEXT_SECONDARY)
-        .fontWeight(FONT_WEIGHT_MEDIUM)
+      SymbolGlyph($r('sys.symbol.arrow_left'))
+        .fontSize(20)
+        .fontColor([adaptivePrimary(this.isDark)])
     }
-    .width(44)
+    .width(40)
     .height(BUTTON_HEIGHT_SM)
     .justifyContent(FlexAlign.Center)
-    .backgroundColor(COLOR_SURFACE)
+    .backgroundColor(adaptiveBtnBg(this.isDark))
     .borderRadius(RADIUS_3XL)
     .borderWidth(1)
-    .borderColor(COLOR_BORDER)
+    .borderColor(adaptiveBtnBorder(this.isDark))
     .onClick(() => this.onBack())
   }
 }
 
-// 毛玻璃风格返回按钮（用于毛玻璃主题页面如 TraceroutePage）
-@Component
+// HM7 品牌色返回按钮（主色调实心胶囊）
+@ComponentV2
 export struct BackButtonGlass {
-  onBack: () => void = () => {}
+  @Param isDark: boolean = true
+  @Param onBack: () => void = () => {}
 
   build() {
     Row() {
-      Text('←')
-        .fontSize(22)
-        .fontColor('#FFFFFF')
-        .fontWeight('500')
-        .shadow({
-          radius: 8,
-          color: '#40000000',
-          offsetX: 0,
-          offsetY: 2
-        })
+      SymbolGlyph($r('sys.symbol.arrow_left'))
+        .fontSize(18)
+        .fontColor([Color.White])
     }
     .padding({ left: 14, right: 14, top: 10, bottom: 10 })
     .borderRadius(24)
-    .backgroundColor('rgba(0,120,212,0.85)')
-    .shadow({
-      radius: 12,
-      color: '#60000000',
-      offsetX: 0,
-      offsetY: 4
-    })
+    .backgroundColor(adaptivePrimary(this.isDark))
     .onClick(() => this.onBack())
   }
 }
 
-// 顶部返回按钮栏（用于 TraceroutePage 等自定义导航栏页面）
-@Component
-export struct TopBackBar {
-  onBack: () => void = () => {}
+// 材质透明返回按钮（适合暗色背景场景）
+@ComponentV2
+export struct BackButtonGlassTransparent {
+  @Param isDark: boolean = true
+  @Param onBack: () => void = () => {}
 
   build() {
     Row() {
-      BackButtonGlass({ onBack: this.onBack })
+      SymbolGlyph($r('sys.symbol.arrow_left'))
+        .fontSize(18)
+        .fontColor([adaptiveTextPrimary(this.isDark)])
+    }
+    .width(32)
+    .height(32)
+    .justifyContent(FlexAlign.Center)
+    .borderRadius(10)
+    .backgroundColor(adaptiveBtnBg(this.isDark))
+    .borderWidth(1)
+    .borderColor(adaptiveBtnBorder(this.isDark))
+    .onClick(() => this.onBack())
+  }
+}
+
+// 顶部返回按钮栏
+@ComponentV2
+export struct TopBackBar {
+  @Param isDark: boolean = true
+  @Param onBack: () => void = () => {}
+
+  build() {
+    Row() {
+      BackButtonGlassTransparent({ isDark: this.isDark, onBack: this.onBack })
       Blank()
     }
     .width('100%')

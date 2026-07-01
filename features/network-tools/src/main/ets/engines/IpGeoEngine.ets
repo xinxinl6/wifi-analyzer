@@ -43,29 +43,29 @@ export class IpGeoEngine {
     const apis: IpQueryApiEntry[] = [
       {
         url: 'https://myip.ipip.net',
-        parser: function (t: string): string {
+        parser: (t: string): string => {
           const m: RegExpMatchArray | null = t.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/)
           return m ? m[1] : ''
         }
       },
       {
         url: 'https://ip.sb/ip',
-        parser: function (t: string): string { return t.trim() }
+        parser: (t: string): string => { return t.trim() }
       },
       {
         url: 'https://ip.3322.net',
-        parser: function (t: string): string { return t.trim() }
+        parser: (t: string): string => { return t.trim() }
       },
       {
         url: 'https://pv.sohu.com/ipimsg',
-        parser: function (t: string): string {
+        parser: (t: string): string => {
           const m: RegExpMatchArray | null = t.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/)
           return m ? m[1] : ''
         }
       },
       {
         url: 'https://ipinfo.io/json',
-        parser: function (t: string): string {
+        parser: (t: string): string => {
           try {
             const j: Record<string, string> = JSON.parse(t) as Record<string, string>
             return j['ip'] || ''
@@ -74,7 +74,7 @@ export class IpGeoEngine {
       },
       {
         url: 'https://api.ipify.org?format=json',
-        parser: function (t: string): string {
+        parser: (t: string): string => {
           try {
             const j: Record<string, string> = JSON.parse(t) as Record<string, string>
             return j['ip'] || ''
@@ -130,11 +130,18 @@ export class IpGeoEngine {
         return result
       }
 
-      // 备用：使用 ipinfo.io
+      // 备用1：使用 ipinfo.io
       const fallback: IpGeoResult = await this.queryFromIpInfo(trimmedIp, startTime)
       if (fallback.status === 'success') {
         this.addHistory(trimmedIp)
         return fallback
+      }
+
+      // 备用2：使用国内 Vore API
+      const cnFallback: IpGeoResult = await this.queryFromVoreTop(trimmedIp, startTime)
+      if (cnFallback.status === 'success') {
+        this.addHistory(trimmedIp)
+        return cnFallback
       }
 
       return this.makeErrorResult(trimmedIp, '所有查询接口均不可用', Date.now() - startTime)
@@ -157,10 +164,12 @@ export class IpGeoEngine {
       }
 
       const result: IpGeoResult = await new Promise<IpGeoResult>((resolve: (v: IpGeoResult) => void) => {
+        let timeoutId: number = -1
         req.request(
           'https://ipapi.co/' + ip + '/json/',
           options,
           (err: BusinessError, resp: http.HttpResponse): void => {
+            clearTimeout(timeoutId)
             req.destroy()
             if (err) {
               resolve(this.makeErrorResult(ip, err.message, Date.now() - startTime))
@@ -196,7 +205,7 @@ export class IpGeoEngine {
             }
           }
         )
-        setTimeout((): void => {
+        timeoutId = setTimeout((): void => {
           resolve(this.makeErrorResult(ip, '查询超时', Date.now() - startTime))
         }, 6000)
       })
@@ -220,10 +229,12 @@ export class IpGeoEngine {
       }
 
       const result: IpGeoResult = await new Promise<IpGeoResult>((resolve: (v: IpGeoResult) => void) => {
+        let timeoutId: number = -1
         req.request(
           'https://ipinfo.io/' + ip + '/json',
           options,
           (err: BusinessError, resp: http.HttpResponse): void => {
+            clearTimeout(timeoutId)
             req.destroy()
             if (err) {
               resolve(this.makeErrorResult(ip, err.message, Date.now() - startTime))
@@ -235,8 +246,8 @@ export class IpGeoEngine {
 
               const locStr: string = data['loc'] || ''
               const latLng: string[] = locStr.split(',')
-              const lat: number = latLng.length > 0 ? parseFloat(latLng[0]) : 0
-              const lng: number = latLng.length > 1 ? parseFloat(latLng[1]) : 0
+              const lat: number = (latLng.length > 0 && latLng[0] !== '') ? parseFloat(latLng[0]) : 0
+              const lng: number = (latLng.length > 1 && latLng[1] !== '') ? parseFloat(latLng[1]) : 0
 
               const geoResult: IpGeoResult = {
                 ip: data['ip'] || ip,
@@ -258,7 +269,72 @@ export class IpGeoEngine {
             }
           }
         )
-        setTimeout((): void => {
+        timeoutId = setTimeout((): void => {
+          resolve(this.makeErrorResult(ip, '查询超时', Date.now() - startTime))
+        }, 6000)
+      })
+
+      return result
+    } catch (e) {
+      return this.makeErrorResult(ip, '查询异常', Date.now() - startTime)
+    }
+  }
+
+  /**
+   * 使用 api.vore.top 查询（国内友好）
+   */
+  private async queryFromVoreTop(ip: string, startTime: number): Promise<IpGeoResult> {
+    try {
+      const req = http.createHttp()
+      const options: IpGeoHttpOptions = {
+        method: http.RequestMethod.GET,
+        connectTimeout: 5000,
+        readTimeout: 5000,
+      }
+
+      const result: IpGeoResult = await new Promise<IpGeoResult>((resolve: (v: IpGeoResult) => void) => {
+        let timeoutId: number = -1
+        req.request(
+          'https://api.vore.top/api/IPdata?ip=' + ip,
+          options,
+          (err: BusinessError, resp: http.HttpResponse): void => {
+            clearTimeout(timeoutId)
+            req.destroy()
+            if (err) {
+              resolve(this.makeErrorResult(ip, err.message, Date.now() - startTime))
+              return
+            }
+            try {
+              const resultStr: string = resp.result as string
+              const data: Record<string, Object> = JSON.parse(resultStr) as Record<string, Object>
+              const ipdata: Record<string, string> = (data['ipdata'] || {}) as Record<string, string>
+
+              if (Number(data['code']) === 200 && ipdata) {
+                const geoResult: IpGeoResult = {
+                  ip: ip,
+                  country: ipdata['info1'] || '',
+                  province: ipdata['info2'] || '',
+                  city: ipdata['info3'] || '',
+                  isp: ipdata['isp'] || '',
+                  district: ipdata['county'] || '',
+                  latitude: parseFloat(ipdata['lat'] || '0'),
+                  longitude: parseFloat(ipdata['lng'] || '0'),
+                  timezone: '',
+                  queryTime: Date.now() - startTime,
+                  status: 'success',
+                  errorMessage: '',
+                }
+                resolve(geoResult)
+              } else {
+                const errMsg: string = String(data['msg'] || '查询失败')
+                resolve(this.makeErrorResult(ip, errMsg, Date.now() - startTime))
+              }
+            } catch (e2) {
+              resolve(this.makeErrorResult(ip, 'JSON解析失败', Date.now() - startTime))
+            }
+          }
+        )
+        timeoutId = setTimeout((): void => {
           resolve(this.makeErrorResult(ip, '查询超时', Date.now() - startTime))
         }, 6000)
       })

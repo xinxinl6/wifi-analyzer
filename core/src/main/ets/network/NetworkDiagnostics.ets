@@ -61,9 +61,8 @@ export class NetworkDiagnostics {
   // 完成回调
   private onComplete?: (result: NetworkDiagnosticsResult) => void
 
-  // 任务完成计数器（localIp, gateway, publicIp 三个任务）
+  // 同步任务完成计数器（localIp, gateway 两个任务）
   private completedTasks: number = 0
-  private totalTasks: number = 3
 
   static getInstance(): NetworkDiagnostics {
     if (!NetworkDiagnostics.instance) {
@@ -145,12 +144,12 @@ export class NetworkDiagnostics {
         // 使用同步方法获取连接属性
         const connectionProperties: connection.ConnectionProperties = connection.getConnectionPropertiesSync(netHandle)
         if (connectionProperties) {
-          // 获取网关
+          // 获取网关（从路由表）
           let gateway = ''
           if (connectionProperties.routes) {
             for (let i = 0; i < connectionProperties.routes.length; i++) {
               const route = connectionProperties.routes[i]
-              if (route && route.isDefaultRoute && route.hasGateway && route.gateway) {
+              if (route && route.hasGateway && route.gateway) {
                 const gatewayAddr: connection.NetAddress = route.gateway as connection.NetAddress
                 gateway = gatewayAddr.address || ''
                 if (gateway) {
@@ -195,6 +194,8 @@ export class NetworkDiagnostics {
       PublicIpConfig.PRIMARY_API,
       PublicIpConfig.FALLBACK_API,
       PublicIpConfig.THIRD_API,
+      PublicIpConfig.FOURTH_API,
+      PublicIpConfig.FIFTH_API,
     ]
 
     for (let i = 0; i < apis.length; i++) {
@@ -213,7 +214,6 @@ export class NetworkDiagnostics {
           if (ip) {
             this.currentState.publicIp = ip
             logInfo('Public IP: ' + ip)
-            this.markTaskComplete()
             return
           }
         }
@@ -226,35 +226,27 @@ export class NetworkDiagnostics {
 
     logWarn('All public IP APIs failed')
     this.currentState.publicIp = '--'
-    this.markTaskComplete()
   }
 
-  // 标记单个任务完成，当所有任务完成后通知
+  // 标记同步任务完成，localIp + gateway 都完成后立即通知
   private markTaskComplete(): void {
     this.completedTasks++
-    logInfo('Task completed: ' + this.completedTasks + '/' + this.totalTasks)
-    if (this.completedTasks >= this.totalTasks) {
+    logInfo('Sync task completed: ' + this.completedTasks + '/2')
+    if (this.completedTasks >= 2) {
       this.notifyComplete()
     }
   }
 
   private notifyComplete(): void {
-    this.currentState.isTesting = false
-    logInfo('Diagnostics complete')
-
+    logInfo('Sync diagnostics complete (localIp + gateway)')
     if (this.onComplete) {
-      const result = this.currentState
+      const r = this.currentState
       this.onComplete({
-        latency: result.latency,
-        jitter: result.jitter,
-        uploadSpeed: result.uploadSpeed,
-        downloadSpeed: result.downloadSpeed,
-        localIp: result.localIp,
-        publicIp: result.publicIp,
-        gateway: result.gateway,
-        dns: result.dns,
-        isTesting: result.isTesting,
-        error: result.error
+        latency: r.latency, jitter: r.jitter,
+        uploadSpeed: r.uploadSpeed, downloadSpeed: r.downloadSpeed,
+        localIp: r.localIp, publicIp: r.publicIp,
+        gateway: r.gateway, dns: r.dns,
+        isTesting: false, error: r.error
       })
     }
   }

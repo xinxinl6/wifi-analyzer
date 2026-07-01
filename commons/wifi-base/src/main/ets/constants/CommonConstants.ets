@@ -12,8 +12,6 @@ export class CommonConstants {
   /** 页面名称 */
   static readonly HOME_PAGE: string = 'HomePage';
   static readonly WIFI_SCAN_PAGE: string = 'WifiScanPage';
-  static readonly CHANNEL_PAGE: string = 'ChannelPage';
-  static readonly SPEED_TEST_PAGE: string = 'SpeedTestPage';
   static readonly TOOLS_PAGE: string = 'ToolsPage';
 
   /** 网络工具页面名称 */
@@ -24,10 +22,7 @@ export class CommonConstants {
   static readonly SUBNET_PAGE: string = 'SubnetPage';
   static readonly IP_GEO_PAGE: string = 'IpGeoPage';
   static readonly POE_PAGE: string = 'PoePage';
-  static readonly MAC_LOOKUP_PAGE: string = 'MacLookupPage';
-  static readonly WOL_PAGE: string = 'WolPage';
   static readonly LAN_SCAN_PAGE: string = 'LanScanPage';
-  static readonly ROAM_TEST_PAGE: string = 'RoamTestPage';
 
   /** WiFi 扫描间隔 (ms) */
   static readonly WIFI_SCAN_INTERVAL: number = 12000;

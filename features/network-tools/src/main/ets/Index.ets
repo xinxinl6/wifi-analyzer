@@ -1,10 +1,12 @@
 // @wifi-analyzer/network-tools
 // 网络工具模块统一导出 — 引擎层 + 数据模型
 
+
+
 // ==================== 数据模型 ====================
 export {
   PingResult, PingStats, PingConfig, PingCallbacks,
-  DnsRecordType, IpFamily, DnsRecord, DnsResult, DnsLookupConfig,
+  DnsRecordType, IpFamily, DnsRecord, DnsResult, DnsLookupResult, DnsLookupConfig,
   DnsServerPreset, DnsHistoryEntry,
   TracerouteHop, TracerouteConfig, TracerouteStats, TracerouteCallbacks,
   DnsResolveResult,

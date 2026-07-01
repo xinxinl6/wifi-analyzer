@@ -4,6 +4,10 @@
 
 import { http, connection } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
+import preferences from '@ohos.data.preferences'
+import { common } from '@kit.AbilityKit'
+import { hilog } from '@kit.PerformanceAnalysisKit'
+import { NetworkTimeout } from '@wifi-analyzer/core'
 import {
   DnsRecordType, IpFamily, DnsRecord, DnsResult, DnsLookupConfig,
   DnsServerPreset, DnsHistoryEntry
@@ -15,6 +19,15 @@ interface DoHAnswerItem {
   type: number
   TTL: number
   data: string
+}
+
+// 历史记录持久化的内部存储格式
+interface DnsSaveItem {
+  domain: string
+  server: string
+  timestamp: number
+  recordCount: number
+  queryTime: number
 }
 
 export class DnsLookupEngine {
@@ -29,13 +42,14 @@ export class DnsLookupEngine {
   }
 
   // 常用 DNS 服务器预设（含 DoH API）
+  // resKey 对应 string.json 中的多语言资源名称
   static readonly DNS_SERVERS: DnsServerPreset[] = [
-    { name: '系统默认', address: '', color: '#0066FF', apiUrl: '' },
-    { name: '阿里DNS', address: '223.5.5.5', color: '#10B981', apiUrl: 'https://dns.alidns.com/resolve' },
-    { name: '腾讯DNS', address: '119.29.29.29', color: '#14B8A6', apiUrl: 'https://doh.pub/dns-query' },
-    { name: '百度DNS', address: '180.76.76.76', color: '#F59E0B', apiUrl: 'https://dns.baidu.com/resolve' },
-    { name: 'Google DNS', address: '8.8.8.8', color: '#8B5CF6', apiUrl: 'https://dns.google/resolve' },
-    { name: 'Cloudflare', address: '1.1.1.1', color: '#EC4899', apiUrl: 'https://cloudflare-dns.com/dns-query' },
+    { name: '系统默认', resKey: 'dns_system_default', address: '', color: '#0066FF', apiUrl: '' },
+    { name: '阿里DNS', resKey: 'dns_alibaba', address: '223.5.5.5', color: '#10B981', apiUrl: 'https://dns.alidns.com/resolve' },
+    { name: '腾讯DNS', resKey: 'dns_tencent', address: '119.29.29.29', color: '#14B8A6', apiUrl: 'https://doh.pub/dns-query' },
+    { name: '百度DNS', resKey: 'dns_baidu', address: '180.76.76.76', color: '#F59E0B', apiUrl: 'https://dns.baidu.com/resolve' },
+    { name: 'Google DNS', resKey: 'dns_google', address: '8.8.8.8', color: '#8B5CF6', apiUrl: 'https://dns.google/resolve' },
+    { name: 'Cloudflare', resKey: 'dns_cloudflare', address: '1.1.1.1', color: '#EC4899', apiUrl: 'https://cloudflare-dns.com/dns-query' },
   ]
 
   // 常用域名
@@ -50,7 +64,7 @@ export class DnsLookupEngine {
     const config: DnsLookupConfig = {
       domain: domain,
       dnsServer: '',
-      timeout: 5000,
+      timeout: NetworkTimeout.DNS_QUERY_MS,
     }
     return config
   }
@@ -421,5 +435,106 @@ export class DnsLookupEngine {
       errorMessage: message,
     }
     return result
+  }
+
+  // ==================== 历史记录持久化 ====================
+
+  private static readonly PREF_NAME: string = 'dns_lookup_history'
+  private static readonly PREF_KEY: string = 'dns_history_list'
+  private static readonly MAX_HISTORY: number = 50
+
+  /** 加载历史记录 */
+  static async loadHistory(context: common.Context): Promise<DnsHistoryEntry[]> {
+    try {
+      const pref: preferences.Preferences = await preferences.getPreferences(context, DnsLookupEngine.PREF_NAME)
+      const jsonStr: string | null = await pref.get(DnsLookupEngine.PREF_KEY, '[]') as string
+      if (!jsonStr || jsonStr === '[]') return []
+      const parsed: Array<Record<string, Object | string | number>> = JSON.parse(jsonStr) as Array<Record<string, Object | string | number>>
+      const entries: DnsHistoryEntry[] = []
+      for (let i = 0; i < parsed.length; i++) {
+        entries.push({
+          domain: String(parsed[i]['domain'] || ''),
+          server: String(parsed[i]['server'] || ''),
+          timestamp: Number(parsed[i]['timestamp'] || 0),
+          recordCount: Number(parsed[i]['recordCount'] || 0),
+          queryTime: Number(parsed[i]['queryTime'] || 0),
+        })
+      }
+      return entries
+    } catch (e) {
+      hilog.warn(0x0000, 'DnsLookup', 'loadHistory error: ' + e)
+      return []
+    }
+  }
+
+  /** 添加一条历史记录 */
+  static async addHistoryEntry(context: common.Context, entry: DnsHistoryEntry): Promise<void> {
+    try {
+      const existing: DnsHistoryEntry[] = await DnsLookupEngine.loadHistory(context)
+      const filtered: DnsHistoryEntry[] = []
+      for (let i = 0; i < existing.length; i++) {
+        if (!(existing[i].domain === entry.domain && existing[i].server === entry.server)) {
+          filtered.push(existing[i])
+        }
+      }
+      filtered.unshift(entry)
+      if (filtered.length > DnsLookupEngine.MAX_HISTORY) { filtered.length = DnsLookupEngine.MAX_HISTORY }
+      const saveList: DnsSaveItem[] = []
+      for (let i = 0; i < filtered.length; i++) {
+        const item: DnsSaveItem = {
+          domain: filtered[i].domain,
+          server: filtered[i].server,
+          timestamp: filtered[i].timestamp,
+          recordCount: filtered[i].recordCount,
+          queryTime: filtered[i].queryTime,
+        }
+        saveList.push(item)
+      }
+      const jsonStr: string = JSON.stringify(saveList)
+      const pref: preferences.Preferences = await preferences.getPreferences(context, DnsLookupEngine.PREF_NAME)
+      await pref.put(DnsLookupEngine.PREF_KEY, jsonStr)
+      await pref.flush()
+    } catch (e) {
+      hilog.warn(0x0000, 'DnsLookup', 'addHistoryEntry error: ' + e)
+    }
+  }
+
+  /** 清空历史记录 */
+  static async clearHistory(context: common.Context): Promise<void> {
+    try {
+      const pref: preferences.Preferences = await preferences.getPreferences(context, DnsLookupEngine.PREF_NAME)
+      await pref.delete(DnsLookupEngine.PREF_KEY)
+      await pref.flush()
+    } catch (e) {
+      hilog.warn(0x0000, 'DnsLookup', 'clearHistory error: ' + e)
+    }
+  }
+
+  /** 删除单条历史记录 */
+  static async removeHistoryEntry(context: common.Context, timestamp: number): Promise<void> {
+    try {
+      const existing: DnsHistoryEntry[] = await DnsLookupEngine.loadHistory(context)
+      const filtered: DnsHistoryEntry[] = []
+      for (let i = 0; i < existing.length; i++) {
+        if (existing[i].timestamp !== timestamp) { filtered.push(existing[i]) }
+      }
+      const saveList: DnsSaveItem[] = []
+      for (let i = 0; i < filtered.length; i++) {
+        const item: DnsSaveItem = {
+          domain: filtered[i].domain,
+          server: filtered[i].server,
+          timestamp: filtered[i].timestamp,
+          recordCount: filtered[i].recordCount,
+          queryTime: filtered[i].queryTime,
+        }
+        saveList.push(item)
+      }
+      const jsonStr: string = JSON.stringify(saveList)
+      const pref: preferences.Preferences = await preferences.getPreferences(context, DnsLookupEngine.PREF_NAME)
+      await pref.put(DnsLookupEngine.PREF_KEY, jsonStr)
+      await pref.flush()
+    } catch (e) {
+      hilog.warn(0x0000, 'DnsLookup', 'removeHistoryEntry error: ' + e)
+    }
   }
 }

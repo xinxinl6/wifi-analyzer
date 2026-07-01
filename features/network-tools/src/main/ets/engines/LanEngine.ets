@@ -2,12 +2,14 @@
 // 三策略探测：mDNS 服务发现（主） + NetBIOS 广播 + TCP 端口连接
 // 适配 @kit.NetworkKit API
 
+import { hilog } from '@kit.PerformanceAnalysisKit'
 import { http, connection, mdns, socket } from '@kit.NetworkKit'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { common } from '@kit.AbilityKit'
 import {
   LanDevice, LanScanCallbacks, LanNetworkInfo
 } from '../models/ToolModels'
+import { NetworkTimeout, ScanConcurrency, NetworkPort } from '@wifi-analyzer/core'
 
 // 内部接口
 interface AddressConfig {
@@ -189,10 +191,9 @@ export class LanEngine {
           if (!done) {
             done = true
             clearTimeout(timer)
-            try { tcp.close() } catch (_e) { /* ignore */ }
-            resolve(false)
           }
-        }, timeout + 200)
+          try { tcp.close(() => {}) } catch (_e) { /* ignore */ }
+        }, timeout + NetworkTimeout.LAN_TCP_OFFSET_MS)
       } catch (e) {
         if (!done) { done = true; clearTimeout(timer); resolve(false) }
       }
@@ -259,7 +260,7 @@ export class LanEngine {
         const hostname: string = this.parseNbnsHostname(value.message)
         const device: LanDevice = {
           ip: respIp, mac: '', hostname: hostname,
-          status: 'online', vendor: 'Windows/NetBIOS', port: 137,
+          status: 'online', vendor: 'Windows/NetBIOS', port: NetworkPort.NETBIOS_NS,
           latency: 0, firstSeen: Date.now(), lastSeen: Date.now(),
           probeMethod: 'netbios',
         }
@@ -268,7 +269,7 @@ export class LanEngine {
       })
 
       try {
-        const sendAddr: AddressConfig = { address: broadcastIp, port: 137, family: 1 }
+        const sendAddr: AddressConfig = { address: broadcastIp, port: NetworkPort.NETBIOS_NS, family: 1 }
         const sendOpts: UdpSendOptions = {
           data: queryPkt.buffer as ArrayBuffer,
           address: sendAddr
@@ -278,7 +279,7 @@ export class LanEngine {
         // NetBIOS 发送失败，忽略
       }
 
-      await new Promise<void>((r: () => void) => { setTimeout(r, 3000) })
+      await new Promise<void>((r: () => void) => { setTimeout(r, NetworkTimeout.NETBIOS_WAIT_MS) })
     } catch (e) {
       // NetBIOS 异常，忽略
     } finally {
@@ -373,7 +374,13 @@ export class LanEngine {
   stopMdnsDiscovery(): void {
     for (let d = 0; d < this.discoveryServices.length; d++) {
       try {
-        this.discoveryServices[d].stopSearchingMDNS()
+        const ds: mdns.DiscoveryService = this.discoveryServices[d]
+        ds.stopSearchingMDNS()
+        // 显式移除监听器，防止闭包引用泄漏
+        ds.off('discoveryStart')
+        ds.off('discoveryStop')
+        ds.off('serviceFound')
+        ds.off('serviceLost')
       } catch (e) {
         // ignore
       }
@@ -390,14 +397,14 @@ export class LanEngine {
     const start: number = Date.now()
 
     const results: boolean[] = await Promise.all([
-      this.tcpConnect(ip, 80, timeout),
-      this.tcpConnect(ip, 445, timeout)
+      this.tcpConnect(ip, NetworkPort.HTTP, timeout),
+      this.tcpConnect(ip, NetworkPort.SMB, timeout)
     ])
 
     if (results[0]) {
       const device: LanDevice = {
         ip: ip, mac: '', hostname: '', status: 'online',
-        vendor: deviceHint(80), port: 80,
+        vendor: deviceHint(NetworkPort.HTTP), port: NetworkPort.HTTP,
         latency: Date.now() - start,
         firstSeen: Date.now(), lastSeen: Date.now(),
         probeMethod: 'tcp',
@@ -407,7 +414,7 @@ export class LanEngine {
     if (results[1]) {
       const device: LanDevice = {
         ip: ip, mac: '', hostname: '', status: 'online',
-        vendor: deviceHint(445), port: 445,
+        vendor: deviceHint(NetworkPort.SMB), port: NetworkPort.SMB,
         latency: Date.now() - start,
         firstSeen: Date.now(), lastSeen: Date.now(),
         probeMethod: 'tcp',
@@ -436,17 +443,13 @@ export class LanEngine {
   async scan(callbacks: LanScanCallbacks): Promise<void> {
     this.abortController = false
     const devices: LanDevice[] = []
-    const maxConcurrency: number = 30
-    const timeout: number = 500
-    const scanPorts: number[] = [80, 445]
 
     const networkInfo: LanNetworkInfo = await this.detectNetworkInfo()
     const prefix: string = networkInfo.networkPrefix
-    const total: number = 254
     const gateway: string = networkInfo.gateway
 
     // 步骤 1：网关探针
-    const gwOnline: boolean = await this.probeGateway(gateway, 1000)
+    const gwOnline: boolean = await this.probeGateway(gateway, NetworkTimeout.LAN_GATEWAY_PROBE_MS)
     if (gwOnline) {
       const gwDevice: LanDevice = {
         ip: gateway, mac: '', hostname: '网关/路由器',
@@ -459,11 +462,30 @@ export class LanEngine {
       callbacks.onDeviceFound(gwDevice)
     }
 
-    // 步骤 2：NetBIOS 广播（并行）
+    // 步骤 2：NetBIOS 广播（并行发起）
     const netBiosPromise: Promise<LanDevice[]> =
       this.netBiosDiscover(prefix, callbacks)
 
     // 步骤 3：批量 TCP 扫描
+    await this.scanTcpBatches(prefix, devices, callbacks)
+
+    // 合并 NetBIOS 结果 + 排序
+    this.mergeNetBiosDevices(await netBiosPromise, devices)
+    devices.sort((a: LanDevice, b: LanDevice): number =>
+      this.ipToNumber(a.ip) - this.ipToNumber(b.ip))
+
+    callbacks.onComplete(devices)
+  }
+
+  // ---------- TCP 批量扫描 ----------
+  private async scanTcpBatches(
+    prefix: string, devices: LanDevice[], callbacks: LanScanCallbacks
+  ): Promise<void> {
+    const maxConcurrency: number = ScanConcurrency.LAN_BATCH
+    const timeout: number = NetworkTimeout.LAN_TCP_DEFAULT_MS
+    const scanPorts: number[] = [NetworkPort.HTTP, NetworkPort.SMB]
+    const total: number = ScanConcurrency.LAN_HOST_COUNT
+
     for (let batchStart = 0; batchStart < total; batchStart += maxConcurrency) {
       if (this.abortController) {
         callbacks.onError('扫描已停止')
@@ -489,9 +511,10 @@ export class LanEngine {
         }
       }
     }
+  }
 
-    // 合并 NetBIOS 结果
-    const nbDevices: LanDevice[] = await netBiosPromise
+  // ---------- 合并 NetBIOS 结果 ----------
+  private mergeNetBiosDevices(nbDevices: LanDevice[], devices: LanDevice[]): void {
     for (let i = 0; i < nbDevices.length; i++) {
       const nb: LanDevice = nbDevices[i]
       let duplicateFound: boolean = false
@@ -505,12 +528,6 @@ export class LanEngine {
         devices.push(nb)
       }
     }
-
-    // 排序
-    devices.sort((a: LanDevice, b: LanDevice): number =>
-      this.ipToNumber(a.ip) - this.ipToNumber(b.ip))
-
-    callbacks.onComplete(devices)
   }
 
   // ==================== 控制 ====================

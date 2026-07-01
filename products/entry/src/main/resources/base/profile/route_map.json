@@ -1,0 +1,49 @@
+{
+  "routerMap": [
+    {
+      "name": "PingPage",
+      "pageSourceFile": "src/main/ets/components/PingPage.ets",
+      "buildFunction": "PingPageBuilder"
+    },
+    {
+      "name": "DnsPage",
+      "pageSourceFile": "src/main/ets/components/DnsPage.ets",
+      "buildFunction": "DnsPageBuilder"
+    },
+    {
+      "name": "TraceroutePage",
+      "pageSourceFile": "src/main/ets/components/TraceroutePage.ets",
+      "buildFunction": "TraceroutePageBuilder"
+    },
+    {
+      "name": "PortScanPage",
+      "pageSourceFile": "src/main/ets/components/PortScanPage.ets",
+      "buildFunction": "PortScanPageBuilder"
+    },
+    {
+      "name": "SubnetPage",
+      "pageSourceFile": "src/main/ets/components/SubnetPage.ets",
+      "buildFunction": "SubnetPageBuilder"
+    },
+    {
+      "name": "IpGeoPage",
+      "pageSourceFile": "src/main/ets/components/IpGeoPage.ets",
+      "buildFunction": "IpGeoPageBuilder"
+    },
+    {
+      "name": "LanScanPage",
+      "pageSourceFile": "src/main/ets/components/LanScanPage.ets",
+      "buildFunction": "LanScanPageBuilder"
+    },
+    {
+      "name": "PoePage",
+      "pageSourceFile": "src/main/ets/components/PoePage.ets",
+      "buildFunction": "PoePageBuilder"
+    },
+    {
+      "name": "SettingsPage",
+      "pageSourceFile": "src/main/ets/components/SettingsPage.ets",
+      "buildFunction": "SettingsPageBuilder"
+    }
+  ]
+}

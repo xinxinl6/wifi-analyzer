@@ -1,5 +1,11 @@
-// 尺寸设计系统
-// 间距系统 (基于4px基准)
+// ============================================
+// HM7 尺寸设计系统（8dp 网格）
+// 页面边距: 16dp | 卡片间距: 12dp | 卡片圆角: 16dp | 按钮圆角: 24dp
+// 安全区: Top 56dp · Bottom 24dp
+// 详见项目根目录 DESIGN.md
+// ============================================
+
+// 间距系统（HM7 规范）
 export const SPACE_XS = 4
 export const SPACE_SM = 8
 export const SPACE_MD = 12
@@ -11,9 +17,10 @@ export const SPACE_4XL = 32
 export const SPACE_5XL = 40
 export const SPACE_6XL = 48
 
-// 圆角系统
-export const RADIUS_XS = 2
-export const RADIUS_SM = 4
+// 圆角系统（HM7 规范）
+// 卡片 16dp、按钮 24dp（全圆）、Tag 6dp、搜索 16dp、弹窗 20dp
+export const RADIUS_XS = 4
+export const RADIUS_SM = 6
 export const RADIUS_MD = 8
 export const RADIUS_LG = 12
 export const RADIUS_XL = 16
@@ -21,7 +28,7 @@ export const RADIUS_2XL = 20
 export const RADIUS_3XL = 24
 export const RADIUS_FULL = 999
 
-// 图标尺寸系统 (基于96×96超高分辨率图标)
+// 图标尺寸系统
 export const ICON_SIZE_XXS = 12
 export const ICON_SIZE_XS = 16
 export const ICON_SIZE_SM = 20
@@ -41,8 +48,8 @@ export const BUTTON_HEIGHT_LG = 48
 export const INPUT_HEIGHT = 44
 export const TAB_BAR_HEIGHT = 72
 
-// 卡片尺寸
-export const CARD_PADDING = 20
+// 卡片尺寸（HM7 规范）
+export const CARD_PADDING = 16
 export const CARD_RADIUS = 16
 export const CARD_SHADOW_RADIUS = 8
 
@@ -62,7 +69,8 @@ export const STROKE_WIDTH_XL = 8
 export const STROKE_WIDTH_2XL = 12
 export const STROKE_WIDTH_3XL = 16
 
-// 玻璃效果尺寸
+// 玻璃效果尺寸（HM7 5级材质 blur 值）
+// Level 0: 4px, Level 1: 8px, Level 2: 16px, Level 3: 24px, Level 4: 32px
 export const GLASS_BLUR_SM = 6
 export const GLASS_BLUR_MD = 8
 export const GLASS_BLUR_LG = 12
@@ -78,11 +86,9 @@ export const GLASS_SHADOW_2XL = 20
 export const GLASS_SHADOW_3XL = 24
 export const GLASS_SHADOW_MAX = 28
 
-// 安全区尺寸（状态栏 + 底部手势条）
-// 真实值由 EntryAbility 通过 getWindowAvoidArea 获取并存入 AppStorage
-// 取值 56 覆盖挖孔屏/刘海屏等高状态栏设备，确保审核不重叠
+// 安全区尺寸
 export const SAFE_AREA_TOP: number = 56
 export const SAFE_AREA_BOTTOM: number = 24
 
-// Tab 栏底部安全间距（Tab Bar 72 + margin bottom 12 + SAFE_AREA_BOTTOM）
+// Tab 栏底部安全间距
 export const TAB_BAR_SAFE_BOTTOM: number = 108

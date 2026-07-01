@@ -1,99 +1,65 @@
-// RouterManager - 统一路由管理
-// 支持两种模式：
-// 1. NavPathStack 模式（Navigation + NavDestination）
-// 2. AppStorage 模式（条件渲染，兼容 API 22）
+// RouterManager - 统一路由管理（v2 简化版）
+// 仅保留 NavPathStack 模式（移除 AppStorage 条件渲染模式）
+// 参照 MultiFinancialManagement 的 HdsNavigation + NavPathStack 模式
 // 位于 core 模块，供所有 HAR 模块共享
 
 import { hilog } from '@kit.PerformanceAnalysisKit'
 
 const DOMAIN = 0x0000
+const TAG = '[RouterManager]'
+
+// 页面名称常量（与 CommonConstants 保持一致，避免循环依赖）
+const PING_PAGE: string = 'PingPage'
+const DNS_PAGE: string = 'DnsPage'
+const TRACEROUTE_PAGE: string = 'TraceroutePage'
+const PORT_SCAN_PAGE: string = 'PortScanPage'
+const SUBNET_PAGE: string = 'SubnetPage'
+const IP_GEO_PAGE: string = 'IpGeoPage'
+const POE_PAGE: string = 'PoePage'
+const LAN_SCAN_PAGE: string = 'LanScanPage'
+const SETTINGS_PAGE: string = 'SettingsPage'
 
 // 路由名称
 export type RouteName =
-  | 'ping'
-  | 'traceroute'
-  | 'dns'
-  | 'portscan'
-  | 'subnet'
-  | 'ipgeo'
-  | 'poe'
-  | 'maclookup'
-  | 'wol'
-  | 'lanscan'
-  | 'roamtest'
-  | 'channel'
-  | 'finddevice'
-  | 'about'
+  | 'ping' | 'traceroute' | 'dns'
+  | 'portscan' | 'subnet' | 'ipgeo' | 'poe'
+  | 'lanscan' | 'settings' | 'speedtest'
 
-// 路由名 → AppStorage key 映射
-const ROUTE_TO_STORAGE_KEY: Record<string, string> = {
-  'ping': 'showPingPage',
-  'traceroute': 'showTraceroutePage',
-  'dns': 'showDnsPage',
-  'portscan': 'showPortScanPage',
-  'subnet': 'showSubnetPage',
-  'ipgeo': 'showIpGeoPage',
-  'poe': 'showPoePage',
-  'maclookup': 'showMacLookupPage',
-  'wol': 'showWolPage',
-  'lanscan': 'showLanScanPage',
-  'roamtest': 'showRoamTestPage',
-  'channel': 'showChannelPage',
-  'finddevice': 'showFindDevicePage',
-  'about': 'showAboutPage',
-}
+// 路由名 → NavDestination 注册名映射（与 Index.ets PagesMap 保持一致）
+const SPEEDTEST_PAGE: string = 'SpeedTestPage'
 
-// 路由名 → NavDestination 注册名映射
 const ROUTE_TO_PAGE: Record<string, string> = {
-  'ping': 'PingTestPage',
-  'traceroute': 'TraceroutePage',
-  'dns': 'DnsLookupPage',
-  'portscan': 'PortScanPage',
-  'subnet': 'SubnetCalcPage',
-  'ipgeo': 'IpGeoPage',
-  'poe': 'PoeCalcPage',
-  'maclookup': 'MacLookupPage',
-  'wol': 'WolPage',
-  'lanscan': 'LanScanPage',
-  'roamtest': 'RoamTestPage',
-  'channel': 'ChannelPage',
-  'finddevice': 'FindDevicePage',
-  'about': 'AboutPage',
+  'ping':       PING_PAGE,
+  'traceroute': TRACEROUTE_PAGE,
+  'dns':        DNS_PAGE,
+  'portscan':   PORT_SCAN_PAGE,
+  'subnet':     SUBNET_PAGE,
+  'ipgeo':      IP_GEO_PAGE,
+  'poe':        POE_PAGE,
+  'lanscan':    LAN_SCAN_PAGE,
+  'settings':   SETTINGS_PAGE,
+  'speedtest':  SPEEDTEST_PAGE,
 }
 
 export class RouterManager {
-  // NavPathStack 模式（可选）
+  // NavPathStack 模式
   private static navPathStack: NavPathStack | null = null
-
-  // 当前模式
-  private static useNavPathStack: boolean = false
-
-  // AppStorage 模式下的页面栈
-  private static pageStack: RouteName[] = []
-
-  // 是否在子页面中（主页之外的任何页面）
-  private static inSubPage: boolean = false
 
   // 路由变更回调
   private static callbacks: Array<(route: string | null) => void> = []
 
-  // 初始化 NavPathStack 模式
-  static initNavPathStack(stack: NavPathStack): void {
-    RouterManager.navPathStack = stack
-    RouterManager.useNavPathStack = true
-  }
+  // Tab 变更回调
+  private static tabCallbacks: Array<(tabIndex: number) => void> = []
 
-  // 初始化 AppStorage 模式（API 22 兼容）
-  static initAppStorageMode(): void {
-    RouterManager.useNavPathStack = false
-    // 初始化所有页面状态为 false
-    for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
-      AppStorage.set(key, false)
+  // 设置 NavPathStack（使用现有栈，与Navigation共享）
+  static createStack(existingStack?: NavPathStack): NavPathStack {
+    if (existingStack) {
+      RouterManager.navPathStack = existingStack
+      return existingStack
     }
-    // 清空页面栈
-    RouterManager.pageStack = []
-    // 重置子页面标志
-    RouterManager.inSubPage = false
+    const stack: NavPathStack = new NavPathStack()
+    RouterManager.navPathStack = stack
+    return stack
   }
 
   // 获取 NavPathStack
@@ -103,44 +69,28 @@ export class RouterManager {
 
   // 导航到指定页面
   static navigate(route: RouteName, param?: Object): void {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      // NavPathStack 模式
-      const pageName = ROUTE_TO_PAGE[route]
-      if (!pageName) {
-        hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Unknown route:' + JSON.stringify(route))
-        return
-      }
-      RouterManager.navPathStack.pushPathByName(pageName, param)
-    } else {
-      // AppStorage 模式
-      const key = ROUTE_TO_STORAGE_KEY[route]
-      if (!key) {
-        hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Unknown route:' + JSON.stringify(route))
-        return
-      }
-      AppStorage.set(key, true)
-      // 添加到页面栈
-      if (!RouterManager.pageStack.includes(route)) {
-        RouterManager.pageStack.push(route)
-      }
-      // 标记已进入子页面
-      RouterManager.inSubPage = true
+    const stack = RouterManager.navPathStack
+    if (!stack) {
+      hilog.error(DOMAIN, TAG, 'NavPathStack not initialized')
+      return
     }
+    const pageName = ROUTE_TO_PAGE[route]
+    if (!pageName) {
+      hilog.error(DOMAIN, TAG, 'Unknown route: %{public}s', route)
+      return
+    }
+    stack.pushPathByName(pageName, param)
     RouterManager.notifyChange(route)
   }
 
   // 导航到指定 Tab
   static navigateToTab(tabIndex: number): void {
     if (tabIndex < 0 || tabIndex > 4) {
-      hilog.error(DOMAIN, 'testTag', '%{public}s', '[RouterManager] Invalid tab index:' + JSON.stringify(tabIndex))
+      hilog.error(DOMAIN, TAG, 'Invalid tab index: %{public}d', tabIndex)
       return
     }
-    AppStorage.set('targetTabIndex', tabIndex)
     RouterManager.notifyTabChange(tabIndex)
   }
-
-  // Tab 变更回调
-  private static tabCallbacks: Array<(tabIndex: number) => void> = []
 
   // 订阅 Tab 变更
   static subscribeTab(callback: (tabIndex: number) => void): () => void {
@@ -162,77 +112,42 @@ export class RouterManager {
 
   // 返回上一页
   static goBack(): boolean {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      if (RouterManager.navPathStack.size() > 0) {
-        RouterManager.navPathStack.pop()
-        if (RouterManager.navPathStack.size() === 0) {
-          RouterManager.notifyChange(null)
-        }
-        return true
+    const stack = RouterManager.navPathStack
+    if (stack && stack.size() > 0) {
+      stack.pop()
+      if (stack.size() === 0) {
+        RouterManager.notifyChange(null)
       }
-      return false
-    } else {
-      // AppStorage 模式：只关闭最后一个页面
-      if (RouterManager.pageStack.length > 0) {
-        const lastRoute = RouterManager.pageStack.pop()
-        if (lastRoute) {
-          const key = ROUTE_TO_STORAGE_KEY[lastRoute]
-          if (key) {
-            AppStorage.set(key, false)
-          }
-        }
-        if (RouterManager.pageStack.length === 0) {
-          // 栈为空，回到主页
-          RouterManager.inSubPage = false
-          RouterManager.notifyChange(null)
-        }
-        return true
-      }
-      return false
+      return true
     }
+    return false
   }
 
   // 返回到根页面
   static goHome(): void {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      if (RouterManager.navPathStack.size() > 0) {
-        RouterManager.navPathStack.clear()
-      }
-    } else {
-      // AppStorage 模式：关闭所有页面并清空栈
-      for (const key of Object.values(ROUTE_TO_STORAGE_KEY)) {
-        AppStorage.set(key, false)
-      }
-      RouterManager.pageStack = []
-      RouterManager.inSubPage = false
+    const stack = RouterManager.navPathStack
+    if (stack && stack.size() > 0) {
+      stack.clear()
     }
     RouterManager.notifyChange(null)
   }
 
   // 检查是否有可返回的页面
   static canGoBack(): boolean {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      return RouterManager.navPathStack.size() > 0
-    }
-    // AppStorage 模式：检查页面栈
-    return RouterManager.pageStack.length > 0
+    const stack = RouterManager.navPathStack
+    return stack !== null && stack.size() > 0
   }
 
   // 检查是否在子页面中
   static isInSubPage(): boolean {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      return RouterManager.navPathStack.size() > 0
-    }
-    return RouterManager.inSubPage
+    const stack = RouterManager.navPathStack
+    return stack !== null && stack.size() > 0
   }
 
   // 获取导航栈大小
   static getStackSize(): number {
-    if (RouterManager.useNavPathStack && RouterManager.navPathStack) {
-      return RouterManager.navPathStack.size()
-    }
-    // AppStorage 模式：返回页面栈大小
-    return RouterManager.pageStack.length
+    const stack = RouterManager.navPathStack
+    return stack ? stack.size() : 0
   }
 
   // 订阅路由变更

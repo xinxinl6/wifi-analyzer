@@ -1,0 +1,1323 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "WlAN Analyzer"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "WLAN Network Analyzer"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "WlAN Analyzer"
+    },
+    {
+      "name": "tab_home",
+      "value": "Home"
+    },
+    {
+      "name": "tab_wifi",
+      "value": "WiFi"
+    },
+    {
+      "name": "tab_channel",
+      "value": "Channel"
+    },
+    {
+      "name": "tab_speed",
+      "value": "Speed"
+    },
+    {
+      "name": "tab_tools",
+      "value": "Tools"
+    },
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi permission is required to scan nearby networks"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "Location permission is required to get WiFi signal strength"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "Network permission is required for speed test and tools"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "Network info permission is required to check connection status"
+    },
+    {
+      "name": "settings",
+      "value": "Settings"
+    },
+    {
+      "name": "general",
+      "value": "General"
+    },
+    {
+      "name": "language",
+      "value": "Language"
+    },
+    {
+      "name": "check_update",
+      "value": "Check Update"
+    },
+    {
+      "name": "about",
+      "value": "About"
+    },
+    {
+      "name": "about_us",
+      "value": "About Us"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "user_agreement",
+      "value": "User Agreement"
+    },
+    {
+      "name": "feedback",
+      "value": "Feedback"
+    },
+    {
+      "name": "app_website",
+      "value": "Website"
+    },
+    {
+      "name": "developer",
+      "value": "Developer"
+    },
+    {
+      "name": "close",
+      "value": "Close"
+    },
+    {
+      "name": "checking_update",
+      "value": "Checking for update..."
+    },
+    {
+      "name": "already_latest",
+      "value": "Already the latest version v"
+    },
+    {
+      "name": "new_version_found",
+      "value": "New version found "
+    },
+    {
+      "name": "update_content",
+      "value": "Update Content"
+    },
+    {
+      "name": "download_now",
+      "value": "Update Now"
+    },
+    {
+      "name": "later",
+      "value": "Later"
+    },
+    {
+      "name": "download_url",
+      "value": "Download URL"
+    },
+    {
+      "name": "no_update_info",
+      "value": "No update info available"
+    },
+    {
+      "name": "network_overview",
+      "value": "Network Overview"
+    },
+    {
+      "name": "local_ip",
+      "value": "Local IP"
+    },
+    {
+      "name": "recommended_tools",
+      "value": "Recommended Tools"
+    },
+    {
+      "name": "network_analyzer",
+      "value": "Network Analyzer"
+    },
+    {
+      "name": "about_app",
+      "value": "WlAN Analyzer v2.0"
+    },
+    {
+      "name": "about_app_desc",
+      "value": "Network diagnostics toolbox, comprehensive WiFi analysis tool"
+    },
+    {
+      "name": "privacy_desc",
+      "value": "Learn how we protect your data"
+    },
+    {
+      "name": "agreement_desc",
+      "value": "Terms and conditions"
+    },
+    {
+      "name": "feedback_desc",
+      "value": "Tell us what you think"
+    },
+    {
+      "name": "website_url",
+      "value": "www.xinnxin.cn"
+    },
+    {
+      "name": "no_network_error",
+      "value": "Cannot connect to server, please check network"
+    },
+    {
+      "name": "update_exception",
+      "value": "An error occurred while checking for updates"
+    },
+    {
+      "name": "version_label",
+      "value": "Version"
+    },
+    {
+      "name": "dns",
+      "value": "DNS"
+    },
+    {
+      "name": "port",
+      "value": "Port"
+    },
+    {
+      "name": "brand_title",
+      "value": "WLAN Analyzer"
+    },
+    {
+      "name": "version_tag",
+      "value": "v2.0 · HM7"
+    },
+    {
+      "name": "brand_second",
+      "value": "Analyzer"
+    },
+    {
+      "name": "connected",
+      "value": "Connected"
+    },
+    {
+      "name": "disconnected",
+      "value": "Disconnected"
+    },
+    {
+      "name": "fetching",
+      "value": "Fetching..."
+    },
+    {
+      "name": "section_network_status",
+      "value": "Network Status"
+    },
+    {
+      "name": "section_quick_tools",
+      "value": "Quick Tools"
+    },
+    {
+      "name": "ip_address",
+      "value": "IP Address"
+    },
+    {
+      "name": "signal_strength",
+      "value": "Signal Strength"
+    },
+    {
+      "name": "current_band",
+      "value": "Current Band"
+    },
+    {
+      "name": "dbm_unit",
+      "value": "dBm"
+    },
+    {
+      "name": "signal_excellent",
+      "value": "Excellent"
+    },
+    {
+      "name": "signal_good",
+      "value": "Good"
+    },
+    {
+      "name": "signal_average",
+      "value": "Average"
+    },
+    {
+      "name": "signal_weak",
+      "value": "Weak"
+    },
+    {
+      "name": "tools_title",
+      "value": "Toolbox"
+    },
+    {
+      "name": "tools_subtitle",
+      "value": "Network Diagnostics & Security Tools"
+    },
+    {
+      "name": "section_diag",
+      "value": "Diagnostics"
+    },
+    {
+      "name": "section_security",
+      "value": "Security"
+    },
+    {
+      "name": "section_network",
+      "value": "Network"
+    },
+    {
+      "name": "section_other",
+      "value": "Other"
+    },
+    {
+      "name": "tool_ping",
+      "value": "Monitor"
+    },
+    {
+      "name": "tool_traceroute",
+      "value": "Trace Route"
+    },
+    {
+      "name": "tool_dns",
+      "value": "DNS Lookup"
+    },
+    {
+      "name": "tool_portscan",
+      "value": "Port Scan"
+    },
+    {
+      "name": "tool_lan",
+      "value": "LAN Scan"
+    },
+    {
+      "name": "tool_subnet",
+      "value": "Subnet Calc"
+    },
+    {
+      "name": "tool_ipgeo",
+      "value": "IP Geo"
+    },
+    {
+      "name": "tool_settings",
+      "value": "Settings"
+    },
+    {
+      "name": "desc_monitor",
+      "value": "Continuous Monitor"
+    },
+    {
+      "name": "desc_path",
+      "value": "Path Analysis"
+    },
+    {
+      "name": "desc_dns_resolve",
+      "value": "Domain Resolution"
+    },
+    {
+      "name": "desc_port",
+      "value": "Port Detection"
+    },
+    {
+      "name": "desc_lan",
+      "value": "Device Discovery"
+    },
+    {
+      "name": "desc_cidr",
+      "value": "CIDR Conversion"
+    },
+    {
+      "name": "desc_geo",
+      "value": "Geo Lookup"
+    },
+    {
+      "name": "desc_settings",
+      "value": "App Config"
+    },
+    {
+      "name": "filter_all",
+      "value": "All"
+    },
+    {
+      "name": "nearby",
+      "value": "Nearby"
+    },
+    {
+      "name": "scanning",
+      "value": "Scanning"
+    },
+    {
+      "name": "scan_btn",
+      "value": "Scan"
+    },
+    {
+      "name": "networks_count",
+      "value": "networks"
+    },
+    {
+      "name": "hidden_network",
+      "value": "Hidden Network"
+    },
+    {
+      "name": "no_networks",
+      "value": "No networks available"
+    },
+    {
+      "name": "scan_hint",
+      "value": "Tap refresh button to scan"
+    },
+    {
+      "name": "network_monitor",
+      "value": "Network Monitor"
+    },
+    {
+      "name": "monitor_config",
+      "value": "Monitor Config"
+    },
+    {
+      "name": "ping_count",
+      "value": "PING Count"
+    },
+    {
+      "name": "infinite_hint",
+      "value": "(0 = infinite)"
+    },
+    {
+      "name": "addr_gateway",
+      "value": "Address 1 (Public)"
+    },
+    {
+      "name": "auto_detect",
+      "value": "Recommended"
+    },
+    {
+      "name": "addr_custom",
+      "value": "Address 2 (Custom)"
+    },
+    {
+      "name": "recommend_baidu",
+      "value": "Recommended: baidu.com"
+    },
+    {
+      "name": "input_domain_or_ip",
+      "value": "Enter domain or IP"
+    },
+    {
+      "name": "detecting",
+      "value": "Detecting..."
+    },
+    {
+      "name": "detect_gateway",
+      "value": "Detecting gateway..."
+    },
+    {
+      "name": "stop_monitor",
+      "value": "Stop Monitor"
+    },
+    {
+      "name": "start_monitor",
+      "value": "Start Monitor"
+    },
+    {
+      "name": "monitoring",
+      "value": "Monitoring"
+    },
+    {
+      "name": "standby",
+      "value": "Standby"
+    },
+    {
+      "name": "elapsed_time",
+      "value": "Elapsed:"
+    },
+    {
+      "name": "sent",
+      "value": "Sent"
+    },
+    {
+      "name": "lost_count",
+      "value": "Lost"
+    },
+    {
+      "name": "loss_rate",
+      "value": "Loss Rate"
+    },
+    {
+      "name": "fastest",
+      "value": "Fastest"
+    },
+    {
+      "name": "slowest",
+      "value": "Slowest"
+    },
+    {
+      "name": "average",
+      "value": "Average"
+    },
+    {
+      "name": "history",
+      "value": "History"
+    },
+    {
+      "name": "clear",
+      "value": "Clear"
+    },
+    {
+      "name": "packet_loss",
+      "value": "Loss"
+    },
+    {
+      "name": "stability",
+      "value": "Stable"
+    },
+    {
+      "name": "monitor_detail",
+      "value": "Monitor Details"
+    },
+    {
+      "name": "packet_data",
+      "value": "Per-packet Data"
+    },
+    {
+      "name": "timeout",
+      "value": "Timeout"
+    },
+    {
+      "name": "enter_address_hint",
+      "value": "Please enter at least one address to monitor"
+    },
+    {
+      "name": "history_tab",
+      "value": "History"
+    },
+    {
+      "name": "input_domain_placeholder",
+      "value": "Enter domain (e.g. github.com)"
+    },
+    {
+      "name": "query_btn",
+      "value": "Query"
+    },
+    {
+      "name": "dns_server_list",
+      "value": "DNS Servers"
+    },
+    {
+      "name": "common_domains_title",
+      "value": "Common Domains"
+    },
+    {
+      "name": "feature_guide",
+      "value": "Feature Guide"
+    },
+    {
+      "name": "dns_real_query",
+      "value": "Real DNS Query"
+    },
+    {
+      "name": "dns_real_query_desc",
+      "value": "Real-time resolution via DoH or system DNS"
+    },
+    {
+      "name": "dns_multi_server_title",
+      "value": "Multiple DNS Servers"
+    },
+    {
+      "name": "dns_server_list_desc",
+      "value": "Alibaba / Tencent / Baidu / Google / Cloudflare"
+    },
+    {
+      "name": "dns_system_default",
+      "value": "System Default"
+    },
+    {
+      "name": "dns_alibaba",
+      "value": "Alibaba DNS"
+    },
+    {
+      "name": "dns_tencent",
+      "value": "Tencent DNS"
+    },
+    {
+      "name": "dns_baidu",
+      "value": "Baidu DNS"
+    },
+    {
+      "name": "dns_google",
+      "value": "Google DNS"
+    },
+    {
+      "name": "dns_cloudflare",
+      "value": "Cloudflare"
+    },
+    {
+      "name": "dns_all_types",
+      "value": "All Record Types"
+    },
+    {
+      "name": "dns_all_types_desc",
+      "value": "A / AAAA / CNAME / MX / NS / TXT"
+    },
+    {
+      "name": "querying",
+      "value": "Querying..."
+    },
+    {
+      "name": "querying_with",
+      "value": "Using"
+    },
+    {
+      "name": "query_suffix",
+      "value": "querying"
+    },
+    {
+      "name": "system_default",
+      "value": "System Default"
+    },
+    {
+      "name": "query_failed",
+      "value": "Query Failed"
+    },
+    {
+      "name": "back_btn",
+      "value": "← Back"
+    },
+    {
+      "name": "re_query",
+      "value": "Re-query"
+    },
+    {
+      "name": "query_history",
+      "value": "Query History"
+    },
+    {
+      "name": "records_suffix",
+      "value": "records"
+    },
+    {
+      "name": "no_history",
+      "value": "No history"
+    },
+    {
+      "name": "ttl_label",
+      "value": "TTL"
+    },
+    {
+      "name": "band_5g",
+      "value": "5GHz"
+    },
+    {
+      "name": "band_24g",
+      "value": "2.4GHz"
+    },
+    {
+      "name": "rec_type_a",
+      "value": "A"
+    },
+    {
+      "name": "rec_type_aaaa",
+      "value": "AAAA"
+    },
+    {
+      "name": "rec_type_cname",
+      "value": "CNAME"
+    },
+    {
+      "name": "rec_type_mx",
+      "value": "MX"
+    },
+    {
+      "name": "rec_type_ns",
+      "value": "NS"
+    },
+    {
+      "name": "rec_type_txt",
+      "value": "TXT"
+    },
+    {
+      "name": "ch_analysis",
+      "value": "Best Channels"
+    },
+    {
+      "name": "ch_idle",
+      "value": "Idle"
+    },
+    {
+      "name": "ch_normal",
+      "value": "Normal"
+    },
+    {
+      "name": "ch_busy",
+      "value": "Busy"
+    },
+    {
+      "name": "ch_congested",
+      "value": "Congested"
+    },
+    {
+      "name": "ch_severe_congested",
+      "value": "Severely Congested"
+    },
+    {
+      "name": "ch_recommended",
+      "value": "Recommended Channels"
+    },
+    {
+      "name": "ch_congested_title",
+      "value": "Congested Channels"
+    },
+    {
+      "name": "ch_detail",
+      "value": "Channel Details"
+    },
+    {
+      "name": "ch_count",
+      "value": "Channel Count"
+    },
+    {
+      "name": "ch_avg_usage",
+      "value": "Avg. Usage"
+    },
+    {
+      "name": "ch_band",
+      "value": "Band"
+    },
+    {
+      "name": "ch_fetching",
+      "value": "Fetching channel data..."
+    },
+    {
+      "name": "ch_best_idle",
+      "value": "Most idle"
+    },
+    {
+      "name": "ch_per_channel",
+      "value": "/channel"
+    },
+    {
+      "name": "speed_network",
+      "value": "Speed Test"
+    },
+    {
+      "name": "speed_test",
+      "value": "Test"
+    },
+    {
+      "name": "speed_download",
+      "value": "Download"
+    },
+    {
+      "name": "speed_upload",
+      "value": "Upload"
+    },
+    {
+      "name": "speed_latency",
+      "value": "Latency"
+    },
+    {
+      "name": "speed_complete",
+      "value": "Test Complete"
+    },
+    {
+      "name": "speed_start_hint",
+      "value": "Tap to start test"
+    },
+    {
+      "name": "speed_testing",
+      "value": "Testing..."
+    },
+    {
+      "name": "speed_start",
+      "value": "Start Test"
+    },
+    {
+      "name": "speed_grade",
+      "value": "Grade:"
+    },
+    {
+      "name": "speed_download_speed",
+      "value": "Download Speed"
+    },
+    {
+      "name": "speed_upload_speed",
+      "value": "Upload Speed"
+    },
+    {
+      "name": "speed_network_latency",
+      "value": "Network Latency"
+    },
+    {
+      "name": "speed_jitter",
+      "value": "Jitter"
+    },
+    {
+      "name": "speed_download_full_latency",
+      "value": "Download Loaded Latency"
+    },
+    {
+      "name": "speed_upload_full_latency",
+      "value": "Upload Loaded Latency"
+    },
+    {
+      "name": "speed_server",
+      "value": "Speed Test Server"
+    },
+    {
+      "name": "speed_guide",
+      "value": "Test Guide"
+    },
+    {
+      "name": "speed_guide_desc",
+      "value": "The speed test measures your current network's download speed, upload speed and latency. Please stay connected to the current WiFi network during the test."
+    },
+    {
+      "name": "speed_select_node",
+      "value": "Selecting best node..."
+    },
+    {
+      "name": "speed_test_latency",
+      "value": "Testing latency..."
+    },
+    {
+      "name": "speed_test_download",
+      "value": "Testing download speed..."
+    },
+    {
+      "name": "speed_test_upload",
+      "value": "Testing upload speed..."
+    },
+    {
+      "name": "speed_failed",
+      "value": "Test Failed"
+    },
+    {
+      "name": "speed_cancelled",
+      "value": "Cancelled"
+    },
+    {
+      "name": "speed_ready",
+      "value": "Ready"
+    },
+    {
+      "name": "speed_grade_extreme",
+      "value": "Extreme"
+    },
+    {
+      "name": "speed_grade_fast",
+      "value": "Fast"
+    },
+    {
+      "name": "speed_grade_normal",
+      "value": "Normal"
+    },
+    {
+      "name": "speed_grade_slow",
+      "value": "Slow"
+    },
+    {
+      "name": "trace_route",
+      "value": "Traceroute"
+    },
+    {
+      "name": "trace_stop",
+      "value": "Stop"
+    },
+    {
+      "name": "trace_target_input",
+      "value": "Domain or IP Address"
+    },
+    {
+      "name": "trace_quick_target",
+      "value": "Quick Targets"
+    },
+    {
+      "name": "trace_enter_target",
+      "value": "Please enter a target address"
+    },
+    {
+      "name": "trace_dns_resolving",
+      "value": "Resolving DNS…"
+    },
+    {
+      "name": "trace_icmp_scanning",
+      "value": "ICMP probing…"
+    },
+    {
+      "name": "trace_tcp_probing",
+      "value": "TCP timing probing…"
+    },
+    {
+      "name": "trace_stopped",
+      "value": "Stopped"
+    },
+    {
+      "name": "trace_no_path",
+      "value": "No route path detected, please check the target address"
+    },
+    {
+      "name": "trace_tcp_fallback_hint",
+      "value": "⚠ System limit, TCP timing fallback enabled (intermediate hops not shown)"
+    },
+    {
+      "name": "trace_total_hops",
+      "value": "Total Hops"
+    },
+    {
+      "name": "trace_success",
+      "value": "Success"
+    },
+    {
+      "name": "trace_avg",
+      "value": "Avg"
+    },
+    {
+      "name": "trace_slowest",
+      "value": "Slowest"
+    },
+    {
+      "name": "trace_fastest",
+      "value": "Fastest"
+    },
+    {
+      "name": "trace_route_path",
+      "value": "Route Path"
+    },
+    {
+      "name": "trace_timeout",
+      "value": "Request Timed Out"
+    },
+    {
+      "name": "trace_no_response",
+      "value": "No Response"
+    },
+    {
+      "name": "trace_excellent",
+      "value": "Excellent"
+    },
+    {
+      "name": "trace_high_latency",
+      "value": "High Latency"
+    },
+    {
+      "name": "trace_click_stop",
+      "value": "Click to stop"
+    },
+    {
+      "name": "trace_path_discovery",
+      "value": "Path Discovery"
+    },
+    {
+      "name": "trace_latency_analysis",
+      "value": "Latency Analysis"
+    },
+    {
+      "name": "trace_fault_location",
+      "value": "Fault Location"
+    },
+    {
+      "name": "trace_gateway",
+      "value": "Gateway"
+    },
+    {
+      "name": "trace_preferred_dns",
+      "value": "Preferred DNS"
+    },
+    {
+      "name": "trace_alternate_dns",
+      "value": "Alternate DNS"
+    },
+    {
+      "name": "trace_github",
+      "value": "GitHub"
+    },
+    {
+      "name": "trace_baidu",
+      "value": "Baidu"
+    },
+    {
+      "name": "netstat_link_speed",
+      "value": "Link Speed"
+    },
+    {
+      "name": "netstat_network_latency",
+      "value": "Network Latency"
+    },
+    {
+      "name": "unit_mbps",
+      "value": "Mbps"
+    },
+    {
+      "name": "unit_ms",
+      "value": "ms"
+    },
+    {
+      "name": "port_web_admin",
+      "value": "Web Admin"
+    },
+    {
+      "name": "scanning_ports_status",
+      "value": "Scanning..."
+    },
+    {
+      "name": "port_open_status",
+      "value": "Open"
+    },
+    {
+      "name": "port_scan_progress",
+      "value": "Scanned "
+    },
+    {
+      "name": "port_scan_open_label",
+      "value": "open"
+    },
+    {
+      "name": "port_scan_unit",
+      "value": ""
+    },
+    {
+      "name": "scan_mode_full",
+      "value": "Full"
+    },
+    {
+      "name": "scan_mode_common",
+      "value": "Common"
+    },
+    {
+      "name": "scan_common_ports",
+      "value": "Scan "
+    },
+    {
+      "name": "scan_range_all",
+      "value": "Scan ports 1–1024"
+    },
+    {
+      "name": "open_ports_label",
+      "value": "Open Ports"
+    },
+    {
+      "name": "no_open_ports",
+      "value": "No open ports found"
+    },
+    {
+      "name": "calculate_action",
+      "value": "Calculate"
+    },
+    {
+      "name": "network_addr",
+      "value": "Network Address"
+    },
+    {
+      "name": "broadcast_addr",
+      "value": "Broadcast Address"
+    },
+    {
+      "name": "cidr_label",
+      "value": "CIDR"
+    },
+    {
+      "name": "subnet_input_hint",
+      "value": "IP/prefix (e.g. 192.168.1.1/24)"
+    },
+    {
+      "name": "host_range_title",
+      "value": "Host Range"
+    },
+    {
+      "name": "start_label",
+      "value": "Start"
+    },
+    {
+      "name": "end_label",
+      "value": "End"
+    },
+    {
+      "name": "usable_hosts_label",
+      "value": "Usable Hosts"
+    },
+    {
+      "name": "detail_info_label",
+      "value": "Detail Info"
+    },
+    {
+      "name": "subnet_mask_label",
+      "value": "Subnet Mask"
+    },
+    {
+      "name": "wildcard_mask_label",
+      "value": "Wildcard Mask"
+    },
+    {
+      "name": "ip_class_label",
+      "value": "IP Class"
+    },
+    {
+      "name": "ip_type_label",
+      "value": "IP Type"
+    },
+    {
+      "name": "is_private_label",
+      "value": "Is Private"
+    },
+    {
+      "name": "input_error_label",
+      "value": "Input Error"
+    },
+    {
+      "name": "geo_placeholder",
+      "value": "IP address (leave empty to check self)"
+    },
+    {
+      "name": "geo_network_error",
+      "value": "Network error, please retry"
+    },
+    {
+      "name": "geo_empty_hint",
+      "value": "Enter an IP address or click 🔍 to check self"
+    },
+    {
+      "name": "geo_loading",
+      "value": "Querying..."
+    },
+    {
+      "name": "geo_query_failed",
+      "value": "Query failed"
+    },
+    {
+      "name": "geo_location_section",
+      "value": "📍 Location"
+    },
+    {
+      "name": "geo_city_label",
+      "value": "City"
+    },
+    {
+      "name": "geo_region_label",
+      "value": "Region"
+    },
+    {
+      "name": "geo_zip_label",
+      "value": "Postal Code"
+    },
+    {
+      "name": "geo_coords_label",
+      "value": "Coordinates"
+    },
+    {
+      "name": "geo_network_section",
+      "value": "🌐 Network Info"
+    },
+    {
+      "name": "geo_isp_label",
+      "value": "ISP"
+    },
+    {
+      "name": "geo_org_label",
+      "value": "Organization"
+    },
+    {
+      "name": "geo_asn_label",
+      "value": "AS Number"
+    },
+    {
+      "name": "geo_additional_section",
+      "value": "📋 Additional Info"
+    },
+    {
+      "name": "geo_timezone_label",
+      "value": "Timezone"
+    },
+    {
+      "name": "geo_country_code_label",
+      "value": "Country Code"
+    },
+    {
+      "name": "badge_mobile",
+      "value": "📱 Mobile Network"
+    },
+    {
+      "name": "badge_proxy",
+      "value": "🔒 Proxy/VPN"
+    },
+    {
+      "name": "badge_hosting",
+      "value": "☁️ Hosting Server"
+    },
+    {
+      "name": "badge_normal",
+      "value": "✅ Home Broadband"
+    },
+    {
+      "name": "lan_scanning_status",
+      "value": "ARP scanning..."
+    },
+    {
+      "name": "lan_unknown_device",
+      "value": "Unknown Device"
+    },
+    {
+      "name": "lan_online",
+      "value": "Online"
+    },
+    {
+      "name": "lan_offline",
+      "value": "Offline"
+    },
+    {
+      "name": "lan_arp_found",
+      "value": "ARP found "
+    },
+    {
+      "name": "lan_device_unit",
+      "value": " devices"
+    },
+    {
+      "name": "lan_arp_unavailable",
+      "value": "ARP unavailable, TCP scanning..."
+    },
+    {
+      "name": "lan_tcp_probing",
+      "value": "TCP probing..."
+    },
+    {
+      "name": "lan_web_service",
+      "value": "Web Service"
+    },
+    {
+      "name": "lan_devices_found",
+      "value": "Found "
+    },
+    {
+      "name": "lan_no_devices",
+      "value": "No devices found"
+    },
+    {
+      "name": "lan_stopped_label",
+      "value": "Stopped"
+    },
+    {
+      "name": "lan_subnet_placeholder",
+      "value": "Subnet (192.168.1.0/24)"
+    },
+    {
+      "name": "lan_device_count",
+      "value": "Discovered Devices"
+    },
+    {
+      "name": "lan_scan_hint",
+      "value": "Click ▶ to start scanning LAN devices"
+    },
+    {
+      "name": "about_content",
+      "value": "WlAN Analyzer v2.0\nAurora Build 2026\n\nDeveloper: xinxin\n\nNetwork Diagnostics Toolbox\nComprehensive WiFi analysis & network diagnostic tool"
+    },
+    {
+      "name": "privacy_content",
+      "value": "Privacy Policy\n\nUpdated: May 2026\n\nWlAN Analyzer respects and protects user privacy. This policy explains how we collect, use, and protect your personal information.\n\n1. Information Collection\nThis app only collects the following information with your explicit consent:\n• Location: Used for scanning nearby WiFi networks (required by HarmonyOS)\n• WiFi Info: Used for displaying network status, signal strength, channel analysis\n\n2. Information Usage\nCollected data is used solely for in-app feature display and is not uploaded to any server.\n\n3. Data Storage\nAll data is stored locally on your device and is not transmitted externally.\n\n4. Third-Party Services\nThis app does not integrate any third-party analytics or advertising SDKs.\n\n5. Contact Us\nFor privacy-related issues, please contact: 1218478630@qq.com"
+    },
+    {
+      "name": "agreement_content",
+      "value": "User Agreement\n\nUpdated: May 2026\n\nWelcome to WlAN Analyzer. By using this app, you agree to the following terms.\n\n1. Service Description\nThis app provides WiFi scanning, network diagnostics, signal analysis, and other features. Features are for personal learning and research purposes only.\n\n2. Usage Rules\n• Do not use this app for any illegal purposes\n• Do not crack, decompile, or modify this app\n• Do not use this app for network attacks or infringement of others' rights\n\n3. Disclaimer\nThis app is provided \"as is\" without warranty of uninterrupted or error-free operation. To the extent permitted by law, the developer shall not be liable for any indirect damages.\n\n4. Intellectual Property\nThe intellectual property rights of this app and all its content belong to the developer.\n\n5. Agreement Changes\nWe may modify this agreement from time to time. The modified agreement takes effect upon publication."
+    },
+    {
+      "name": "feedback_content",
+      "value": "Feedback\n\nThank you for using WlAN Analyzer!\n\nContact\n• Email: 1218478630@qq.com\n• Website: www.xinnxin.cn\n\nFeature Suggestions\nIf you have ideas for new features or improvements, feel free to contact us through the channels above. We value every user's feedback.\n\nBug Reports\nIf you encounter a bug or issue, please provide:\n• Device model and system version\n• Steps to reproduce the issue\n• Screenshots of the error (if available)"
+    },
+    {
+      "name": "ip_type_private_a",
+      "value": "Private (Class A)"
+    },
+    {
+      "name": "ip_type_private_b",
+      "value": "Private (Class B)"
+    },
+    {
+      "name": "ip_type_private_c",
+      "value": "Private (Class C)"
+    },
+    {
+      "name": "ip_type_loopback",
+      "value": "Loopback"
+    },
+    {
+      "name": "ip_type_link_local",
+      "value": "Link-Local"
+    },
+    {
+      "name": "ip_type_multicast",
+      "value": "Multicast"
+    },
+    {
+      "name": "ip_type_reserved",
+      "value": "Reserved"
+    },
+    {
+      "name": "ip_type_public",
+      "value": "Public"
+    },
+    {
+      "name": "yes",
+      "value": "Yes"
+    },
+    {
+      "name": "no",
+      "value": "No"
+    },
+    {
+      "name": "update_checking",
+      "value": "Checking for update..."
+    },
+    {
+      "name": "update_latest",
+      "value": "Already the latest version"
+    },
+    {
+      "name": "update_new_found",
+      "value": "New version found"
+    },
+    {
+      "name": "update_no_info",
+      "value": "No update info available"
+    },
+    {
+      "name": "update_now",
+      "value": "Update Now"
+    },
+    {
+      "name": "update_later",
+      "value": "Later"
+    },
+    {
+      "name": "update_download",
+      "value": "Download URL"
+    },
+    {
+      "name": "update_network_error",
+      "value": "Cannot connect to server, please check network"
+    },
+    {
+      "name": "update_error",
+      "value": "An error occurred while checking for updates"
+    },
+    {
+      "name": "feature_not_ready",
+      "value": "Feature not yet available"
+    },
+    {
+      "name": "language_switch_zh",
+      "value": "Please switch to Chinese in system settings"
+    },
+    {
+      "name": "language_switch_en",
+      "value": "Please switch to English in system settings"
+    }
+  ]
+}
+
+
+

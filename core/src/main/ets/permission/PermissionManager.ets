@@ -3,7 +3,6 @@
 // 必须在运行时通过 API 弹窗请求用户授权
 
 import { abilityAccessCtrl, common, Permissions, Want } from '@kit.AbilityKit'
-import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 
 const DOMAIN = 0x0000
@@ -46,6 +45,27 @@ export class PermissionManager {
     return PermissionManager.atManager
   }
 
+  // 静态版本：仅检查所有权限状态，不弹窗（供 onPageShow 使用）
+  static async checkPermissionsSilently(context: common.UIAbilityContext): Promise<boolean> {
+    try {
+      const atManager: abilityAccessCtrl.AtManager = PermissionManager.getAtManagerStatic()
+      const tokenId: number = context.applicationInfo.accessTokenId
+      for (let i = 0; i < REQUIRED_PERMISSIONS.length; i++) {
+        const perm: string = REQUIRED_PERMISSIONS[i] as string
+        const status: number = await atManager.checkAccessToken(tokenId, REQUIRED_PERMISSIONS[i] as Permissions)
+        hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] SilentCheck ' + perm + ' = ' + status + ' (0=OK, -1=NO)')
+        if (status !== abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] ❌ DENIED: ' + perm + ' status=' + status)
+          return false
+        }
+      }
+      return true
+    } catch (e) {
+      hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Silent check error: ' + JSON.stringify(e))
+      return false
+    }
+  }
+
   // 检查并请求所有必要权限
   // 接受 UIAbilityContext 参数
   static async requestPermissions(context: common.UIAbilityContext): Promise<boolean> {
@@ -84,26 +104,14 @@ export class PermissionManager {
 
       // 有未授权的权限，弹出授权窗口
       hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Permissions not granted, showing request dialog...')
-      const result = await atManager.requestPermissionsFromUser(
+      await atManager.requestPermissionsFromUser(
         context,
         REQUIRED_PERMISSIONS as Permissions[]
       )
 
-      hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Permission request result:' + JSON.stringify(result))
-
-      if (result.authResults) {
-        const allOk: boolean = result.authResults.every((r: number) =>
-          r === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED
-        )
-        if (allOk) {
-          hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] All permissions granted by user')
-          return true
-        } else {
-          hilog.warn(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Some permissions denied:' + JSON.stringify(result.authResults))
-          return false
-        }
-      }
-      return false
+      // 弹窗后重新静默检查实际权限状态（比依赖 result.authResults 更可靠，避免"仅使用期间允许"误判）
+      hilog.info(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Re-checking permissions after user interaction...')
+      return await PermissionManager.checkPermissionsSilently(context)
     } catch (e) {
       hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Error requesting permissions:' + JSON.stringify(e))
       hilog.error(DOMAIN, 'testTag', '%{public}s', '[PermissionManager] Error message:' + (e as Error).message)

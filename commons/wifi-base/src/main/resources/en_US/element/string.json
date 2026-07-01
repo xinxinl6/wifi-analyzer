@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "wifi_permission_reason",
+      "value": "WiFi Analyzer needs WiFi info to scan and analyze nearby networks"
+    },
+    {
+      "name": "location_permission_reason",
+      "value": "System requires location permission to scan WiFi networks"
+    },
+    {
+      "name": "internet_permission_reason",
+      "value": "Speed test and toolbox need internet access"
+    },
+    {
+      "name": "network_info_permission_reason",
+      "value": "Network status info is needed to analyze connection quality"
+    }
+  ]
+}
